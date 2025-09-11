@@ -1,0 +1,4 @@
+from: check-host.net/terminal
+run:
+apt update
+apt install gcc libncurses5-dev libncursesw5-dev
