@@ -1,4 +1,2 @@
 .token.txt
-main
-test
-tutorial/*
+*.out
