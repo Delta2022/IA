@@ -1,2 +1,2 @@
 %: %.c
-	gcc $@.c -o $@ -lncurses
+	gcc $@.c -o $@.out -lncurses
