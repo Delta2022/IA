@@ -1,2 +1,2 @@
 %: %.c
-	gcc $@.c -o $@.out -lncurses
+	gcc -gdwarf $@.c -o $@ -lpanel -lmenu -lncurses
