@@ -1,0 +1,89 @@
+// TODO modularize this when its too difficult
+#include <stdio.h>
+#include <stdlib.h>
+#include "splint_redefs.h"
+#include "dbg.h"
+// TODO: rewrite dbg.h such that it can output in the final window
+#define MAX_CHAR 50
+#define MAX_NOTE 50 // max length for notes
+#define ARRAY_LEN(a) (int) (sizeof(a) / sizeof(a[0]))
+#define MAX_PNOTES 10
+#define MAX_CREATURES 10
+#define GRID_X 5
+#define GRID_Y 5
+#define PRINT_TABS(t) \
+    {for (int p = 0; p < t; p++) (void) putchar('\t');}
+
+// redundancy for later on if I want to implement a better note system
+struct note {
+    char string[MAX_NOTE];
+    int len;
+};
+
+struct creature {
+    char name[MAX_CHAR];
+};
+
+struct square {
+    /*@null@*/ /*@dependent@*/ struct material *material;
+        // pointer to material from master list
+    bool is_wall;
+    struct creature *creatures[MAX_CREATURES]; // pointer to
+        // creature from master list
+    int movement_modifier; // usually 1 if in difficult terrain
+};
+
+struct p_note {
+    int x;
+    int y;
+    
+    struct note note;
+};
+
+struct material {
+    char name[MAX_CHAR];
+    char desc[MAX_CHAR];
+    char print_char;
+
+    struct note note;
+};
+
+struct grid {
+    struct square squares[GRID_Y][GRID_X];
+        // coordinates are going to be like ncurses
+    int max_y;
+    int max_x;
+
+    struct p_note p_notes[MAX_PNOTES];
+    int p_note_len;
+
+    int x_scale; // the ft that a square is (normally 5ft)
+    int y_scale;
+
+    // TODO maybe add a diagonal scale for moving diagonally
+};
+
+struct campaign {
+    char name[MAX_CHAR];
+
+    struct grid world_grid;
+    // encounter grid array??
+
+    struct note note;
+};
+
+int init_campaign(/*@out@*/ struct campaign *target);
+int init_grid(/*@out@*/ struct grid *target);
+int init_square(/*@out@*/ struct square *target);
+int init_material(/*@out@*/ struct material *target);
+int init_p_note(/*@out@*/ struct p_note *target);
+int init_note(/*@out@*/ struct note *target);
+void get_note(struct note *target
+    , char *buffer, int buffer_len);
+void print_note(struct note *target, FILE *format);
+void debug_p_note(struct p_note *target, int tabs, FILE *format);
+void debug_campaign(struct campaign *target, FILE *format);
+void debug_grid(struct grid *target, int tabs, FILE *format);
+void debug_square(struct square *target, int tabs, FILE *format);
+void debug_material(/*@null@*/ struct material *target
+    , int tabs, FILE *format);
