@@ -1,0 +1,231 @@
+#include "main.h"
+
+static char *start_menu_options[] = {
+    "Start Campaign",
+    "Load Campaign",
+    "Exit"
+};
+
+//static func_pointer start_menu_fp[] = {
+//    {}
+//}
+
+int start_menu()
+    // contained start menu for the main function
+{
+    // ----- init
+    ITEM **start_menu_items;
+    MENU *start_menu;
+    int n_choices = 0;
+    int c = 0;
+    ITEM *cur_item = NULL;
+    int menu_index = -1;
+
+    n_choices = ARRAY_LEN(start_menu_options);
+    start_menu_items = calloc((size_t) n_choices + 1
+        , sizeof(*start_menu_items));
+
+    // check if the calloc succeeded
+    if (start_menu_items == NULL) {
+        (void) mvprintw(0, 0, "error when allocating"
+            " data to start_menu_items, please fix.");
+        (void) getch();
+        (void) endwin();
+        exit(EXIT_FAILURE);
+    }
+
+    // set the items 
+    for (int i = 0; i < (int) n_choices; i++) {
+        start_menu_items[i] = new_item(start_menu_options[i]
+            , start_menu_options[i]);
+    }
+
+    // menu requires this to work
+    start_menu_items[n_choices] = (ITEM *) NULL;
+
+    // create menu
+    start_menu = new_menu((ITEM **) start_menu_items);
+
+    (void) post_menu(start_menu);
+    (void) refresh();
+    do {
+        c = getch();
+        switch (c) {
+            case KEY_DOWN:
+                (void) menu_driver(start_menu, REQ_DOWN_ITEM);
+                break;
+            case KEY_UP:
+                (void) menu_driver(start_menu, REQ_UP_ITEM);
+                break;
+            case 10: // enter
+                cur_item = current_item(start_menu);
+                menu_index = item_index(cur_item);
+                break;
+        }
+    } while (c != 10);
+
+    // TODO use menu_index to select function
+
+    // free values
+    (void) unpost_menu(start_menu);
+    (void) free_menu(start_menu);
+
+    for (int i = 0; i < (int) n_choices + 1; i++) {
+        (void) free_item(start_menu_items[i]);
+    }
+    
+    free(start_menu_items);
+
+    return 0;
+}
+
+int start_campaign(/*@unused@*/ struct campaign *target_campaign)
+    // campaign has to be initialized and defined
+{
+    char note_temp[MAX_CHAR];
+    int text_pos[] = {1, 3};
+    int text_pos_len = ARRAY_LEN(text_pos);
+
+    (void) memset(note_temp, 0, sizeof(note_temp));
+    char *save_ptrs[] = {target_campaign->name, note_temp};
+
+    (void) clear(); // clear stdscr from the menu in start_menu
+    (void) mvprintw(0, 0, "Name: ");
+    (void) mvprintw(2, 0, "Notes: ");
+
+    (void) mvprintw(LINES - 1, 0, "Press F1 to save values");
+    (void) mvprintw(LINES - 2, 0, "Press F2 to move on");
+
+    (void) get_multi_input(save_ptrs, text_pos_len
+        , MAX_CHAR, text_pos);
+
+    // TODO replace with note setter function when that is done
+    strncpy(target_campaign->note.string, note_temp
+        , (size_t) target_campaign->note.len);
+    target_campaign->note.string[target_campaign->note.len - 1] = '\0';
+    (void) getch();
+
+    return 0;
+}
+
+int get_multi_input(char **dest, int num_dest, int max_buffer_len, int *text_pos)
+// TODO make it support other windows
+// TODO make it support left and right editing
+    // dest is an array of pointers to the destinations to write to
+    // num_dest is the length of dest 
+        //(the number of destinations there are)
+    // max_buffer_len is the maximum number of characters to write 
+        // to the buffer
+    // text_pos is the position of where to show the inputted text
+        //(this should be an empty line). Its length is num_dest
+{
+    // ----- checks
+    if (text_pos == NULL || dest == NULL || *dest == NULL) {
+        return -1;
+    } else if (num_dest <= 0 || max_buffer_len <= 0) {
+        return -1;
+    }
+
+    // ----- inits
+    int c = 0;
+    char c_char = '\0';
+
+    char buffers[num_dest][max_buffer_len]; // stores the texts 
+        // inputted by the user
+    int buffer_indices[num_dest]; // stores the next clear 
+        //position to write a character for each buffer
+    int num_text = num_dest; // stores the number of input fields (texts)
+    int cur_buffer = 0; // points to the current buffer 
+        // that is being edited
+
+    int cur_x = 0;
+    int cur_y = 0;
+
+    // ----- zero out the arrays
+    (void) memset(buffers[0], 0, sizeof(buffers[0]));
+    (void) memset(buffers[1], 0, sizeof(buffers[1]));
+    (void) memset(buffer_indices, 0, sizeof(buffer_indices));
+
+    // ----- set up the cursor in its correct position 
+        // and set cur_y and cur_x
+    (void) move(text_pos[0], 0);
+    cur_y = getcury(stdscr);
+    cur_x = getcurx(stdscr);
+
+    // ----- input loop
+    while (c != KEY_F(2)) {
+        c = getch();
+        switch (c) {
+            case 263: // delete
+                if (cur_x > 0) {
+                    // only delete something if it is 
+                        // something the user typed
+                    (void) move(cur_y, --cur_x);
+                    (void) delch();
+                }
+                if (buffer_indices[cur_buffer] > 0) // only mark a
+                        // letter as deletable if it is greater than 0
+                    buffer_indices[cur_buffer]--; // delete a char 
+                        // from temp like an hdd deletes data (by just
+                        // signalling that it can be overwritten)
+                break;
+            
+            case KEY_DOWN:
+                if (cur_buffer < num_text) {
+                    cur_buffer++; // change the current buffer to edit
+                    
+                    // update cur_y and cur_x to reflect the 
+                        // new current buffer
+                    cur_y = text_pos[cur_buffer];
+                    cur_x = buffer_indices[cur_buffer];
+                    (void) move(cur_y, cur_x);
+                }
+                break;
+            case KEY_UP:
+                if (cur_buffer > 0) {
+                    cur_buffer--; // change the current buffer to edit
+
+                    // update cur_y and cur_x to reflect 
+                        // the new current buffer
+                    cur_y = text_pos[cur_buffer];
+                    cur_x = buffer_indices[cur_buffer];
+                    (void) move(cur_y, cur_x);
+                }
+                break;
+
+            default: // typing regular characters
+                // does not add any characters 
+                    // if the max_buffer_len is reached
+                if (buffer_indices[cur_buffer] == max_buffer_len - 1) {
+                    // if the index points to the last empty character
+                        // (since max_buffer_len is the max index)
+                    continue;
+                }
+                c_char = (char) c;
+
+                // remove all characters that aren't allowed 
+                    // (alphabetical only for now) TODO change
+                if (c_char != ' ' 
+                    && (c_char < 'a' || c_char > 'z') 
+                    && (c_char < 'A' || c_char > 'Z'))
+                    continue;
+                (void) addch((chtype) c_char);
+                buffers[cur_buffer][buffer_indices[cur_buffer]++]
+                    = c_char;
+                cur_x++;
+        }
+    }
+
+    // ----- null terminate string and save it to dest
+    for (int i = 0; i < num_text; i++) {
+        buffers[i][buffer_indices[i]] = '\0'; // end the string 
+            // with a \0, avoiding any 'deleted'
+            // (but still present) data from messing things up and
+            // ensuring that the string is null terminated
+
+        // copy to dest (safely)
+        (void) strncpy(dest[i], buffers[i], (size_t)max_buffer_len);
+        dest[i][max_buffer_len] = '\0';
+    }
+    return 0;
+}

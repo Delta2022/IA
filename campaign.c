@@ -15,7 +15,7 @@ int init_campaign(/*@out@*/ struct campaign *target)
     // ----- set/initialize all values to their defaults
     (void) memset(target->name, 0, sizeof(target->name));
 
-    foutput = init_grid(&target->world_grid);
+    foutput = init_grid(&target->encounter_grid);
     check(foutput == 0, "init_grid failed with code %d", foutput);
 
     foutput = init_note(&target->note);
@@ -38,7 +38,7 @@ void debug_campaign(struct campaign *target, FILE *format)
         fprintf(format, "name: '%s' | note: ", target->name);
         print_note(&target->note, format);
         (void) puts("");
-        debug_grid(&target->world_grid, 1, format);
+        debug_grid(&target->encounter_grid, 1, format);
             // print 1 tab for grid
         (void) puts("");
     }

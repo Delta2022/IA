@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "splint_redefs.h"
 #include "dbg.h"
+#include <string.h>
 // TODO: rewrite dbg.h such that it can output in the final window
 #define MAX_CHAR 50
 #define MAX_NOTE 50 // max length for notes
@@ -13,6 +14,11 @@
 #define GRID_Y 5
 #define PRINT_TABS(t) \
     {for (int p = 0; p < t; p++) (void) putchar('\t');}
+
+struct func_pointer {
+    void (*pointer) (void *);
+    int type; // specifies a type of function pointer to convert to
+};
 
 // redundancy for later on if I want to implement a better note system
 struct note {
@@ -66,7 +72,7 @@ struct grid {
 struct campaign {
     char name[MAX_CHAR];
 
-    struct grid world_grid;
+    struct grid encounter_grid;
     // encounter grid array??
 
     struct note note;
@@ -87,3 +93,6 @@ void debug_grid(struct grid *target, int tabs, FILE *format);
 void debug_square(struct square *target, int tabs, FILE *format);
 void debug_material(/*@null@*/ struct material *target
     , int tabs, FILE *format);
+int start_menu();
+int start_campaign(struct campaign *target_campaign);
+int get_multi_input(char **dest, int num_dest, int max_buffer_len, int *text_pos);
