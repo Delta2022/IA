@@ -298,13 +298,14 @@ int start_encounter(struct grid *target_grid
 }
 
 int creature_creation_menu(struct creature *creature_list
-    , int creature_list_len)
+    , /*@unused@*/ int creature_list_len)
 {
-    int text_pos[1] = {1};
-    char *dest[1] = {creature_list[0].name};
+    int text_pos[2] = {1, 3};
+    char *dest[2] = {creature_list[0].name, creature_list[0].note.string};
     (void) mvprintw(0, 0, "Name: ");
+    (void) mvprintw(2, 0, "Notes: ");
 
-    (void) get_multi_input(dest, 1, MAX_CHAR, text_pos);
+    (void) get_multi_input(dest, 2, MAX_CHAR, text_pos);
     (void) getch();
 
     return 0;
@@ -375,7 +376,8 @@ int get_multi_input(char **dest, int num_dest, int max_buffer_len
                 break;
             
             case KEY_DOWN:
-                if (cur_buffer < num_text) {
+                if (cur_buffer < num_text - 1) { // the maximum that
+                    // cur_buffer can be is num_text - 1 (the max index)
                     cur_buffer++; // change the current buffer to edit
                     
                     // update cur_y and cur_x to reflect the 

@@ -28,6 +28,9 @@ struct note {
 
 struct creature {
     char name[MAX_CHAR];
+    int name_len;
+
+    struct note note;
 };
 
 struct square {
@@ -102,3 +105,4 @@ void mvprintw_square(int y, int x, struct square *target
     , WINDOW *restrict window);
 int creature_creation_menu(struct creature *creature_list
     , int creature_list_len);
+int init_creature(/*@out@*/ struct creature *target);

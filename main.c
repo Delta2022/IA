@@ -14,6 +14,9 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    for (int i = 0; i < len; i++) {
+        (void) init_creature(&mast_creature_list[i]);
+    }
     (void) snprintf(mast_creature_list[0].name, MAX_CHAR, "Hi");
 
     // ----- start ncurses

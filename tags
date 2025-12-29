@@ -85,6 +85,7 @@ get_multi_input	start_menu.c	/^int get_multi_input(char **dest, int num_dest, in
 get_note	note.c	/^void get_note(struct note *target$/;"	f	typeref:typename:void
 grid	main.h	/^struct grid {$/;"	s
 init_campaign	campaign.c	/^int init_campaign(\/*@out@*\/ struct campaign *target)$/;"	f	typeref:typename:int
+init_creature	creature.c	/^int init_creature(\/*@out@*\/ struct creature *target)$/;"	f	typeref:typename:int
 init_grid	grid.c	/^int init_grid(\/*@out@*\/ struct grid *target)$/;"	f	typeref:typename:int
 init_material	grid.c	/^int init_material(\/*@out@*\/ struct material *target)$/;"	f	typeref:typename:int
 init_note	note.c	/^int init_note(\/*@out@*\/ struct note *target)$/;"	f	typeref:typename:int
@@ -102,7 +103,9 @@ mvprintw_square	grid.c	/^void mvprintw_square(int y, int x, struct square *targe
 name	main.h	/^    char name[MAX_CHAR];$/;"	m	struct:campaign	typeref:typename:char[]
 name	main.h	/^    char name[MAX_CHAR];$/;"	m	struct:creature	typeref:typename:char[]
 name	main.h	/^    char name[MAX_CHAR];$/;"	m	struct:material	typeref:typename:char[]
+name_len	main.h	/^    int name_len;$/;"	m	struct:creature	typeref:typename:int
 note	main.h	/^    struct note note;$/;"	m	struct:campaign	typeref:struct:note
+note	main.h	/^    struct note note;$/;"	m	struct:creature	typeref:struct:note
 note	main.h	/^    struct note note;$/;"	m	struct:material	typeref:struct:note
 note	main.h	/^    struct note note;$/;"	m	struct:p_note	typeref:struct:note
 note	main.h	/^struct note {$/;"	s

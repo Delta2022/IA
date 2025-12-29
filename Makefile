@@ -1,4 +1,4 @@
-FILES = main.c campaign.c grid.c note.c main.h start_menu.c
+FILES = main.c campaign.c grid.c note.c main.h start_menu.c creature.c
 
 %: %.c
 	gcc -gdwarf $@.c -o $@ -lpanel -lmenu -lncurses
