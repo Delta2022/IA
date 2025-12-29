@@ -297,8 +297,21 @@ int start_encounter(struct grid *target_grid
     return 0;
 }
 
+int creature_creation_menu(struct creature *creature_list
+    , int creature_list_len)
+{
+    int text_pos[1] = {1};
+    char *dest[1] = {creature_list[0].name};
+    (void) mvprintw(0, 0, "Name: ");
 
-int get_multi_input(char **dest, int num_dest, int max_buffer_len, int *text_pos)
+    (void) get_multi_input(dest, 1, MAX_CHAR, text_pos);
+    (void) getch();
+
+    return 0;
+}
+
+int get_multi_input(char **dest, int num_dest, int max_buffer_len
+    , int *text_pos)
 // TODO make it support other windows
 // TODO make it support left and right editing
     // dest is an array of pointers to the destinations to write to
@@ -332,8 +345,9 @@ int get_multi_input(char **dest, int num_dest, int max_buffer_len, int *text_pos
     int cur_y = 0;
 
     // ----- zero out the arrays
-    (void) memset(buffers[0], 0, sizeof(buffers[0]));
-    (void) memset(buffers[1], 0, sizeof(buffers[1]));
+    for (int i = 0; i < num_dest; i++) {
+        (void) memset(buffers[i], i, sizeof(buffers[i]));
+    }
     (void) memset(buffer_indices, 0, sizeof(buffer_indices));
 
     // ----- set up the cursor in its correct position 

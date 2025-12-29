@@ -100,3 +100,5 @@ int start_encounter(struct grid *target_grid
     , struct material *mat_list, int mat_list_len);
 void mvprintw_square(int y, int x, struct square *target
     , WINDOW *restrict window);
+int creature_creation_menu(struct creature *creature_list
+    , int creature_list_len);

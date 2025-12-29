@@ -69,7 +69,9 @@ MAX_NOTE	main.h	/^#define MAX_NOTE /;"	d
 MAX_PNOTES	main.h	/^#define MAX_PNOTES /;"	d
 PRINT_TABS	main.h	/^#define PRINT_TABS(/;"	d
 campaign	main.h	/^struct campaign {$/;"	s
+coord	start_menu.c	/^struct coord {$/;"	s	file:
 creature	main.h	/^struct creature {$/;"	s
+creature_creation_menu	start_menu.c	/^int creature_creation_menu(struct creature *creature_list$/;"	f	typeref:typename:int
 creatures	main.h	/^    struct creature *creatures[MAX_CREATURES]; \/\/ pointer to$/;"	m	struct:square	typeref:struct:creature * []
 debug_campaign	campaign.c	/^void debug_campaign(struct campaign *target, FILE *format)$/;"	f	typeref:typename:void
 debug_grid	grid.c	/^void debug_grid(struct grid *target, int tabs, FILE *format)$/;"	f	typeref:typename:void
@@ -79,7 +81,7 @@ debug_square	grid.c	/^void debug_square(struct square *target, int tabs, FILE *f
 desc	main.h	/^    char desc[MAX_CHAR];$/;"	m	struct:material	typeref:typename:char[]
 encounter_grid	main.h	/^    struct grid encounter_grid;$/;"	m	struct:campaign	typeref:struct:grid
 func_pointer	main.h	/^struct func_pointer {$/;"	s
-get_multi_input	start_menu.c	/^int get_multi_input(char **dest, int num_dest, int max_buffer_len, int *text_pos)$/;"	f	typeref:typename:int
+get_multi_input	start_menu.c	/^int get_multi_input(char **dest, int num_dest, int max_buffer_len$/;"	f	typeref:typename:int
 get_note	note.c	/^void get_note(struct note *target$/;"	f	typeref:typename:void
 grid	main.h	/^struct grid {$/;"	s
 init_campaign	campaign.c	/^int init_campaign(\/*@out@*\/ struct campaign *target)$/;"	f	typeref:typename:int
@@ -120,6 +122,8 @@ start_menu_options	start_menu.c	/^static char *start_menu_options[] = {$/;"	v	ty
 string	main.h	/^    char string[MAX_NOTE];$/;"	m	struct:note	typeref:typename:char[]
 type	main.h	/^    int type; \/\/ specifies a type of function pointer to convert to$/;"	m	struct:func_pointer	typeref:typename:int
 x	main.h	/^    int x;$/;"	m	struct:p_note	typeref:typename:int
+x	start_menu.c	/^    int x;$/;"	m	struct:coord	typeref:typename:int	file:
 x_scale	main.h	/^    int x_scale; \/\/ the ft that a square is (normally 5ft)$/;"	m	struct:grid	typeref:typename:int
 y	main.h	/^    int y;$/;"	m	struct:p_note	typeref:typename:int
+y	start_menu.c	/^    int y;$/;"	m	struct:coord	typeref:typename:int	file:
 y_scale	main.h	/^    int y_scale;$/;"	m	struct:grid	typeref:typename:int

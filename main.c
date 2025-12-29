@@ -4,7 +4,31 @@
 
 int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
 {
-    // TODO define the function array
+
+    struct creature *mast_creature_list;
+    int len = 5;
+    mast_creature_list = calloc((size_t) len 
+        , sizeof(*mast_creature_list));
+
+    if (mast_creature_list == NULL) {
+        exit(EXIT_FAILURE);
+    }
+
+    (void) snprintf(mast_creature_list[0].name, MAX_CHAR, "Hi");
+
+    // ----- start ncurses
+    (void) initscr();
+    (void) cbreak();
+    (void) noecho();
+    (void) keypad(stdscr, true);
+
+    (void) creature_creation_menu(mast_creature_list, len);
+
+    (void) endwin();
+    free(mast_creature_list);
+    return 0;
+}
+/*  // Encounter debug
     struct material *mat_master_list;
     int mat_master_len = 5;
     mat_master_list = calloc((size_t) mat_master_len
@@ -40,5 +64,4 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     (void) endwin();
     debug_campaign(&temp, stdout);
     free(mat_master_list);
-    return 0;
-}
+*/
