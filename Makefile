@@ -7,7 +7,10 @@ main: $(FILES)
 	gcc -gdwarf $(FILES) -o main -lpanel -lmenu -lncurses
 
 splint:
-	splint -incondefs $(FILES)
+	splint -incondefs +loopexec $(FILES)
+
+ctags: $(FILES)
+	ctags $(FILES)
 
 test: test.c campaign.c grid.c note.c main.h
 	gcc -gdwarf test.c campaign.c grid.c note.c -o test -lpanel -lmenu -lncurses

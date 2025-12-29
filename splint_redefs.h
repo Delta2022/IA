@@ -22,5 +22,7 @@
     extern /*@dependent@*/ item_value(const ITEM *item);
     extern /*@dependent@*/ item_name(const ITEM *item);
     extern /*@dependent@*/ ITEM **menu_items(const MENU *menu);
-    extern /*@dependent@*/ ITEM *current_item(const MENU *menu);
+    extern /*@dependent@*/ /*@null@*/ ITEM *current_item(const MENU *menu);
+    extern wchgat(WINDOW *win, int n, attr_t attr, short pair
+        , /*@null@*/ const void *opts);
 #endif

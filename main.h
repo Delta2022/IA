@@ -96,3 +96,7 @@ void debug_material(/*@null@*/ struct material *target
 int start_menu();
 int start_campaign(struct campaign *target_campaign);
 int get_multi_input(char **dest, int num_dest, int max_buffer_len, int *text_pos);
+int start_encounter(struct grid *target_grid
+    , struct material *mat_list, int mat_list_len);
+void mvprintw_square(int y, int x, struct square *target
+    , WINDOW *restrict window);

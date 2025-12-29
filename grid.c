@@ -150,3 +150,19 @@ void debug_grid(struct grid *target, int tabs, FILE *format)
     // check the squares and print them
 
 }
+
+void mvprintw_square(int y, int x, struct square *target
+    , WINDOW *restrict window)
+    // prints a square to a position in a stream
+{
+    if (target->is_wall == true) { // render wall
+        (void) mvwprintw(window, y, x, "+");
+    } else if (target->material == NULL) {
+        (void) mvwprintw(window, y, x, ".");
+    } else { // render the right material
+        (void) mvwprintw(window, y, x, "%c"
+            , target->material->print_char);
+    }
+
+    // TODO do creatures later
+}
