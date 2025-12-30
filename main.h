@@ -81,6 +81,11 @@ struct campaign {
     struct note note;
 };
 
+struct coord {
+    int y;
+    int x;
+};
+
 int init_campaign(/*@out@*/ struct campaign *target);
 int init_grid(/*@out@*/ struct grid *target);
 int init_square(/*@out@*/ struct square *target);
@@ -106,3 +111,4 @@ void mvprintw_square(int y, int x, struct square *target
 int creature_creation_menu(struct creature *creature_list
     , int creature_list_len);
 int init_creature(/*@out@*/ struct creature *target);
+void print_grid(struct grid *target_grid, WINDOW *target_window);

@@ -166,3 +166,16 @@ void mvprintw_square(int y, int x, struct square *target
 
     // TODO do creatures later
 }
+
+void print_grid(struct grid *target_grid, WINDOW *target_window)
+    // prints the grid out into a target window
+    // assumes the target window is larger than the squares
+    // TODO allow moving around the grid
+{
+    for (int i = 0; i < target_grid->max_y; i++) {
+        for (int j = 0; j < target_grid->max_x; j++) {
+            (void) mvprintw_square(i, j, &target_grid->squares[i][j]
+                , target_window);
+        }
+    }
+}

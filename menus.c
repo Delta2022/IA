@@ -10,10 +10,6 @@ static char *start_menu_options[] = {
 //    {}
 //}
 
-struct coord {
-    int y;
-    int x;
-};
 
 int start_menu()
     // contained start menu for the main function
@@ -113,18 +109,6 @@ int start_campaign(/*@unused@*/ struct campaign *target_campaign)
     return 0;
 }
 
-static void print_grid(struct grid *target_grid, WINDOW *target_window)
-    // prints the grid out into a target window
-    // assumes the target window is larger than the squares
-    // TODO allow moving around the grid
-{
-    for (int i = 0; i < target_grid->max_y; i++) {
-        for (int j = 0; j < target_grid->max_x; j++) {
-            (void) mvprintw_square(i, j, &target_grid->squares[i][j]
-                , target_window);
-        }
-    }
-}
 
 int start_encounter(struct grid *target_grid
     , struct material *mat_list, int mat_list_len)
@@ -306,132 +290,7 @@ int creature_creation_menu(struct creature *creature_list
     (void) mvprintw(2, 0, "Notes: ");
 
     (void) get_multi_input(dest, 2, MAX_CHAR, text_pos);
-    (void) getch();
 
     return 0;
 }
 
-int get_multi_input(char **dest, int num_dest, int max_buffer_len
-    , int *text_pos)
-// TODO make it support other windows
-// TODO make it support left and right editing
-    // dest is an array of pointers to the destinations to write to
-    // num_dest is the length of dest 
-        //(the number of destinations there are)
-    // max_buffer_len is the maximum number of characters to write 
-        // to the buffer
-    // text_pos is the position of where to show the inputted text
-        //(this should be an empty line). Its length is num_dest
-{
-    // ----- checks
-    if (text_pos == NULL || dest == NULL || *dest == NULL) {
-        return -1;
-    } else if (num_dest <= 0 || max_buffer_len <= 0) {
-        return -1;
-    }
-
-    // ----- inits
-    int c = 0;
-    char c_char = '\0';
-
-    char buffers[num_dest][max_buffer_len]; // stores the texts 
-        // inputted by the user
-    int buffer_indices[num_dest]; // stores the next clear 
-        //position to write a character for each buffer
-    int num_text = num_dest; // stores the number of input fields (texts)
-    int cur_buffer = 0; // points to the current buffer 
-        // that is being edited
-
-    int cur_x = 0;
-    int cur_y = 0;
-
-    // ----- zero out the arrays
-    for (int i = 0; i < num_dest; i++) {
-        (void) memset(buffers[i], i, sizeof(buffers[i]));
-    }
-    (void) memset(buffer_indices, 0, sizeof(buffer_indices));
-
-    // ----- set up the cursor in its correct position 
-        // and set cur_y and cur_x
-    (void) move(text_pos[0], 0);
-    cur_y = getcury(stdscr);
-    cur_x = getcurx(stdscr);
-
-    // ----- input loop
-    while (c != KEY_F(2)) {
-        c = getch();
-        switch (c) {
-            case 263: // delete
-                if (cur_x > 0) {
-                    // only delete something if it is 
-                        // something the user typed
-                    (void) move(cur_y, --cur_x);
-                    (void) delch();
-                }
-                if (buffer_indices[cur_buffer] > 0) // only mark a
-                        // letter as deletable if it is greater than 0
-                    buffer_indices[cur_buffer]--; // delete a char 
-                        // from temp like an hdd deletes data (by just
-                        // signalling that it can be overwritten)
-                break;
-            
-            case KEY_DOWN:
-                if (cur_buffer < num_text - 1) { // the maximum that
-                    // cur_buffer can be is num_text - 1 (the max index)
-                    cur_buffer++; // change the current buffer to edit
-                    
-                    // update cur_y and cur_x to reflect the 
-                        // new current buffer
-                    cur_y = text_pos[cur_buffer];
-                    cur_x = buffer_indices[cur_buffer];
-                    (void) move(cur_y, cur_x);
-                }
-                break;
-            case KEY_UP:
-                if (cur_buffer > 0) {
-                    cur_buffer--; // change the current buffer to edit
-
-                    // update cur_y and cur_x to reflect 
-                        // the new current buffer
-                    cur_y = text_pos[cur_buffer];
-                    cur_x = buffer_indices[cur_buffer];
-                    (void) move(cur_y, cur_x);
-                }
-                break;
-
-            default: // typing regular characters
-                // does not add any characters 
-                    // if the max_buffer_len is reached
-                if (buffer_indices[cur_buffer] == max_buffer_len - 1) {
-                    // if the index points to the last empty character
-                        // (since max_buffer_len is the max index)
-                    continue;
-                }
-                c_char = (char) c;
-
-                // remove all characters that aren't allowed 
-                    // (alphabetical only for now) TODO change
-                if (c_char != ' ' 
-                    && (c_char < 'a' || c_char > 'z') 
-                    && (c_char < 'A' || c_char > 'Z'))
-                    continue;
-                (void) addch((chtype) c_char);
-                buffers[cur_buffer][buffer_indices[cur_buffer]++]
-                    = c_char;
-                cur_x++;
-        }
-    }
-
-    // ----- null terminate string and save it to dest
-    for (int i = 0; i < num_text; i++) {
-        buffers[i][buffer_indices[i]] = '\0'; // end the string 
-            // with a \0, avoiding any 'deleted'
-            // (but still present) data from messing things up and
-            // ensuring that the string is null terminated
-
-        // copy to dest (safely)
-        (void) strncpy(dest[i], buffers[i], (size_t)max_buffer_len);
-        dest[i][max_buffer_len] = '\0';
-    }
-    return 0;
-}
