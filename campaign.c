@@ -41,9 +41,12 @@ void debug_campaign(struct campaign *target, FILE *format)
     } else {
         fprintf(format, "name: '%s' | note: ", target->name);
         print_note(&target->note, format);
-        (void) puts("");
+        
+        (void) fprintf(format, "\n");
+
         debug_grid(&target->encounter_grid, 1, format);
             // print 1 tab for grid
-        (void) puts("");
+
+        (void) fprintf(format, "\n");
     }
 }

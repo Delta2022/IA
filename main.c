@@ -6,7 +6,7 @@ static void save_debug();
 
 int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
 {
-    save_debug();
+    encounter_debug();
     return 0;
 }
 
@@ -77,7 +77,7 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     free(mat_master_list);
 }
 
-static void save_debug()
+/*@unused@*/ static void save_debug()
 {
     /*@null@*/ FILE *save_file = NULL;
     struct campaign test;

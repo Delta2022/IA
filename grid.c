@@ -55,6 +55,7 @@ int init_square(/*@out@*/ struct square *target)
     target->material = NULL;
     target->is_wall = false;
     (void) memset(target->creatures, 0, sizeof(target->creatures));
+    target->max_creatures = ARRAY_LEN(target->creatures);
     target->movement_modifier = 0;
 
     return 0;
@@ -101,7 +102,7 @@ void debug_material(/*@null@*/ struct material *target
             " | char: '%c' | note: "
             , target->name, target->desc, target->print_char);
         print_note(&target->note, format);
-        (void) puts("");
+        (void) fprintf(format, "\n");
     }
 }
 
@@ -116,6 +117,10 @@ void debug_square(struct square *target, int tabs, FILE *format)
         fprintf(format, "is_wall: %d | movement_modifier: %d\n"
             , target->is_wall ? 1 : 0, target->movement_modifier);
         debug_material(target->material, tabs + 1, format);
+        (void) fprintf(format, "\n");
+        for (int i = 0; i < target->max_creatures; i++) {
+            debug_creature(target->creatures[i], tabs + 1, format);
+        }
     }
     
 }
@@ -139,7 +144,7 @@ void debug_grid(struct grid *target, int tabs, FILE *format)
     for (int i = 0; i < target->p_note_len; i++) {
         debug_p_note(&target->p_notes[i], tabs + 1, format);
     }
-    (void) puts("");
+    (void) fprintf(format, "\n");
     
     // print all the squares
     for (int i = 0; i < target->max_y; i++) {
@@ -147,6 +152,8 @@ void debug_grid(struct grid *target, int tabs, FILE *format)
             debug_square(&target->squares[i][j], tabs + 1, format);
         }
     }
+    (void) fprintf(format, "\n");
+
     // check the squares and print them
 
 }

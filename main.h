@@ -9,7 +9,7 @@
 #define MAX_NOTE 50 // max length for notes
 #define ARRAY_LEN(a) (int) (sizeof(a) / sizeof(a[0]))
 #define MAX_PNOTES 10
-#define MAX_CREATURES 10
+#define MAX_CREATURES 2
 #define GRID_X 2
 #define GRID_Y 1
 #define PRINT_TABS(t) \
@@ -40,6 +40,8 @@ struct square {
     bool is_wall;
     struct creature *creatures[MAX_CREATURES]; // pointer to
         // creature from master list
+    // NOTE: removing max_creatures can save space if needed
+    int max_creatures;
     int movement_modifier; // usually 1 if in difficult terrain
 };
 
@@ -114,3 +116,4 @@ int creature_creation_menu(struct creature *creature_list
 int init_creature(/*@out@*/ struct creature *target);
 int print_grid(struct grid *target_grid, WINDOW *target_window
     , struct coord start_point, struct coord end_point);
+void debug_creature(struct creature *target, int tabs, FILE *format);

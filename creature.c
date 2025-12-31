@@ -14,3 +14,20 @@ int init_creature(/*@out@*/ struct creature *target)
 
     return 0;
 }
+
+// TODO switch all puts to fputs
+void debug_creature(struct creature *target, int tabs, FILE *format)
+{
+    PRINT_TABS(tabs);
+    fprintf(format, "CREATURE | ");
+    if (target == NULL) {
+        fprintf(format, "<NULL>\n");
+        return;
+    }
+    fprintf(format
+        , "name: \"%s\" | name_len: %d | print_char: %c | note: "
+        , target->name, target->name_len, target->print_char);
+    print_note(&target->note, format);
+
+    (void) fprintf(format, "\n");
+}

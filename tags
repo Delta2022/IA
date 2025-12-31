@@ -75,6 +75,7 @@ creature_creation_menu	menus.c	/^int creature_creation_menu(struct creature *cre
 creature_debug	main.c	/^\/*@unused@*\/ static void creature_debug()$/;"	f	typeref:typename:void	file:
 creatures	main.h	/^    struct creature *creatures[MAX_CREATURES]; \/\/ pointer to$/;"	m	struct:square	typeref:struct:creature * []
 debug_campaign	campaign.c	/^void debug_campaign(struct campaign *target, FILE *format)$/;"	f	typeref:typename:void
+debug_creature	creature.c	/^void debug_creature(struct grid *target, int tabs, FILE *format)$/;"	f	typeref:typename:void
 debug_grid	grid.c	/^void debug_grid(struct grid *target, int tabs, FILE *format)$/;"	f	typeref:typename:void
 debug_material	grid.c	/^void debug_material(\/*@null@*\/ struct material *target$/;"	f	typeref:typename:void
 debug_p_note	note.c	/^void debug_p_note(struct p_note *target, int tabs, FILE *format)$/;"	f	typeref:typename:void
@@ -98,6 +99,7 @@ len	main.h	/^    int len;$/;"	m	struct:note	typeref:typename:int
 main	main.c	/^int main(\/*@unused@*\/ int argc, \/*@unused@*\/ char *argv[])$/;"	f	typeref:typename:int
 material	main.h	/^    \/*@null@*\/ \/*@dependent@*\/ struct material *material;$/;"	m	struct:square	typeref:struct:material *
 material	main.h	/^struct material {$/;"	s
+max_creatures	main.h	/^    int max_creatures;$/;"	m	struct:square	typeref:typename:int
 max_x	main.h	/^    int max_x;$/;"	m	struct:grid	typeref:typename:int
 max_y	main.h	/^    int max_y;$/;"	m	struct:grid	typeref:typename:int
 movement_modifier	main.h	/^    int movement_modifier; \/\/ usually 1 if in difficult terrain$/;"	m	struct:square	typeref:typename:int

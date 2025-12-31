@@ -91,7 +91,7 @@ void debug_p_note(struct p_note *target, int tabs, FILE *format)
     } else {
         fprintf(format, "(y: %d, x: %d) ", target->y, target->x);
         print_note(&target->note, format);
-        (void) puts("");
+        (void) fprintf(format, "\n");
     }
 }
 
