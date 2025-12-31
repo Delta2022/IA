@@ -73,7 +73,7 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
         , mat_master_list, mat_master_len);
 
     (void) endwin();
-    //debug_campaign(&temp, stdout);
+    debug_campaign(&temp, stdout);
     free(mat_master_list);
 }
 

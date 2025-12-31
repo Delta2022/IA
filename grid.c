@@ -16,6 +16,9 @@ int init_grid(/*@out@*/ struct grid *target)
     target->max_y = ARRAY_LEN(target->squares);
     target->max_x = ARRAY_LEN(target->squares[0]);
 
+    target->grid_start.y = 0;
+    target->grid_start.x = 0;
+
     for (int i = 0; i < target->max_y; i++) {
         for (int j = 0; j < target->max_x; j++) {
             foutput = init_square(&target->squares[i][j]);
@@ -136,9 +139,11 @@ void debug_grid(struct grid *target, int tabs, FILE *format)
         return;
     }
     fprintf(format, "x_scale: %d | y_scale: %d | max_y: %d"
-        " | max_x: %d | p_note_len: %d\n"
+        " | max_x: %d | grid_start: (%d, %d) | p_note_len: %d\n"
         , target->x_scale, target->y_scale
-        , target->max_y, target->max_x, target->p_note_len);
+        , target->max_y, target->max_x
+        , target->grid_start.y, target->grid_start.x
+        , target->p_note_len);
 
     // print the p_notes
     for (int i = 0; i < target->p_note_len; i++) {

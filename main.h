@@ -10,14 +10,31 @@
 #define ARRAY_LEN(a) (int) (sizeof(a) / sizeof(a[0]))
 #define MAX_PNOTES 10
 #define MAX_CREATURES 2
-#define GRID_X 2
-#define GRID_Y 1
+#define GRID_X 5
+#define GRID_Y 6
 #define PRINT_TABS(t) \
     {for (int p = 0; p < t; p++) (void) putchar('\t');}
+
+#define MOVE_UP         0
+#define MOVE_DOWN       1
+#define MOVE_LEFT       2
+#define MOVE_RIGHT      3
+
+#define CURSOR_UP       4
+#define CURSOR_DOWN     5
+#define CURSOR_LEFT     6
+#define CURSOR_RIGHT    7
+#define SET_MAT         8
+#define TOGGLE_WALL     9
 
 struct func_pointer {
     void (*pointer) (void *);
     int type; // specifies a type of function pointer to convert to
+};
+
+struct coord {
+    int y;
+    int x;
 };
 
 // redundancy for later on if I want to implement a better note system
@@ -66,6 +83,8 @@ struct grid {
     int max_y;
     int max_x;
 
+    struct coord grid_start;
+
     struct p_note p_notes[MAX_PNOTES];
     int p_note_len;
 
@@ -84,10 +103,16 @@ struct campaign {
     struct note note;
 };
 
-struct coord {
-    int y;
-    int x;
+struct grid_editor {
+    /*@temp@*/ struct grid *target_grid;
+    /*@temp@*/ WINDOW *target_win;
+
+    struct coord cursor;
+    struct coord max_cursor;
+    struct coord old_cursor;
+    struct coord grid_end;
 };
+typedef struct grid_editor GRID_EDITOR;
 
 int init_campaign(/*@out@*/ struct campaign *target);
 int init_grid(/*@out@*/ struct grid *target);
@@ -117,3 +142,8 @@ int init_creature(/*@out@*/ struct creature *target);
 int print_grid(struct grid *target_grid, WINDOW *target_window
     , struct coord start_point, struct coord end_point);
 void debug_creature(struct creature *target, int tabs, FILE *format);
+int grid_editor_driver(GRID_EDITOR *target_ge
+    , /*@null@*/ struct material *target_material, const int action);
+int init_grid_editor(/*@out@*/GRID_EDITOR *target_ge
+    , struct grid *target_grid
+    , struct coord grid_end, WINDOW *target_win);
