@@ -2,10 +2,11 @@
 
 static void encounter_debug();
 static void creature_debug();
+static void save_debug();
 
 int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
 {
-    encounter_debug();
+    save_debug();
     return 0;
 }
 
@@ -37,7 +38,7 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     free(mast_creature_list);
 }
 
-static void encounter_debug()
+/*@unused@*/ static void encounter_debug()
 {
     struct material *mat_master_list;
     int mat_master_len = 5;
@@ -74,4 +75,32 @@ static void encounter_debug()
     (void) endwin();
     //debug_campaign(&temp, stdout);
     free(mat_master_list);
+}
+
+static void save_debug()
+{
+    /*@null@*/ FILE *save_file = NULL;
+    struct campaign test;
+    struct campaign test2;
+
+    (void) memset(&test, 0, sizeof(test));
+
+    (void) init_campaign(&test);
+
+    save_file = fopen("test", "w+");
+    if (save_file == NULL) {
+        exit(EXIT_FAILURE);
+    }
+
+    // saving
+    (void) fwrite(&test, sizeof(test), 1, save_file);
+
+    // reading (rewind is to reset the file pos
+        // indicator to 0 again
+    rewind(save_file);
+    (void) fread(&test2, sizeof(test2), 1, save_file);
+
+    debug_campaign(&test2, stdout);
+
+    (void) fclose(save_file);
 }

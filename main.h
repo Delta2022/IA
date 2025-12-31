@@ -10,8 +10,8 @@
 #define ARRAY_LEN(a) (int) (sizeof(a) / sizeof(a[0]))
 #define MAX_PNOTES 10
 #define MAX_CREATURES 10
-#define GRID_X 100
-#define GRID_Y 100
+#define GRID_X 2
+#define GRID_Y 1
 #define PRINT_TABS(t) \
     {for (int p = 0; p < t; p++) (void) putchar('\t');}
 
@@ -29,6 +29,7 @@ struct note {
 struct creature {
     char name[MAX_CHAR];
     int name_len;
+    char print_char;
 
     struct note note;
 };

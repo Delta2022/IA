@@ -8,6 +8,7 @@ int init_creature(/*@out@*/ struct creature *target)
 
     target->name_len = ARRAY_LEN(target->name);
     (void) memset(target->name , 0, sizeof(target->name_len));
+    target->print_char = '\0';
 
     (void) init_note(&target->note);
 

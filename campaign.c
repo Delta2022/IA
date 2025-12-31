@@ -9,6 +9,10 @@ int init_campaign(/*@out@*/ struct campaign *target)
     // ----- checks
     check(target != NULL, "target was NULL (should be campaign to"
         " initialize).");
+
+    // ----- zero out the entire campaign
+        // (needed for no valgrind errors)
+    (void) memset(target, 0, sizeof(*target));
     // ----- init
     int foutput = 0;
 

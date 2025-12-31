@@ -80,7 +80,7 @@ debug_material	grid.c	/^void debug_material(\/*@null@*\/ struct material *target
 debug_p_note	note.c	/^void debug_p_note(struct p_note *target, int tabs, FILE *format)$/;"	f	typeref:typename:void
 debug_square	grid.c	/^void debug_square(struct square *target, int tabs, FILE *format)$/;"	f	typeref:typename:void
 desc	main.h	/^    char desc[MAX_CHAR];$/;"	m	struct:material	typeref:typename:char[]
-encounter_debug	main.c	/^static void encounter_debug()$/;"	f	typeref:typename:void	file:
+encounter_debug	main.c	/^\/*@unused@*\/ static void encounter_debug()$/;"	f	typeref:typename:void	file:
 encounter_grid	main.h	/^    struct grid encounter_grid;$/;"	m	struct:campaign	typeref:struct:grid
 func_pointer	main.h	/^struct func_pointer {$/;"	s
 get_multi_input	get_multi_input.c	/^int get_multi_input(char **dest, int num_dest, int max_buffer_len$/;"	f	typeref:typename:int
@@ -115,9 +115,11 @@ p_note	main.h	/^struct p_note {$/;"	s
 p_note_len	main.h	/^    int p_note_len;$/;"	m	struct:grid	typeref:typename:int
 p_notes	main.h	/^    struct p_note p_notes[MAX_PNOTES];$/;"	m	struct:grid	typeref:struct:p_note[]
 pointer	main.h	/^    void (*pointer) (void *);$/;"	m	struct:func_pointer	typeref:typename:void (*)(void *)
+print_char	main.h	/^    char print_char;$/;"	m	struct:creature	typeref:typename:char
 print_char	main.h	/^    char print_char;$/;"	m	struct:material	typeref:typename:char
 print_grid	grid.c	/^int print_grid(struct grid *target_grid, WINDOW *target_window$/;"	f	typeref:typename:int
 print_note	note.c	/^void print_note(struct note *target, FILE *format)$/;"	f	typeref:typename:void
+save_debug	main.c	/^static void save_debug()$/;"	f	typeref:typename:void	file:
 square	main.h	/^struct square {$/;"	s
 squares	main.h	/^    struct square squares[GRID_Y][GRID_X];$/;"	m	struct:grid	typeref:struct:square[][]
 start_campaign	menus.c	/^int start_campaign(\/*@unused@*\/ struct campaign *target_campaign)$/;"	f	typeref:typename:int
