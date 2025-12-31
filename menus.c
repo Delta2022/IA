@@ -121,6 +121,7 @@ int start_encounter(struct grid *target_grid
     WINDOW *grid_win;
     WINDOW *menu_win;
     WINDOW *sub_win; // sub_win is the sub window of menu_win
+    WINDOW *seperator;
     ITEM **menu_items;
     MENU *materials_menu;
     int half_length = COLS / 2;
@@ -132,26 +133,33 @@ int start_encounter(struct grid *target_grid
     int cur_index = 0;
     ITEM *cur_item;
     struct square *cursor_square;
+
+    struct coord grid_start = {0, 0};
+    struct coord grid_end = {0, 0};
     
     // grid win is on the left and menu_win is on the right
 
-    grid_win = newwin(LINES, half_length, 0, 0);
-    menu_win = newwin(LINES, half_length, 0, half_length + 1);
-    sub_win = derwin(menu_win, LINES - 1, half_length, 1, 0);
-        // TODO not perfect but fix later (two half_length / 2 windows
-            // may be one short if the length is odd)
+    // even: (grid|sep|menu) __|_|_
+    // odd: (grid|sep|menu) _|_|_
+    grid_win = newwin(0, half_length, 0, 0);
+    
+    seperator = newwin(0, 1, 0, half_length);
 
-    // ----- render a dividing line on the grid side (so the menu side is
-        // left untouched for the menu
+    menu_win = newwin(0, 0, 0, half_length + 1);
+    sub_win = derwin(menu_win, 0, 0, 1, 0);
+
+    // ----- render a dividing line on the seperator window
     for (int i = 0; i < LINES; i++) {
-        (void) mvwprintw(grid_win, i, COLS / 2 - 1, "|");
+        (void) mvwprintw(seperator, i, getmaxx(seperator) - 1, "|");
     }
 
     // ----- print menu
     (void) mvwprintw(menu_win, 0, 0, "Material Options");
 
     // ----- print the squares
-    print_grid(target_grid, grid_win);
+    getmaxyx(grid_win, grid_end.y, grid_end.x);
+    (void) print_grid(target_grid, grid_win
+        , grid_start, grid_end);
 
     // ----- create menu for materials
     // define the item array
@@ -178,11 +186,20 @@ int start_encounter(struct grid *target_grid
     // --- set cursor and cursor max values 
         // TODO make this accomodate large grids
         // where the limits of the screen are the limiting factor
-    cursor.y = target_grid->max_y / 2;
-    cursor.x = target_grid->max_x / 2;
+    cursor = grid_start;
     max_cursor.y = target_grid->max_y - 1; 
         // - 1 is to convert length to index
     max_cursor.x = target_grid->max_x - 1;
+
+    // set the max_cursor to the end of the grid if it is there
+    if (max_cursor.y > grid_end.y) {
+        max_cursor.y = grid_end.y;
+    }
+        
+    if (max_cursor.x > grid_end.x - 1) { // -1 due to grid_end being
+        // length
+        max_cursor.x = grid_end.x - 1;
+    }
 
     old_cursor = cursor; // set the starting old_cursor
         // to the starting cursor as a default
@@ -203,32 +220,46 @@ int start_encounter(struct grid *target_grid
             old_cursor = cursor; // copy the new cursor into the old
         }
 
+        // --- put cursor in the menu
         // --- update screen in CORRECT ORDER (stdscr has to be at bottom)
+        //box(grid_win, 0, 0);
+        //box(seperator, 0, 0);
+        //box(menu_win, 0, 0);
         (void) wnoutrefresh(stdscr);
         (void) wnoutrefresh(grid_win);
+        (void) wnoutrefresh(seperator);
         (void) wnoutrefresh(menu_win);
         (void) doupdate();
 
         // --- process input
         c = getch();
         switch (c) {
+
+            // cursor - grid_start is the coordinates on the grid
+                // irrespective of movement offsets
+            // the if statements ensure that the cursor
+                // dont exceed the grid
             case KEY_UP:
-                if (cursor.y > 0) {
+                if (cursor.y - grid_start.y > 0) {
                     cursor.y--;
                 }
                 break;
             case KEY_DOWN:
-                if (cursor.y < max_cursor.y) {
+                if (cursor.y - grid_start.y < max_cursor.y) {
                     cursor.y++;
                 }
                 break;
+
+
             case KEY_LEFT:
-                if (cursor.x > 0) {
+                if (cursor.x - grid_start.x > 0) {
                     cursor.x--;
                 }
                 break;
+
+
             case KEY_RIGHT:
-                if (cursor.x < max_cursor.x) {
+                if (cursor.x - grid_start.x < max_cursor.x) {
                     cursor.x++;
                 }
                 break;
@@ -243,7 +274,10 @@ int start_encounter(struct grid *target_grid
 
                 // use the material in the menu to set the square's
                     // material
-                cursor_square = &target_grid->squares[cursor.x][cursor.y];
+                cursor_square = &target_grid->squares
+                    [cursor.y - grid_start.y][cursor.x - grid_start.x];
+                // cursor - grid_start is to ensure that the offsets 
+                    // when moving around are cancelled out
 
                 cursor_square->material = &mat_list[cur_index];
                 
@@ -258,8 +292,8 @@ int start_encounter(struct grid *target_grid
             case 'p': // previous material
                 (void) menu_driver(materials_menu, REQ_UP_ITEM);
                 break;
-            case 'w': // toggle wall
-                cursor_square = &target_grid->squares[cursor.x][cursor.y];
+            case 'q': // toggle wall
+                cursor_square = &target_grid->squares[cursor.y][cursor.x];
                 cursor_square->is_wall = !(cursor_square->is_wall);
                 mvprintw_square(cursor.y, cursor.x
                     , cursor_square, grid_win);
@@ -267,6 +301,33 @@ int start_encounter(struct grid *target_grid
 
             // TODO: meke set wall and set material thing
 
+            case 'w':
+                grid_start.y++;
+                cursor.y++;
+                (void) print_grid(target_grid, grid_win
+                    , grid_start, grid_end);
+                break;
+
+            case 'd': // move grid left
+                grid_start.x--;
+                cursor.x--;
+                (void) print_grid(target_grid, grid_win
+                    , grid_start, grid_end);
+                break;
+
+            case 's':
+                grid_start.y--;
+                cursor.y--;
+                (void) print_grid(target_grid, grid_win
+                    , grid_start, grid_end);
+                break;
+
+            case 'a': // move grid right
+                grid_start.x++;
+                cursor.x++;
+                (void) print_grid(target_grid, grid_win
+                    , grid_start, grid_end);
+                break;
         }
     } while(c != KEY_F(2));
         

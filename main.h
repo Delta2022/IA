@@ -10,8 +10,8 @@
 #define ARRAY_LEN(a) (int) (sizeof(a) / sizeof(a[0]))
 #define MAX_PNOTES 10
 #define MAX_CREATURES 10
-#define GRID_X 5
-#define GRID_Y 5
+#define GRID_X 100
+#define GRID_Y 100
 #define PRINT_TABS(t) \
     {for (int p = 0; p < t; p++) (void) putchar('\t');}
 
@@ -111,4 +111,5 @@ void mvprintw_square(int y, int x, struct square *target
 int creature_creation_menu(struct creature *creature_list
     , int creature_list_len);
 int init_creature(/*@out@*/ struct creature *target);
-void print_grid(struct grid *target_grid, WINDOW *target_window);
+int print_grid(struct grid *target_grid, WINDOW *target_window
+    , struct coord start_point, struct coord end_point);

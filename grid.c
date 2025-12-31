@@ -167,15 +167,85 @@ void mvprintw_square(int y, int x, struct square *target
     // TODO do creatures later
 }
 
-void print_grid(struct grid *target_grid, WINDOW *target_window)
-    // prints the grid out into a target window
-    // assumes the target window is larger than the squares
-    // TODO allow moving around the grid
+int print_grid(struct grid *target_grid, WINDOW *target_window
+    , struct coord start_point, struct coord end_point)
+    // prints a grid starting at the start point, up until
+    // the end of the grid
 {
+    (void) werase(target_window);
+    /*
+    (void) mvwprintw(target_window
+        , LINES - 1, 0, "start_point: (%d %d) end_point: (%d %d)"
+        , start_point.y, start_point.x
+        , end_point.y, end_point.x);
+    */
+
+    struct coord print_pos = {0, 0};
+
     for (int i = 0; i < target_grid->max_y; i++) {
         for (int j = 0; j < target_grid->max_x; j++) {
-            (void) mvprintw_square(i, j, &target_grid->squares[i][j]
+            print_pos.y = start_point.y + i;
+            print_pos.x = start_point.x + j;
+
+            // delete when the value isn't shown when printing anyways
+            if (print_pos.y < 0 || print_pos.x < 0
+                || print_pos.y > end_point.y 
+                || print_pos.x > end_point.x) {
+                continue;
+            }
+
+            (void) mvprintw_square(print_pos.y, print_pos.x
+                , &target_grid->squares[i][j]
                 , target_window);
         }
     }
+    return 0;    
 }
+
+/*
+int print_grid(struct grid *target_grid, WINDOW *target_window
+    , struct coord win_end, struct coord start_print
+    , struct coord grid_start, struct coord grid_end)
+    // prints the grid out into a target window
+    // assumes the target window is larger than the squares
+    // TODO allow moving around the grid
+    // TODO report status
+{
+    // end print is the position when to stop printing
+        // as this can be either the end of the grid or the 
+        // end of the window
+    struct coord end_print = grid_end;
+
+    if (end_print.y > win_end.y) {
+        end_print.y = win_end.y;
+    }
+
+    if (end_print.x > win_end.x) {
+        end_print.x = win_end.x;
+    }
+
+    (void) mvwprintw(target_window
+        , LINES - 2, 0, "(%d %d) (%d %d) (%d %d) (%d %d)"
+        , win_end.y, win_end.x
+        , start_print.y, start_print.x
+        , grid_start.y, grid_start.x
+        , grid_end.y, grid_end.x);
+
+    (void) mvwprintw(target_window
+        , LINES - 1, 0, "(%d %d) (%d %d)"
+        , start_print.y, start_print.x
+        , end_print.y, end_print.x);
+
+    // NOTE: didn't clear line, which caused bugs
+    // NOTE: this line had the error bc its not starting at 0
+    for (int i = grid_start.y; i < end_print.y; i++) {
+        for (int j = grid_start.x; j < end_print.x; j++) {
+            (void) mvprintw_square(start_print.y + i, start_print.x + j
+                , &target_grid->squares[i]
+                    [j]
+                , target_window);
+        }
+    }
+    return 0;
+}
+*/

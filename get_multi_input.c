@@ -4,6 +4,8 @@ int get_multi_input(char **dest, int num_dest, int max_buffer_len
     , int *text_pos)
 // TODO make it support other windows
 // TODO support jumping to jumps in the text
+// TODO add wrapping
+// TODO allow vertical traverse of text
     // dest is an array of pointers to the destinations to write to
     // num_dest is the length of dest 
         //(the number of destinations there are)

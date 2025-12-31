@@ -1,10 +1,16 @@
 #include "main.h"
 
-
+static void encounter_debug();
+static void creature_debug();
 
 int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
 {
+    encounter_debug();
+    return 0;
+}
 
+/*@unused@*/ static void creature_debug()
+{
     struct creature *mast_creature_list;
     int len = 5;
     mast_creature_list = calloc((size_t) len 
@@ -29,9 +35,10 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
 
     (void) endwin();
     free(mast_creature_list);
-    return 0;
 }
-/*  // Encounter debug
+
+static void encounter_debug()
+{
     struct material *mat_master_list;
     int mat_master_len = 5;
     mat_master_list = calloc((size_t) mat_master_len
@@ -65,6 +72,6 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
         , mat_master_list, mat_master_len);
 
     (void) endwin();
-    debug_campaign(&temp, stdout);
+    //debug_campaign(&temp, stdout);
     free(mat_master_list);
-*/
+}
