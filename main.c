@@ -3,10 +3,11 @@
 static void encounter_debug();
 static void creature_debug();
 static void save_debug();
+static void main_debug();
 
 int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
 {
-    encounter_debug();
+    main_debug();
     return 0;
 }
 
@@ -103,4 +104,20 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     debug_campaign(&test2, stdout);
 
     (void) fclose(save_file);
+}
+
+static void main_debug()
+{
+    // ----- start ncurses
+    (void) initscr();
+    (void) cbreak();
+    (void) noecho();
+    (void) keypad(stdscr, true);
+
+    struct campaign temp;
+    (void) init_campaign(&temp);
+
+    (void) main_menu(&temp);
+
+    (void) endwin();
 }

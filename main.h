@@ -147,3 +147,4 @@ int grid_editor_driver(GRID_EDITOR *target_ge
 int init_grid_editor(/*@out@*/GRID_EDITOR *target_ge
     , struct grid *target_grid
     , struct coord grid_end, WINDOW *target_win);
+int main_menu(struct campaign *target_campaign);

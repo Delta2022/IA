@@ -146,7 +146,7 @@ int start_encounter(struct grid *target_grid
 
     // ----- render a dividing line on the seperator window
     for (int i = 0; i < LINES; i++) {
-        (void) mvwprintw(seperator, i, getmaxx(seperator) - 1, "|");
+        (void) mvwprintw(seperator, i, 0, "|");
     }
 
     // ----- print menu
@@ -245,7 +245,7 @@ int start_encounter(struct grid *target_grid
                 (void) grid_editor_driver(&grid_editor, NULL, MOVE_DOWN);
                 break;
         }
-    } while(c != KEY_F(2));
+    } while (c != KEY_F(2));
         
     
     // ----- free menu itmes
