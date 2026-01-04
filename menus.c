@@ -126,14 +126,9 @@ int start_encounter(struct grid *target_grid
     MENU *materials_menu;
     int half_length = COLS / 2;
     int c = -1;
-    // TODO make the case when target_grid is larger than the window
-    //struct coord cursor = {-1, -1};
-    //struct coord max_cursor = {-1, -1};
-    //struct coord old_cursor = {-1, -1};
     int cur_index = 0;
     ITEM *cur_item;
 
-    //struct coord *grid_start = &target_grid->grid_start;
     struct coord grid_end = {0, 0};
 
     GRID_EDITOR grid_editor;
@@ -161,8 +156,6 @@ int start_encounter(struct grid *target_grid
     getmaxyx(grid_win, grid_end.y, grid_end.x);
     (void) init_grid_editor(&grid_editor, target_grid
         , grid_end, grid_win);
-    //(void) print_grid(target_grid, grid_win
-    //    , *grid_start, grid_end);
 
     // ----- create menu for materials
     // define the item array
@@ -186,48 +179,8 @@ int start_encounter(struct grid *target_grid
     (void) set_menu_sub(materials_menu, sub_win);
     (void) post_menu(materials_menu);
 
-    // --- set cursor and cursor max values 
-        // TODO make this accomodate large grids
-        // where the limits of the screen are the limiting factor
-    //cursor = *grid_start;
-    //max_cursor.y = target_grid->max_y - 1; 
-    //    // - 1 is to convert length to index
-    //max_cursor.x = target_grid->max_x - 1;
-
-    //// set the max_cursor to the end of the grid if it is there
-    //if (max_cursor.y > grid_end.y) {
-    //    max_cursor.y = grid_end.y;
-    //}
-    //    
-    //if (max_cursor.x > grid_end.x - 1) { // -1 due to grid_end being
-    //    // length
-    //    max_cursor.x = grid_end.x - 1;
-    //}
-
-    //old_cursor = cursor; // set the starting old_cursor
-        // to the starting cursor as a default
-        // (they are the same, so its caught when showing and only
-        // highlights the cursor w/o unhighlighting the old cursor)
-
     // ----- loop for inputs
     do {
-        // --- show cursor for grid
-        //mvwchgat(grid_win
-        //    , cursor.y, cursor.x, 1, A_REVERSE, 0, NULL);
-
-        //// only replace the old position with normal
-        //    // if the cursor was moved
-        //if (cursor.y != old_cursor.y || cursor.x != old_cursor.x) {
-        //    mvwchgat(grid_win
-        //        , old_cursor.y, old_cursor.x, 1, A_NORMAL, 0, NULL);
-        //    old_cursor = cursor; // copy the new cursor into the old
-        //}
-
-        // --- put cursor in the menu
-        // --- update screen in CORRECT ORDER (stdscr has to be at bottom)
-        //box(grid_win, 0, 0);
-        //box(seperator, 0, 0);
-        //box(menu_win, 0, 0);
         (void) wnoutrefresh(stdscr);
         (void) wnoutrefresh(grid_win);
         (void) wnoutrefresh(seperator);
@@ -237,35 +190,6 @@ int start_encounter(struct grid *target_grid
         // --- process input
         c = getch();
         switch (c) {
-
-            // cursor - *grid_start is the coordinates on the grid
-                // irrespective of movement offsets
-            // the if statements ensure that the cursor
-                // dont exceed the grid
-            //case KEY_UP:
-            //    if (cursor.y - grid_start->y > 0) {
-            //        cursor.y--;
-            //    }
-            //    break;
-            //case KEY_DOWN:
-            //    if (cursor.y - grid_start->y < max_cursor.y) {
-            //        cursor.y++;
-            //    }
-            //    break;
-
-
-            //case KEY_LEFT:
-            //    if (cursor.x - grid_start->x > 0) {
-            //        cursor.x--;
-            //    }
-            //    break;
-
-
-            //case KEY_RIGHT:
-            //    if (cursor.x - grid_start->x < max_cursor.x) {
-            //        cursor.x++;
-            //    }
-            //    break;
             case KEY_UP:
                 (void) grid_editor_driver(&grid_editor, NULL, CURSOR_UP);
                 break;
@@ -293,18 +217,6 @@ int start_encounter(struct grid *target_grid
 
                 (void) grid_editor_driver(&grid_editor
                     , &mat_list[cur_index], SET_MAT);
-                // use the material in the menu to set the square's
-                    // material
-                //cursor_square = &target_grid->squares
-                //    [cursor.y - grid_start->y][cursor.x - grid_start->x];
-                //// cursor - *grid_start is to ensure that the offsets 
-                //    // when moving around are cancelled out
-
-                //cursor_square->material = &mat_list[cur_index];
-                //
-                //// update the square
-                //mvprintw_square(cursor.y, cursor.x
-                //    , cursor_square, grid_win);
                 break;
             
             case 'n': // next material
@@ -316,10 +228,6 @@ int start_encounter(struct grid *target_grid
             case 'q': // toggle wall
                 (void) grid_editor_driver(&grid_editor, NULL
                     , TOGGLE_WALL);
-                //cursor_square = &target_grid->squares[cursor.y][cursor.x];
-                //cursor_square->is_wall = !(cursor_square->is_wall);
-                //mvprintw_square(cursor.y, cursor.x
-                //    , cursor_square, grid_win);
                 break;
 
             // TODO: meke set wall and set material thing
@@ -336,34 +244,6 @@ int start_encounter(struct grid *target_grid
             case 's': // move grid down
                 (void) grid_editor_driver(&grid_editor, NULL, MOVE_DOWN);
                 break;
-
-            //case 'w':
-            //    grid_start->y++;
-            //    cursor.y++;
-            //    (void) print_grid(target_grid, grid_win
-            //        , *grid_start, grid_end);
-            //    break;
-
-            //case 'd': // move grid left
-            //    grid_start->x--;
-            //    cursor.x--;
-            //    (void) print_grid(target_grid, grid_win
-            //        , *grid_start, grid_end);
-            //    break;
-
-            //case 's':
-            //    grid_start->y--;
-            //    cursor.y--;
-            //    (void) print_grid(target_grid, grid_win
-            //        , *grid_start, grid_end);
-            //    break;
-
-            //case 'a': // move grid right
-            //    grid_start->x++;
-            //    cursor.x++;
-            //    (void) print_grid(target_grid, grid_win
-            //        , *grid_start, grid_end);
-            //    break;
         }
     } while(c != KEY_F(2));
         
