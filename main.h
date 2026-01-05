@@ -148,3 +148,6 @@ int init_grid_editor(/*@out@*/GRID_EDITOR *target_ge
     , struct grid *target_grid
     , struct coord grid_end, WINDOW *target_win);
 int main_menu(struct campaign *target_campaign);
+void mvdisplay_square(WINDOW *target_window, int y, int x
+    , struct square *target_square);
+struct coord get_cursor(GRID_EDITOR *target);

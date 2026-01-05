@@ -15,6 +15,7 @@ int main_menu(struct campaign *target_campaign)
     // vertical seperator
     // horizontal seperator
 
+    // REMEMBER TO ERASE AND FREE WINDOWS at hte end
     int c = -1;
     struct coord grid_end;
     WINDOW *grid_win;
@@ -25,12 +26,19 @@ int main_menu(struct campaign *target_campaign)
     WINDOW *v_sep;
     WINDOW *h_sep;
 
+    // ----- hide the cursor (its not needed)
+    (void) curs_set(0);
+    // NOTE newwin positions were found experimentally
+        // using box and seeing the result when compiled
     // ----- init grid_win
     grid_win = newwin(H_SEP_POS, V_SEP_POS, 0, 0);
 
     getmaxyx(grid_win, grid_end.y, grid_end.x);
     (void) init_grid_editor(&grid_editor
         , &target_campaign->encounter_grid, grid_end, grid_win);
+
+    // ----- init data_win
+    data_win = newwin(H_SEP_POS, 0, 0, V_SEP_POS + 1);
     // ----- init seperator windows
     // NOTE: for the intersect point, render h_sep above v_sep
     v_sep = newwin(0, 1, 0, V_SEP_POS);
@@ -49,16 +57,26 @@ int main_menu(struct campaign *target_campaign)
     (void) mvwprintw(h_sep, 0, V_SEP_POS, "+");
 
     do {
-        // ----- show data in the data window
-        // TODO
+        // ----- update the data section
+        struct coord cursor = get_cursor(&grid_editor);
+        (void) werase(data_win);
+        mvdisplay_square(data_win, 0, 0
+            , &target_campaign->encounter_grid
+                .squares[cursor.y][cursor.x]);
         // ----- update the screen
+        //box(grid_win, 0, 0);
+        //box(v_sep, 0, 0);
+        //box(h_sep, 0, 0);
+        //box(data_win, 0, 0);
+
         (void) wnoutrefresh(stdscr);
         (void) wnoutrefresh(grid_win);
         (void) wnoutrefresh(v_sep);
         (void) wnoutrefresh(h_sep);
+        (void) wnoutrefresh(data_win);
         (void) doupdate();
 
-        // --- process input
+        // ----- process input
         c = getch();
         switch (c) {
             case KEY_UP:
@@ -77,19 +95,34 @@ int main_menu(struct campaign *target_campaign)
                     , CURSOR_RIGHT);
                 break;
 
-            case 's': // move grid up
+            case 'w': // move grid up
                 (void) grid_editor_driver(&grid_editor, NULL, MOVE_UP);
                 break;
-            case 'a': // move grid left
+            case 'd': // move grid left
                 (void) grid_editor_driver(&grid_editor, NULL, MOVE_LEFT);
                 break;
-            case 'd': // move grid right
+            case 'a': // move grid right
                 (void) grid_editor_driver(&grid_editor, NULL, MOVE_RIGHT);
                 break;
-            case 'w': // move grid down
+            case 's': // move grid down
                 (void) grid_editor_driver(&grid_editor, NULL, MOVE_DOWN);
                 break;
         }
+
     } while (c != KEY_F(2));
+
+    // ----- delete windows
+    (void) delwin(stdscr);
+    (void) delwin(grid_win);
+    (void) delwin(v_sep);
+    (void) delwin(h_sep);
+    (void) delwin(data_win);
+    
+    // ----- clear screen
+    (void) erase();
+    (void) refresh();
+
     return 0;
 }
+
+

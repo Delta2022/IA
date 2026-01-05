@@ -69,25 +69,25 @@ int grid_editor_driver(GRID_EDITOR *target_ge
     // ----- do the action
     switch (action) {
         // ----- move the grid
-        case MOVE_UP:
+        case MOVE_DOWN:
             grid_start->y++;
             cursor->y++;
             (void) print_grid(target_grid, target_win
                 , *grid_start, *grid_end);
             break;
-        case MOVE_DOWN:
+        case MOVE_UP:
             grid_start->y--;
             cursor->y--;
             (void) print_grid(target_grid, target_win
                 , *grid_start, *grid_end);
             break;
-        case MOVE_RIGHT:
+        case MOVE_LEFT:
             grid_start->x++;
             cursor->x++;
             (void) print_grid(target_grid, target_win
                 , *grid_start, *grid_end);
             break;
-        case MOVE_LEFT:
+        case MOVE_RIGHT:
             grid_start->x--;
             cursor->x--;
             (void) print_grid(target_grid, target_win
@@ -178,4 +178,15 @@ int grid_editor_driver(GRID_EDITOR *target_ge
     //    , grid_start->y, grid_start->x);
 
     return 0;
+}
+
+struct coord get_cursor(GRID_EDITOR *target)
+    // returns the cursor position of the target in the grid (not where
+    // it is on screen)
+{
+    struct coord *cursor = &target->cursor;
+    struct coord *grid_start = &target->target_grid->grid_start;
+    struct coord return_val = {cursor->y - grid_start->y
+        , cursor->x - grid_start->x};
+    return return_val;
 }

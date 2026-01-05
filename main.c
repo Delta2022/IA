@@ -7,7 +7,7 @@ static void main_debug();
 
 int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
 {
-    main_debug();
+    encounter_debug();
     return 0;
 }
 
@@ -70,10 +70,20 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     (void) snprintf(mat_master_list[1].desc, MAX_CHAR, "this is veg");
     mat_master_list[1].print_char = '"';
 
+    /*@null@*/ /*@unused@*/ FILE *save_file = NULL;
+    //save_file = fopen("test", "w+");
+    //if (save_file == NULL) {
+    //    exit(EXIT_FAILURE);
+    //}
+    
     (void) start_encounter(&temp.encounter_grid
         , mat_master_list, mat_master_len);
 
+    (void) main_menu(&temp);
     (void) endwin();
+
+    //(void) fwrite(&temp, sizeof(temp), 1, save_file);
+
     debug_campaign(&temp, stdout);
     free(mat_master_list);
 }
@@ -106,7 +116,7 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     (void) fclose(save_file);
 }
 
-static void main_debug()
+/*@unused@*/ static void main_debug()
 {
     // ----- start ncurses
     (void) initscr();
@@ -114,10 +124,18 @@ static void main_debug()
     (void) noecho();
     (void) keypad(stdscr, true);
 
+    /*@null@*/ FILE *save_file = NULL;
+    save_file = fopen("test", "r");
+    if (save_file == NULL) {
+        exit(EXIT_FAILURE);
+    }
+
     struct campaign temp;
     (void) init_campaign(&temp);
-
-    (void) main_menu(&temp);
+    //(void) fread(&temp, sizeof(temp), 1, save_file);
 
     (void) endwin();
+    debug_campaign(&temp, stdout);
+    //(void) main_menu(&temp);
+
 }

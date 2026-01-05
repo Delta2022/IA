@@ -214,6 +214,22 @@ int print_grid(struct grid *target_grid, WINDOW *target_window
     return 0;    
 }
 
+void mvdisplay_square(WINDOW *target_window, int y, int x
+    , struct square *target_square)
+    // displays a square's data onto a window at position y, x
+    // TODO handle too much data
+{
+    // dont print the material name if anything is null
+    if (target_square->material == NULL) {
+        (void) mvwprintw(target_window, y, x, "%s"
+            , target_square->is_wall ? "Wall" : "");
+        return;
+    }
+    (void) mvwprintw(target_window, y, x, "%s %s"
+        , target_square->material->name
+        , target_square->is_wall ? "wall" : "");
+}
+
 /*
 int print_grid(struct grid *target_grid, WINDOW *target_window
     , struct coord win_end, struct coord start_print

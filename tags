@@ -98,6 +98,7 @@ desc	main.h	/^    char desc[MAX_CHAR];$/;"	m	struct:material	typeref:typename:ch
 encounter_debug	main.c	/^\/*@unused@*\/ static void encounter_debug()$/;"	f	typeref:typename:void	file:
 encounter_grid	main.h	/^    struct grid encounter_grid;$/;"	m	struct:campaign	typeref:struct:grid
 func_pointer	main.h	/^struct func_pointer {$/;"	s
+get_cursor	grid_edit.c	/^struct coord get_cursor(GRID_EDITOR *target)$/;"	f	typeref:struct:coord
 get_multi_input	get_multi_input.c	/^int get_multi_input(char **dest, int num_dest, int max_buffer_len$/;"	f	typeref:typename:int
 get_note	note.c	/^void get_note(struct note *target$/;"	f	typeref:typename:void
 grid	main.h	/^struct grid {$/;"	s
@@ -116,8 +117,8 @@ init_square	grid.c	/^int init_square(\/*@out@*\/ struct square *target)$/;"	f	ty
 is_wall	main.h	/^    bool is_wall;$/;"	m	struct:square	typeref:typename:bool
 len	main.h	/^    int len;$/;"	m	struct:note	typeref:typename:int
 main	main.c	/^int main(\/*@unused@*\/ int argc, \/*@unused@*\/ char *argv[])$/;"	f	typeref:typename:int
-main_debug	main.c	/^static void main_debug()$/;"	f	typeref:typename:void	file:
-main_menu	main_menu.c	/^int main_menu()$/;"	f	typeref:typename:int
+main_debug	main.c	/^\/*@unused@*\/ static void main_debug()$/;"	f	typeref:typename:void	file:
+main_menu	main_menu.c	/^int main_menu(struct campaign *target_campaign)$/;"	f	typeref:typename:int
 material	main.h	/^    \/*@null@*\/ \/*@dependent@*\/ struct material *material;$/;"	m	struct:square	typeref:struct:material *
 material	main.h	/^struct material {$/;"	s
 max_creatures	main.h	/^    int max_creatures;$/;"	m	struct:square	typeref:typename:int
@@ -125,6 +126,7 @@ max_cursor	main.h	/^    struct coord max_cursor;$/;"	m	struct:grid_editor	typere
 max_x	main.h	/^    int max_x;$/;"	m	struct:grid	typeref:typename:int
 max_y	main.h	/^    int max_y;$/;"	m	struct:grid	typeref:typename:int
 movement_modifier	main.h	/^    int movement_modifier; \/\/ usually 1 if in difficult terrain$/;"	m	struct:square	typeref:typename:int
+mvdisplay_square	grid.c	/^void mvdisplay_square(WINDOW *target_window, int y, int x$/;"	f	typeref:typename:void
 mvprintw_square	grid.c	/^void mvprintw_square(int y, int x, struct square *target$/;"	f	typeref:typename:void
 name	main.h	/^    char name[MAX_CHAR];$/;"	m	struct:campaign	typeref:typename:char[]
 name	main.h	/^    char name[MAX_CHAR];$/;"	m	struct:creature	typeref:typename:char[]

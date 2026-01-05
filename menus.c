@@ -255,6 +255,17 @@ int start_encounter(struct grid *target_grid
         (void) free_item(menu_items[i]);
     }
     free(menu_items);
+
+    // ----- free windows
+    (void) delwin(grid_win);
+    (void) delwin(sub_win); // sub_win must be freed first
+    (void) delwin(menu_win);
+    (void) delwin(seperator);
+
+    // ----- clear the screen for the next function to use
+    (void) erase();
+    (void) refresh();
+
     return 0;
 }
 
