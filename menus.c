@@ -110,10 +110,12 @@ int start_campaign(/*@unused@*/ struct campaign *target_campaign)
 }
 
 
-int start_encounter(struct grid *target_grid
-    , struct material *mat_list, int mat_list_len)
+int start_encounter(struct campaign *target_campaign)
     // TODO: allow support for large grids (scrolling)
 {
+    struct grid *target_grid = &target_campaign->encounter_grid;
+    struct material *mat_list = target_campaign->material_list;
+    int mat_list_len = target_campaign->material_list_len;
     if (mat_list_len <= 0) {
         return -1;
     }

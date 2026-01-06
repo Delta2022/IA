@@ -73,6 +73,8 @@ MAX_CHAR	main.h	/^#define MAX_CHAR /;"	d
 MAX_CREATURES	main.h	/^#define MAX_CREATURES /;"	d
 MAX_NOTE	main.h	/^#define MAX_NOTE /;"	d
 MAX_PNOTES	main.h	/^#define MAX_PNOTES /;"	d
+MAX_SAVED_CREATURES	main.h	/^#define MAX_SAVED_CREATURES /;"	d
+MAX_SAVED_MATERIALS	main.h	/^#define MAX_SAVED_MATERIALS /;"	d
 MOVE_DOWN	main.h	/^#define MOVE_DOWN /;"	d
 MOVE_LEFT	main.h	/^#define MOVE_LEFT /;"	d
 MOVE_RIGHT	main.h	/^#define MOVE_RIGHT /;"	d
@@ -86,6 +88,8 @@ coord	main.h	/^struct coord {$/;"	s
 creature	main.h	/^struct creature {$/;"	s
 creature_creation_menu	menus.c	/^int creature_creation_menu(struct creature *creature_list$/;"	f	typeref:typename:int
 creature_debug	main.c	/^\/*@unused@*\/ static void creature_debug()$/;"	f	typeref:typename:void	file:
+creature_list	main.h	/^    struct creature creature_list[MAX_SAVED_CREATURES];$/;"	m	struct:campaign	typeref:struct:creature[]
+creature_list_len	main.h	/^    int creature_list_len;$/;"	m	struct:campaign	typeref:typename:int
 creatures	main.h	/^    struct creature *creatures[MAX_CREATURES]; \/\/ pointer to$/;"	m	struct:square	typeref:struct:creature * []
 cursor	main.h	/^    struct coord cursor;$/;"	m	struct:grid_editor	typeref:struct:coord
 debug_campaign	campaign.c	/^void debug_campaign(struct campaign *target, FILE *format)$/;"	f	typeref:typename:void
@@ -116,11 +120,14 @@ init_p_note	note.c	/^int init_p_note(\/*@out@*\/ struct p_note *target)$/;"	f	ty
 init_square	grid.c	/^int init_square(\/*@out@*\/ struct square *target)$/;"	f	typeref:typename:int
 is_wall	main.h	/^    bool is_wall;$/;"	m	struct:square	typeref:typename:bool
 len	main.h	/^    int len;$/;"	m	struct:note	typeref:typename:int
+load_debug	main.c	/^\/*@unused@*\/ static void load_debug()$/;"	f	typeref:typename:void	file:
+load_grid_material_ptrs	campaign.c	/^void load_grid_material_ptrs(struct campaign *target_campaign$/;"	f	typeref:typename:void
 main	main.c	/^int main(\/*@unused@*\/ int argc, \/*@unused@*\/ char *argv[])$/;"	f	typeref:typename:int
-main_debug	main.c	/^\/*@unused@*\/ static void main_debug()$/;"	f	typeref:typename:void	file:
 main_menu	main_menu.c	/^int main_menu(struct campaign *target_campaign)$/;"	f	typeref:typename:int
 material	main.h	/^    \/*@null@*\/ \/*@dependent@*\/ struct material *material;$/;"	m	struct:square	typeref:struct:material *
 material	main.h	/^struct material {$/;"	s
+material_list	main.h	/^    struct material material_list[MAX_SAVED_MATERIALS];$/;"	m	struct:campaign	typeref:struct:material[]
+material_list_len	main.h	/^    int material_list_len;$/;"	m	struct:campaign	typeref:typename:int
 max_creatures	main.h	/^    int max_creatures;$/;"	m	struct:square	typeref:typename:int
 max_cursor	main.h	/^    struct coord max_cursor;$/;"	m	struct:grid_editor	typeref:struct:coord
 max_x	main.h	/^    int max_x;$/;"	m	struct:grid	typeref:typename:int
@@ -147,10 +154,12 @@ print_char	main.h	/^    char print_char;$/;"	m	struct:material	typeref:typename:
 print_grid	grid.c	/^int print_grid(struct grid *target_grid, WINDOW *target_window$/;"	f	typeref:typename:int
 print_note	note.c	/^void print_note(struct note *target, FILE *format)$/;"	f	typeref:typename:void
 save_debug	main.c	/^\/*@unused@*\/ static void save_debug()$/;"	f	typeref:typename:void	file:
+save_grid_ptrs	campaign.c	/^void save_grid_ptrs(struct campaign *target_campaign$/;"	f	typeref:typename:void
+save_square_ptrs	campaign.c	/^static void save_square_ptrs(struct square *target_square$/;"	f	typeref:typename:void	file:
 square	main.h	/^struct square {$/;"	s
 squares	main.h	/^    struct square squares[GRID_Y][GRID_X];$/;"	m	struct:grid	typeref:struct:square[][]
 start_campaign	menus.c	/^int start_campaign(\/*@unused@*\/ struct campaign *target_campaign)$/;"	f	typeref:typename:int
-start_encounter	menus.c	/^int start_encounter(struct grid *target_grid$/;"	f	typeref:typename:int
+start_encounter	menus.c	/^int start_encounter(struct campaign *target_campaign)$/;"	f	typeref:typename:int
 start_menu	menus.c	/^int start_menu()$/;"	f	typeref:typename:int
 start_menu_options	menus.c	/^static char *start_menu_options[] = {$/;"	v	typeref:typename:char * []	file:
 string	main.h	/^    char string[MAX_NOTE];$/;"	m	struct:note	typeref:typename:char[]

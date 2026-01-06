@@ -154,6 +154,7 @@ void debug_grid(struct grid *target, int tabs, FILE *format)
     // print all the squares
     for (int i = 0; i < target->max_y; i++) {
         for (int j = 0; j < target->max_x; j++) {
+            printf("%d %d\n", i, j);
             debug_square(&target->squares[i][j], tabs + 1, format);
         }
     }
@@ -221,14 +222,15 @@ void mvdisplay_square(WINDOW *target_window, int y, int x
 {
     // dont print the material name if anything is null
     if (target_square->material == NULL) {
-        (void) mvwprintw(target_window, y, x, "%s"
-            , target_square->is_wall ? "Wall" : "");
+        (void) mvwprintw(target_window, y, x, "Nothing %s"
+            , target_square->is_wall ? "with a wall" : "");
         return;
     }
     (void) mvwprintw(target_window, y, x, "%s %s"
         , target_square->material->name
         , target_square->is_wall ? "wall" : "");
 }
+
 
 /*
 int print_grid(struct grid *target_grid, WINDOW *target_window

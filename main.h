@@ -10,8 +10,10 @@
 #define ARRAY_LEN(a) (int) (sizeof(a) / sizeof(a[0]))
 #define MAX_PNOTES 10
 #define MAX_CREATURES 2
-#define GRID_X 5
-#define GRID_Y 6
+#define MAX_SAVED_CREATURES 10
+#define MAX_SAVED_MATERIALS 10
+#define GRID_X 2
+#define GRID_Y 3
 #define PRINT_TABS(t) \
     {for (int p = 0; p < t; p++) (void) putchar('\t');}
 
@@ -101,6 +103,11 @@ struct campaign {
     // encounter grid array??
 
     struct note note;
+
+    struct material material_list[MAX_SAVED_MATERIALS];
+    int material_list_len;
+    struct creature creature_list[MAX_SAVED_CREATURES];
+    int creature_list_len;
 };
 
 struct grid_editor {
@@ -132,8 +139,7 @@ void debug_material(/*@null@*/ struct material *target
 int start_menu();
 int start_campaign(struct campaign *target_campaign);
 int get_multi_input(char **dest, int num_dest, int max_buffer_len, int *text_pos);
-int start_encounter(struct grid *target_grid
-    , struct material *mat_list, int mat_list_len);
+int start_encounter(struct campaign *target_campaign);
 void mvprintw_square(int y, int x, struct square *target
     , WINDOW *restrict window);
 int creature_creation_menu(struct creature *creature_list
@@ -151,3 +157,8 @@ int main_menu(struct campaign *target_campaign);
 void mvdisplay_square(WINDOW *target_window, int y, int x
     , struct square *target_square);
 struct coord get_cursor(GRID_EDITOR *target);
+void save_grid_ptrs(struct campaign *target_campaign
+    , FILE *restrict material_file
+    , FILE *restrict creature_file);
+void load_grid_material_ptrs(struct campaign *target_campaign
+    , FILE *restrict material_file);

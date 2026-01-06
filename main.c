@@ -3,11 +3,11 @@
 static void encounter_debug();
 static void creature_debug();
 static void save_debug();
-static void main_debug();
+static void load_debug();
 
 int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
 {
-    encounter_debug();
+    load_debug();
     return 0;
 }
 
@@ -76,8 +76,8 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     //    exit(EXIT_FAILURE);
     //}
     
-    (void) start_encounter(&temp.encounter_grid
-        , mat_master_list, mat_master_len);
+    //(void) start_encounter(&temp.encounter_grid
+    //    , mat_master_list, mat_master_len);
 
     (void) main_menu(&temp);
     (void) endwin();
@@ -90,52 +90,81 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
 
 /*@unused@*/ static void save_debug()
 {
-    /*@null@*/ FILE *save_file = NULL;
-    struct campaign test;
-    struct campaign test2;
-
-    (void) memset(&test, 0, sizeof(test));
-
-    (void) init_campaign(&test);
-
-    save_file = fopen("test", "w+");
+    FILE *c_save_file = fopen("c.save", "w");
+    FILE *mat_save_file = fopen("m.save", "w");
+    FILE *save_file = fopen("save.save", "w");
+    if (c_save_file == NULL) {
+        exit(EXIT_FAILURE);
+    }
+    if (mat_save_file == NULL) {
+        exit(EXIT_FAILURE);
+    }
     if (save_file == NULL) {
         exit(EXIT_FAILURE);
     }
-
-    // saving
-    (void) fwrite(&test, sizeof(test), 1, save_file);
-
-    // reading (rewind is to reset the file pos
-        // indicator to 0 again
-    rewind(save_file);
-    (void) fread(&test2, sizeof(test2), 1, save_file);
-
-    debug_campaign(&test2, stdout);
-
-    (void) fclose(save_file);
-}
-
-/*@unused@*/ static void main_debug()
-{
     // ----- start ncurses
     (void) initscr();
     (void) cbreak();
     (void) noecho();
     (void) keypad(stdscr, true);
 
-    /*@null@*/ FILE *save_file = NULL;
-    save_file = fopen("test", "r");
+    struct campaign temp;
+    (void) init_campaign(&temp);
+
+    (void) snprintf(temp.material_list[0].name, MAX_CHAR, "ground");
+    (void) snprintf(temp.material_list[0].desc, MAX_CHAR, "this is gorund");
+    temp.material_list[0].print_char = '_';
+
+    (void) snprintf(temp.material_list[1].name, MAX_CHAR, "vegitation");
+    (void) snprintf(temp.material_list[1].desc, MAX_CHAR, "this is veg");
+    temp.material_list[1].print_char = '"';
+
+    (void) start_encounter(&temp);
+    (void) endwin();
+
+    save_grid_ptrs(&temp, mat_save_file, c_save_file);
+    (void) fwrite(&temp, sizeof(temp), 1, save_file);
+
+    (void) fclose(mat_save_file);
+    (void) fclose(c_save_file);
+    (void) fclose(save_file);
+}
+
+/*@unused@*/ static void load_debug()
+{
+    struct campaign temp;
+    (void) init_campaign(&temp);
+
+    FILE *c_save_file = fopen("c.save", "r");
+    FILE *mat_save_file = fopen("m.save", "r");
+    FILE *save_file = fopen("save.save", "r");
+    if (c_save_file == NULL) {
+        exit(EXIT_FAILURE);
+    }
+    if (mat_save_file == NULL) {
+        exit(EXIT_FAILURE);
+    }
     if (save_file == NULL) {
         exit(EXIT_FAILURE);
     }
+    
+    // ----- read from file
+    (void) fread(&temp, sizeof(temp), 1, save_file);
+    load_grid_material_ptrs(&temp, mat_save_file, c_save_file);
 
-    struct campaign temp;
-    (void) init_campaign(&temp);
-    //(void) fread(&temp, sizeof(temp), 1, save_file);
+    (void) fclose(mat_save_file);
+    (void) fclose(c_save_file);
+    (void) fclose(save_file);
+
+    // ----- start ncurses
+    (void) initscr();
+    (void) cbreak();
+    (void) noecho();
+    (void) keypad(stdscr, true);
+
+    (void) main_menu(&temp);
 
     (void) endwin();
-    debug_campaign(&temp, stdout);
-    //(void) main_menu(&temp);
 
+    debug_campaign(&temp, stdout);
 }
