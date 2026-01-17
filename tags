@@ -79,6 +79,7 @@ MOVE_DOWN	main.h	/^#define MOVE_DOWN /;"	d
 MOVE_LEFT	main.h	/^#define MOVE_LEFT /;"	d
 MOVE_RIGHT	main.h	/^#define MOVE_RIGHT /;"	d
 MOVE_UP	main.h	/^#define MOVE_UP /;"	d
+PLACE_CHAR	main.h	/^#define PLACE_CHAR /;"	d
 PRINT_TABS	main.h	/^#define PRINT_TABS(/;"	d
 SET_MAT	main.h	/^#define SET_MAT /;"	d
 TOGGLE_WALL	main.h	/^#define TOGGLE_WALL /;"	d
@@ -86,7 +87,7 @@ V_SEP_POS	main_menu.c	/^#define V_SEP_POS /;"	d	file:
 campaign	main.h	/^struct campaign {$/;"	s
 coord	main.h	/^struct coord {$/;"	s
 creature	main.h	/^struct creature {$/;"	s
-creature_creation_menu	menus.c	/^int creature_creation_menu(struct creature *creature_list$/;"	f	typeref:typename:int
+creature_creation_menu	menus.c	/^int creature_creation_menu(struct campaign *target_campaign)$/;"	f	typeref:typename:int
 creature_debug	main.c	/^\/*@unused@*\/ static void creature_debug()$/;"	f	typeref:typename:void	file:
 creature_list	main.h	/^    struct creature creature_list[MAX_SAVED_CREATURES];$/;"	m	struct:campaign	typeref:struct:creature[]
 creature_list_len	main.h	/^    int creature_list_len;$/;"	m	struct:campaign	typeref:typename:int
@@ -99,11 +100,10 @@ debug_material	grid.c	/^void debug_material(\/*@null@*\/ struct material *target
 debug_p_note	note.c	/^void debug_p_note(struct p_note *target, int tabs, FILE *format)$/;"	f	typeref:typename:void
 debug_square	grid.c	/^void debug_square(struct square *target, int tabs, FILE *format)$/;"	f	typeref:typename:void
 desc	main.h	/^    char desc[MAX_CHAR];$/;"	m	struct:material	typeref:typename:char[]
-encounter_debug	main.c	/^\/*@unused@*\/ static void encounter_debug()$/;"	f	typeref:typename:void	file:
 encounter_grid	main.h	/^    struct grid encounter_grid;$/;"	m	struct:campaign	typeref:struct:grid
 func_pointer	main.h	/^struct func_pointer {$/;"	s
 get_cursor	grid_edit.c	/^struct coord get_cursor(GRID_EDITOR *target)$/;"	f	typeref:struct:coord
-get_multi_input	get_multi_input.c	/^int get_multi_input(char **dest, int num_dest, int max_buffer_len$/;"	f	typeref:typename:int
+get_multi_input	get_multi_input.c	/^int get_multi_input(char **dest, int num_dest, int *buffer_max_lens$/;"	f	typeref:typename:int
 get_note	note.c	/^void get_note(struct note *target$/;"	f	typeref:typename:void
 grid	main.h	/^struct grid {$/;"	s
 grid_editor	main.h	/^struct grid_editor {$/;"	s
@@ -128,12 +128,13 @@ material	main.h	/^    \/*@null@*\/ \/*@dependent@*\/ struct material *material;$
 material	main.h	/^struct material {$/;"	s
 material_list	main.h	/^    struct material material_list[MAX_SAVED_MATERIALS];$/;"	m	struct:campaign	typeref:struct:material[]
 material_list_len	main.h	/^    int material_list_len;$/;"	m	struct:campaign	typeref:typename:int
-max_creatures	main.h	/^    int max_creatures;$/;"	m	struct:square	typeref:typename:int
+max_creatures	main.h	/^    int max_creatures; \/\/ maximum amount of creatures that can be added$/;"	m	struct:square	typeref:typename:int
 max_cursor	main.h	/^    struct coord max_cursor;$/;"	m	struct:grid_editor	typeref:struct:coord
 max_x	main.h	/^    int max_x;$/;"	m	struct:grid	typeref:typename:int
 max_y	main.h	/^    int max_y;$/;"	m	struct:grid	typeref:typename:int
+menus_debug	main.c	/^\/*@unused@*\/ static void menus_debug()$/;"	f	typeref:typename:void	file:
 movement_modifier	main.h	/^    int movement_modifier; \/\/ usually 1 if in difficult terrain$/;"	m	struct:square	typeref:typename:int
-mvdisplay_square	grid.c	/^void mvdisplay_square(WINDOW *target_window, int y, int x$/;"	f	typeref:typename:void
+mvdisplay_square_info	grid.c	/^void mvdisplay_square_info(WINDOW *target_window, int y, int x$/;"	f	typeref:typename:void
 mvprintw_square	grid.c	/^void mvprintw_square(int y, int x, struct square *target$/;"	f	typeref:typename:void
 name	main.h	/^    char name[MAX_CHAR];$/;"	m	struct:campaign	typeref:typename:char[]
 name	main.h	/^    char name[MAX_CHAR];$/;"	m	struct:creature	typeref:typename:char[]
@@ -144,6 +145,7 @@ note	main.h	/^    struct note note;$/;"	m	struct:creature	typeref:struct:note
 note	main.h	/^    struct note note;$/;"	m	struct:material	typeref:struct:note
 note	main.h	/^    struct note note;$/;"	m	struct:p_note	typeref:struct:note
 note	main.h	/^struct note {$/;"	s
+num_creatures	main.h	/^    int num_creatures; \/\/ current number of creatures on this square$/;"	m	struct:square	typeref:typename:int
 old_cursor	main.h	/^    struct coord old_cursor;$/;"	m	struct:grid_editor	typeref:struct:coord
 p_note	main.h	/^struct p_note {$/;"	s
 p_note_len	main.h	/^    int p_note_len;$/;"	m	struct:grid	typeref:typename:int

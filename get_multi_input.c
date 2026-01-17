@@ -1,24 +1,34 @@
 #include "main.h"
 
-int get_multi_input(char **dest, int num_dest, int max_buffer_len
+int get_multi_input(char **dest, int num_dest, int *buffer_max_lens
     , int *text_pos)
 // TODO make it support other windows
 // TODO support jumping to jumps in the text
 // TODO add wrapping
 // TODO allow vertical traverse of text
+// TODO rename cur_buffer to be different from current_buffer
     // dest is an array of pointers to the destinations to write to
     // num_dest is the length of dest 
         //(the number of destinations there are)
-    // max_buffer_len is the maximum number of characters to write 
-        // to the buffer
+    // buffer_max_lens is the maximum number of characters to write 
+        // to the buffer. its length is num_dest
     // text_pos is the position of where to show the inputted text
         //(this should be an empty line). Its length is num_dest
 {
     // ----- simple checks
-    if (text_pos == NULL || dest == NULL || *dest == NULL) {
+    if (text_pos == NULL || dest == NULL || *dest == NULL
+        || buffer_max_lens == NULL) {
         return -1;
-    } else if (num_dest <= 0 || max_buffer_len <= 0) {
+    } else if (num_dest <= 0) {
         return -1;
+    }
+
+    // ----- find the maximum buffer size to allocate
+    int max_buffer_len = 0;
+    for (int i = 0; i < num_dest; i++) {
+        if (buffer_max_lens[i] > max_buffer_len) {
+            max_buffer_len = buffer_max_lens[i];
+        }
     }
 
     // ----- inits
@@ -181,9 +191,10 @@ int get_multi_input(char **dest, int num_dest, int max_buffer_len
             default: // ----- typing regular characters
                 c_char = (char) c;
 
-                // does not add any characters if the max_buffer_len 
+                // does not add any characters if the buffer's length
                     // is reached
-                if (*cur_buffer_index == max_buffer_len - 1) {
+                if (*cur_buffer_index 
+                    == buffer_max_lens[cur_buffer] - 1) {
                     // if the index points to the last empty character
                         // (since max_buffer_len is the max index)
                     break;
@@ -244,9 +255,9 @@ int get_multi_input(char **dest, int num_dest, int max_buffer_len
         }
 
         // ----- debug
-        //(void) move(LINES - 1, 0);
-        //(void) clrtoeol();
-        //(void) printw("%d", *cur_buffer_cursor);
+        //(void) mvprintw(LINES - 1, 0, "%d", *cur_buffer_cursor);
+        //(void) mvprintw(LINES - 2, 0, "%d"
+        //  , buffer_max_lens[cur_buffer]);
         //(void) move(cursor.y, cursor.x);
         //(void) refresh();
     }
@@ -259,7 +270,8 @@ int get_multi_input(char **dest, int num_dest, int max_buffer_len
             // ensuring that the string is null terminated
 
         // copy to dest (safely)
-        (void) strncpy(dest[i], buffers[i], (size_t)max_buffer_len);
+        (void) strncpy(dest[i], buffers[i]
+            , (size_t)buffer_max_lens[i]);
         dest[i][max_buffer_len] = '\0';
 
         //(void) mvprintw(i + 10, 0, "%s", buffers[i]);

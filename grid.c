@@ -60,6 +60,7 @@ int init_square(/*@out@*/ struct square *target)
     (void) memset(target->creatures, 0, sizeof(target->creatures));
     target->max_creatures = ARRAY_LEN(target->creatures);
     target->movement_modifier = 0;
+    target->num_creatures = 0;
 
     return 0;
 error:
@@ -117,8 +118,10 @@ void debug_square(struct square *target, int tabs, FILE *format)
     if (target == NULL) {
         fprintf(format, "<NULL>\n");
     } else {
-        fprintf(format, "is_wall: %d | movement_modifier: %d\n"
-            , target->is_wall ? 1 : 0, target->movement_modifier);
+        fprintf(format, "is_wall: %d | max_creatures: %d"
+            " | num_creatures: %d | movement_modifier: %d\n"
+            , target->is_wall ? 1 : 0, target->max_creatures
+            , target->num_creatures, target->movement_modifier);
         debug_material(target->material, tabs + 1, format);
         (void) fprintf(format, "\n");
         for (int i = 0; i < target->max_creatures; i++) {
@@ -154,7 +157,7 @@ void debug_grid(struct grid *target, int tabs, FILE *format)
     // print all the squares
     for (int i = 0; i < target->max_y; i++) {
         for (int j = 0; j < target->max_x; j++) {
-            printf("%d %d\n", i, j);
+            //printf("%d %d\n", i, j);
             debug_square(&target->squares[i][j], tabs + 1, format);
         }
     }
@@ -167,23 +170,32 @@ void debug_grid(struct grid *target, int tabs, FILE *format)
 void mvprintw_square(int y, int x, struct square *target
     , WINDOW *restrict window)
     // prints a square to a position in a stream
+    // TODO allow multi character movement
 {
-    if (target->is_wall == true) { // render wall
-        (void) mvwprintw(window, y, x, "+");
+    char print_char = '\0';
+    if (target->num_creatures > 1) {
+        // NOTE: doesn't account for more than 9 but its prob fine
+        print_char = (char) target->num_creatures + '0';
+    } else if (target->num_creatures == 1 
+        && target->creatures[0] != NULL) {
+        print_char = target->creatures[0]->print_char;
+    } else if (target->is_wall == true) { // render wall
+        print_char = '+';
     } else if (target->material == NULL) {
-        (void) mvwprintw(window, y, x, ".");
+        print_char = '.';
     } else { // render the right material
-        (void) mvwprintw(window, y, x, "%c"
-            , target->material->print_char);
+        print_char = target->material->print_char;
     }
+    (void) mvwprintw(window, y, x, "%c", print_char);
 
-    // TODO do creatures later
 }
 
 int print_grid(struct grid *target_grid, WINDOW *target_window
     , struct coord start_point, struct coord end_point)
     // prints a grid starting at the start point, up until
     // the end of the grid
+    // TODO can refactor to make it only print between start_point
+        // and end_point
 {
     (void) werase(target_window);
     /*
@@ -215,17 +227,34 @@ int print_grid(struct grid *target_grid, WINDOW *target_window
     return 0;    
 }
 
-void mvdisplay_square(WINDOW *target_window, int y, int x
+void mvdisplay_square_info(WINDOW *target_window, int y, int x
     , struct square *target_square)
     // displays a square's data onto a window at position y, x
     // TODO handle too much data
 {
-    // dont print the material name if anything is null
+    // ----- print creature information
+    /*@null@*/ struct creature *target_creature = NULL;
+    if (target_square->num_creatures > 0) {
+
+        // loop through every num_creature
+        for (int i = 0; i < target_square->num_creatures; i++) {
+            target_creature = target_square->creatures[i];
+            if (target_creature == NULL) continue;
+
+            // print the character and name
+            (void) mvwprintw(target_window, y + 1 + i, x, "%c - %s"
+                , target_creature->print_char, target_creature->name);
+        }
+    }
+    // ----- print material information
+    // --- print information (material + wall) when the material is NULL
     if (target_square->material == NULL) {
         (void) mvwprintw(target_window, y, x, "Nothing %s"
             , target_square->is_wall ? "with a wall" : "");
         return;
     }
+
+    // --- print information (material + wall) if the material isn't NULL
     (void) mvwprintw(target_window, y, x, "%s %s"
         , target_square->material->name
         , target_square->is_wall ? "wall" : "");

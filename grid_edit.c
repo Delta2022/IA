@@ -49,8 +49,11 @@ int init_grid_editor(/*@out@*/GRID_EDITOR *target_ge
 }
 
 int grid_editor_driver(GRID_EDITOR *target_ge
-    , /*@null@*/ /*@dependent@*/ struct material *target_material
+    , /*@null@*/ /*@dependent@*/ void *target_information
     , const int action)
+    // target_information will be a pointer to a character if the action
+    // is PLACE_CHAR and a pointer to material if the action is SET_MAT.
+    // it is otherwise ignored and can be NULL
 {
     // ----- set cleaner variables to use
     WINDOW *target_win = target_ge->target_win;
@@ -65,6 +68,10 @@ int grid_editor_driver(GRID_EDITOR *target_ge
     struct coord *grid_end = &target_ge->grid_end;
 
     struct square *cursor_square;
+
+    struct material *target_material;
+    struct creature *target_creature;
+    /*@null@*/ int *next_empty_creature = NULL;
 
     // ----- do the action
     switch (action) {
@@ -122,6 +129,7 @@ int grid_editor_driver(GRID_EDITOR *target_ge
 
         // ----- set material
         case SET_MAT:
+            target_material = (struct material *)target_information;
             if (target_material == NULL) {
                 break;
             }
@@ -137,6 +145,40 @@ int grid_editor_driver(GRID_EDITOR *target_ge
             mvprintw_square(cursor->y, cursor->x
                 , cursor_square, target_win);
             break;
+
+        // ----- place character
+        case PLACE_CHAR:
+            next_empty_creature = NULL;
+            target_creature = (struct creature *)target_information;
+            if (target_creature == NULL) {
+                break;
+            }
+
+            cursor_square = &target_grid->squares
+                [cursor->y - grid_start->y][cursor->x - grid_start->x];
+
+            // --- find the next empty place in the square
+                // to store the creature
+            next_empty_creature = &cursor_square->num_creatures;
+
+            // if no place is found for the creature
+                // NOTE: prob needs to return a proper value
+            if (*next_empty_creature == cursor_square->max_creatures) {
+                break;
+            }
+
+            // --- save the creature's pointer into the square
+            cursor_square->creatures[*next_empty_creature]
+                = target_creature;
+
+            // --- update the square's creature count
+            (*next_empty_creature)++;
+
+            // --- update the square
+            mvprintw_square(cursor->y, cursor->x
+                , cursor_square, target_win);
+
+            break; 
         
         // ----- set wall
         case TOGGLE_WALL:

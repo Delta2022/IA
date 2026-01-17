@@ -84,11 +84,13 @@ int start_campaign(/*@unused@*/ struct campaign *target_campaign)
     // campaign has to be initialized and defined
 {
     char note_temp[MAX_CHAR];
-    int text_pos[] = {1, 3};
-    int text_pos_len = ARRAY_LEN(text_pos);
-
     (void) memset(note_temp, 0, sizeof(note_temp));
-    char *save_ptrs[] = {target_campaign->name, note_temp};
+
+    // get_multi_input argument values
+    int text_pos[2] = {1, 3};
+    int text_pos_len = ARRAY_LEN(text_pos);
+    char *save_ptrs[2] = {target_campaign->name, note_temp};
+    int max_lens[2] = {MAX_CHAR, MAX_CHAR};
 
     (void) clear(); // clear stdscr from the menu in start_menu
     (void) mvprintw(0, 0, "Name: ");
@@ -98,7 +100,7 @@ int start_campaign(/*@unused@*/ struct campaign *target_campaign)
     (void) mvprintw(LINES - 2, 0, "Press F2 to move on");
 
     (void) get_multi_input(save_ptrs, text_pos_len
-        , MAX_CHAR, text_pos);
+        , max_lens, text_pos);
 
     // TODO replace with note setter function when that is done
     strncpy(target_campaign->note.string, note_temp
@@ -271,16 +273,84 @@ int start_encounter(struct campaign *target_campaign)
     return 0;
 }
 
-int creature_creation_menu(struct creature *creature_list
-    , /*@unused@*/ int creature_list_len)
+int creature_creation_menu(struct campaign *target_campaign)
+    // TODO add another window for the grid editor, perhaps
+    // a popup
+    // TODO support adding multiple characters
 {
-    int text_pos[2] = {1, 3};
-    char *dest[2] = {creature_list[0].name, creature_list[0].note.string};
+    struct creature *creature_list = target_campaign->creature_list;
+    GRID_EDITOR grid_editor;
+
+    // ----- initialize info for get_multi_input
+    char print_char_string[2]; // a string to store the print char
+        // , which will then be converted into just a char
+    (void) memset(print_char_string, 0, sizeof(print_char_string));
+
+    // get_multi_input argument values
+    int text_pos[3] = {1, 3, 5};
+    char *dest[3] 
+        = {creature_list[0].name, print_char_string
+            , creature_list[0].note.string};
+    int max_lens[3] = {MAX_CHAR, 2, MAX_CHAR};
+
     (void) mvprintw(0, 0, "Name: ");
-    (void) mvprintw(2, 0, "Notes: ");
+    (void) mvprintw(2, 0, "Char: ");
+    (void) mvprintw(4, 0, "Notes: ");
 
-    (void) get_multi_input(dest, 2, MAX_CHAR, text_pos);
+    // ----- get information about the character
+    (void) get_multi_input(dest, 3, max_lens, text_pos);
 
+    // ----- convert the print_char_string into a char and save it into
+        // the creature
+    creature_list[0].print_char = print_char_string[0];
+
+    // ----- place the character menu
+    // turn off the cursor because it's interfering with the grid
+    (void) curs_set(0);
+    int c = 0;
+    struct coord window_end = {LINES, COLS};
+    (void) init_grid_editor(&grid_editor
+        , &target_campaign->encounter_grid, window_end, stdscr);
+
+    do {
+        c = getch();
+        switch (c) {
+            case KEY_UP:
+                (void) grid_editor_driver(&grid_editor, NULL, CURSOR_UP);
+                break;
+            case KEY_DOWN:
+                (void) grid_editor_driver(&grid_editor, NULL
+                    , CURSOR_DOWN);
+                break;
+            case KEY_LEFT:
+                (void) grid_editor_driver(&grid_editor, NULL
+                    , CURSOR_LEFT);
+                break;
+            case KEY_RIGHT:
+                (void) grid_editor_driver(&grid_editor, NULL
+                    , CURSOR_RIGHT);
+                break;
+
+            case 'w': // move grid up
+                (void) grid_editor_driver(&grid_editor, NULL, MOVE_UP);
+                break;
+            case 'd': // move grid left
+                (void) grid_editor_driver(&grid_editor, NULL, MOVE_LEFT);
+                break;
+            case 'a': // move grid right
+                (void) grid_editor_driver(&grid_editor, NULL, MOVE_RIGHT);
+                break;
+            case 's': // move grid down
+                (void) grid_editor_driver(&grid_editor, NULL, MOVE_DOWN);
+                break;
+            case ' ':
+                (void) grid_editor_driver(&grid_editor
+                    , &creature_list[0].name, PLACE_CHAR);
+                goto end;
+        }
+    } while (c != KEY_F(2));
+
+end:
     return 0;
 }
 

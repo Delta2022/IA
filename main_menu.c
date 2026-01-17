@@ -60,7 +60,7 @@ int main_menu(struct campaign *target_campaign)
         // ----- update the data section
         struct coord cursor = get_cursor(&grid_editor);
         (void) werase(data_win);
-        mvdisplay_square(data_win, 0, 0
+        mvdisplay_square_info(data_win, 0, 0
             , &target_campaign->encounter_grid
                 .squares[cursor.y][cursor.x]);
         // ----- update the screen
