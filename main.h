@@ -165,3 +165,5 @@ void save_grid_ptrs(struct campaign *target_campaign
     , FILE *restrict creature_file);
 void load_grid_material_ptrs(struct campaign *target_campaign
     , FILE *restrict material_file);
+void load_grid_creature_ptrs(struct campaign *target_campaign
+    , FILE *restrict material_file);

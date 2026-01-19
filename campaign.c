@@ -161,8 +161,7 @@ void load_grid_material_ptrs(struct campaign *target_campaign
     size_t char_buffer_len = 10; // an initial size
     ssize_t nread = -1;
     long index_val = -1;
-    int i = 0;
-    int j = 0;
+    struct coord grid_pos = {0, 0}; // position in the grid
 
     // ----- init char_buffer
     char_buffer = calloc(char_buffer_len, sizeof(char));
@@ -181,28 +180,91 @@ void load_grid_material_ptrs(struct campaign *target_campaign
         if (nread == -1)
             break;
 
+        // --- get index
+        index_val = strtol(char_buffer, NULL, 10);
+
+        // --- set the material
+        if (index_val == -1) { // set to NULL when its -1
+            target_grid->squares[grid_pos.y][grid_pos.x].material = NULL;
+            printf("setting [%d][%d] to NULL\n", grid_pos.y, grid_pos.x);
+        } else { // set to the index of the material_list
+            target_grid->squares[grid_pos.y][grid_pos.x].material
+                = &target_campaign->material_list[index_val];
+            printf("setting [%d][%d] to %p\n", grid_pos.y, grid_pos.x
+                , &target_campaign->material_list[index_val]);
+        }
+        grid_pos.x++;
+
+        // --- check when to move to the next array
+        if (grid_pos.x == target_grid->max_x) {
+            grid_pos.y++;
+            grid_pos.x = 0;
+        }
+    }
+
+    free(char_buffer);
+}
+
+void load_grid_creature_ptrs(struct campaign *target_campaign
+    , FILE *restrict material_file)
+{
+    struct grid *target_grid = &target_campaign->encounter_grid;
+    char *char_buffer;
+    size_t char_buffer_len = 10; // an initial size
+    ssize_t nread = -1;
+    long index_val = -1;
+    struct coord grid_pos = {0, 0}; // position in the grid
+    int creatures_index = -1;
+
+    // ----- init char_buffer
+    char_buffer = calloc(char_buffer_len, sizeof(char));
+    if (char_buffer == NULL)
+        return;
+
+    char_buffer = memset(char_buffer, 0, sizeof(char_buffer));
+
+    // ----- read from file
+    while (true) {
+        // ----- read a line from the file
+        nread = getline(&char_buffer, &char_buffer_len, material_file);
+        //printf("nread is %d\n", nread);
+
+        // ----- break out of reading when EOF found
+        if (nread == -1)
+            break;
+
+        // ----- when an empty line is found (which means to
+            // move to the next square in the grid)
+        if (char_buffer[0] == '\n') {
+            grid_pos.x++;
+            creatures_index = 0;
+
+            // --- check when to move to the next array
+            if (grid_pos.x == target_grid->max_x) {
+                grid_pos.y++;
+                grid_pos.x = 0;
+            }
+            continue;
+        }
 
         // --- get index
         index_val = strtol(char_buffer, NULL, 10);
 
         // --- set the material
-        if (index_val == -1) {
-            target_grid->squares[i][j].material = NULL;
-            printf("setting [%d][%d] to NULL\n", i, j);
-        } else {
-            target_grid->squares[i][j].material
-                = &target_campaign->material_list[index_val];
-            printf("setting [%d][%d] to %p\n", i, j
-                , &target_campaign->material_list[index_val]);
-        }
-        j++;
+        if (index_val == -1) { // set to NULL when its -1
+            printf("setting [%d][%d] to NULL\n", grid_pos.y, grid_pos.x);
+            target_grid->squares[grid_pos.y][grid_pos.x]
+              .creatures[creatures_index] = NULL;
 
-        // --- check when to move to the next array
-            // (j is past len(squares[0]))
-        if (j == target_grid->max_x) {
-            i++;
-            j = 0;
+        } else { // set to the index of the material_list
+            target_grid->squares[grid_pos.y][grid_pos.x]
+                .creatures[creatures_index]
+                = &target_campaign->creature_list[creatures_index];
+
+            printf("setting [%d][%d] to %p\n", grid_pos.y, grid_pos.x
+                , &target_campaign->creature_list[creatures_index]);
         }
+        creatures_index++;
     }
 
     free(char_buffer);

@@ -121,6 +121,7 @@ init_square	grid.c	/^int init_square(\/*@out@*\/ struct square *target)$/;"	f	ty
 is_wall	main.h	/^    bool is_wall;$/;"	m	struct:square	typeref:typename:bool
 len	main.h	/^    int len;$/;"	m	struct:note	typeref:typename:int
 load_debug	main.c	/^\/*@unused@*\/ static void load_debug()$/;"	f	typeref:typename:void	file:
+load_grid_creature_ptrs	campaign.c	/^void load_grid_creature_ptrs(struct campaign *target_campaign$/;"	f	typeref:typename:void
 load_grid_material_ptrs	campaign.c	/^void load_grid_material_ptrs(struct campaign *target_campaign$/;"	f	typeref:typename:void
 main	main.c	/^int main(\/*@unused@*\/ int argc, \/*@unused@*\/ char *argv[])$/;"	f	typeref:typename:int
 main_menu	main_menu.c	/^int main_menu(struct campaign *target_campaign)$/;"	f	typeref:typename:int
