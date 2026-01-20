@@ -30,12 +30,20 @@ int init_campaign(/*@out@*/ struct campaign *target)
     foutput = init_note(&target->note);
     check(foutput == 0, "init_note failed with code %d", foutput);
 
+    // --- define the lengths
     target->material_list_len = ARRAY_LEN(target->material_list);
     target->creature_list_len = ARRAY_LEN(target->creature_list);
+    target->item_list_len = ARRAY_LEN(target->item_list);
 
+    // note: not proper
     for (int i = 0; i < MAX_SAVED_CREATURES; i++) {
         target->creature_list[i].name_len
             = ARRAY_LEN(target->creature_list[i].name);
+    }
+
+    // proper
+    for (int i = 0; i < target->item_list_len; i++) {
+        init_item(&target->item_list[i]);
     }
 
     // NOTE: add this when len values are added to materials
@@ -74,6 +82,12 @@ void debug_campaign(struct campaign *target, FILE *format)
 
         for (int i = 0; i < target->creature_list_len; i++) {
             debug_creature(&target->creature_list[i], 1, format);
+        }
+
+        (void) fprintf(format, "\n");
+
+        for (int i = 0; i < target->item_list_len; i++) {
+            debug_item(&target->item_list[i], 1, format);
         }
     }
 }

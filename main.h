@@ -12,10 +12,12 @@
 #define MAX_CREATURES 2
 #define MAX_SAVED_CREATURES 10
 #define MAX_SAVED_MATERIALS 10
+#define MAX_SAVED_ITEMS 10
 #define GRID_X 3
 #define GRID_Y 2
 #define PRINT_TABS(t) \
     {for (int p = 0; p < t; p++) (void) putchar('\t');}
+#define MAX_INVENTORY 3
 
 #define MOVE_UP         0
 #define MOVE_DOWN       1
@@ -54,11 +56,24 @@ struct creature {
     struct note note;
 };
 
+struct item {
+    char name[MAX_CHAR];
+    int name_len;
+    char print_char;
+    int weight;
+    struct item *inventory[MAX_INVENTORY];
+    int inventory_len;
+
+    struct note note;
+};
+
+typedef /*@null@*/ struct creature * pos_null_creature;
+
 struct square {
     /*@null@*/ /*@dependent@*/ struct material *material;
         // pointer to material from master list
     bool is_wall;
-    struct creature *creatures[MAX_CREATURES]; // pointer to
+    pos_null_creature creatures[MAX_CREATURES]; // pointer to
         // creature from master list
     // NOTE: removing max_creatures can save space if needed
     int max_creatures; // maximum amount of creatures that can be added
@@ -110,6 +125,8 @@ struct campaign {
     int material_list_len;
     struct creature creature_list[MAX_SAVED_CREATURES];
     int creature_list_len;
+    struct item item_list[MAX_SAVED_ITEMS];
+    int item_list_len;
 };
 
 struct grid_editor {
@@ -149,7 +166,8 @@ int creature_creation_menu(struct campaign *target_campaign);
 int init_creature(/*@out@*/ struct creature *target);
 int print_grid(struct grid *target_grid, WINDOW *target_window
     , struct coord start_point, struct coord end_point);
-void debug_creature(struct creature *target, int tabs, FILE *format);
+void debug_creature(/*@null@*/ struct creature *target
+    , int tabs, FILE *format);
 int grid_editor_driver(GRID_EDITOR *target_ge
     , /*@null@*/ /*@dependent@*/ void *target_information
     , const int action);
@@ -167,3 +185,5 @@ void load_grid_material_ptrs(struct campaign *target_campaign
     , FILE *restrict material_file);
 void load_grid_creature_ptrs(struct campaign *target_campaign
     , FILE *restrict material_file);
+void init_item(/*@out@*/ struct item *target);
+void debug_item(struct item *target, int tabs, FILE *format);

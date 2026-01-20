@@ -16,7 +16,8 @@ int init_creature(/*@out@*/ struct creature *target)
 }
 
 // TODO switch all puts to fputs
-void debug_creature(struct creature *target, int tabs, FILE *format)
+void debug_creature(/*@null@*/ struct creature *target, int tabs
+    , FILE *format)
 {
     PRINT_TABS(tabs);
     fprintf(format, "CREATURE | ");
