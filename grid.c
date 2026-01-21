@@ -1,7 +1,8 @@
 #include "main.h"
 
 int init_grid(/*@out@*/ struct grid *target)
-    // initializes a grid
+    // initializes a grid. Assumes the grid was memset
+        // to zero already
     // ----- returns -----
     // 0: normal
     // -1: error
@@ -16,8 +17,8 @@ int init_grid(/*@out@*/ struct grid *target)
     target->max_y = ARRAY_LEN(target->squares);
     target->max_x = ARRAY_LEN(target->squares[0]);
 
-    target->grid_start.y = 0;
-    target->grid_start.x = 0;
+    //target->grid_start.y = 0;
+    //target->grid_start.x = 0;
 
     for (int i = 0; i < target->max_y; i++) {
         for (int j = 0; j < target->max_x; j++) {
@@ -35,9 +36,9 @@ int init_grid(/*@out@*/ struct grid *target)
         check(foutput == 0, "init_p_note failed with code %d", foutput);
     }
 
-    // -- set scale values to default (5)
-    target->x_scale = 5;
-    target->y_scale = 5;
+    // -- set scale values to default (should be 5ft * 5ft)
+    target->x_scale = SQUARE_X_LEN;
+    target->y_scale = SQUARE_Y_LEN;
 
     return 0;
 error:
@@ -46,6 +47,7 @@ error:
 
 int init_square(/*@out@*/ struct square *target)
     // initializes a square
+        // assumes the square was memset to 0 already
     // ----- returns -----
     // 0: normal
     // -1: error
@@ -55,12 +57,12 @@ int init_square(/*@out@*/ struct square *target)
         " initialize).");
 
     // ----- set/initalize all values to their defaults
-    target->material = NULL;
+    //target->material = NULL;
     target->is_wall = false;
-    (void) memset(target->creatures, 0, sizeof(target->creatures));
+    //(void) memset(target->creatures, 0, sizeof(target->creatures));
     target->max_creatures = ARRAY_LEN(target->creatures);
-    target->movement_modifier = 0;
-    target->num_creatures = 0;
+    //target->movement_modifier = 0;
+    //target->num_creatures = 0;
 
     return 0;
 error:

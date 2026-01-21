@@ -18,6 +18,8 @@
 #define PRINT_TABS(t) \
     {for (int p = 0; p < t; p++) (void) putchar('\t');}
 #define MAX_INVENTORY 3
+#define SQUARE_X_LEN 5
+#define SQUARE_Y_LEN 5
 
 #define MOVE_UP         0
 #define MOVE_DOWN       1

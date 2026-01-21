@@ -27,7 +27,7 @@ error:
 }
 
 int init_note(/*@out@*/ struct note *target)
-    // initializes a note
+    // initializes a note assumes the note is already memset to 0
     // ----- returns -----
     // 0: normal
     // -1: error
@@ -37,7 +37,7 @@ int init_note(/*@out@*/ struct note *target)
         " initialize).");
 
     // ----- set value
-    (void) memset(target->string, 0, sizeof(target->string));
+    //(void) memset(target->string, 0, sizeof(target->string));
     target->len = ARRAY_LEN(target->string);
 
     return 0;
