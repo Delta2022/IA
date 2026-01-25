@@ -10,6 +10,7 @@
 #define ARRAY_LEN(a) (int) (sizeof(a) / sizeof(a[0]))
 #define MAX_PNOTES 10
 #define MAX_CREATURES 2
+#define MAX_ITEMS 2
 #define MAX_SAVED_CREATURES 10
 #define MAX_SAVED_MATERIALS 10
 #define MAX_SAVED_ITEMS 10
@@ -70,6 +71,7 @@ struct item {
 };
 
 typedef /*@null@*/ struct creature * pos_null_creature;
+typedef /*@null@*/ struct item * pos_null_item;
 
 struct square {
     /*@null@*/ /*@dependent@*/ struct material *material;
@@ -80,6 +82,10 @@ struct square {
     // NOTE: removing max_creatures can save space if needed
     int max_creatures; // maximum amount of creatures that can be added
     int num_creatures; // current number of creatures on this square
+
+    pos_null_item items[MAX_ITEMS]; // pointer to items in master list
+    int max_items;
+    //int num_items; // include if neccessary
     int movement_modifier; // usually 1 if in difficult terrain
 };
 
@@ -188,4 +194,4 @@ void load_grid_material_ptrs(struct campaign *target_campaign
 void load_grid_creature_ptrs(struct campaign *target_campaign
     , FILE *restrict material_file);
 void init_item(/*@out@*/ struct item *target);
-void debug_item(struct item *target, int tabs, FILE *format);
+void debug_item(/*@null@*/ struct item *target, int tabs, FILE *format);

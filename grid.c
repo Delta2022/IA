@@ -63,6 +63,7 @@ int init_square(/*@out@*/ struct square *target)
     target->max_creatures = ARRAY_LEN(target->creatures);
     //target->movement_modifier = 0;
     //target->num_creatures = 0;
+    target->max_items = ARRAY_LEN(target->items);
 
     return 0;
 error:
@@ -100,7 +101,7 @@ void debug_material(/*@null@*/ struct material *target
     // prints the material's name, desc and note
 {
     PRINT_TABS(tabs);
-    fprintf(format, "material - ");
+    fprintf(format, "MATERIAL | ");
     if (target == NULL) {
         fprintf(format, "<NULL>\n");
     } else {
@@ -121,13 +122,22 @@ void debug_square(struct square *target, int tabs, FILE *format)
         fprintf(format, "<NULL>\n");
     } else {
         fprintf(format, "is_wall: %d | max_creatures: %d"
-            " | num_creatures: %d | movement_modifier: %d\n"
+            " | num_creatures: %d | movement_modifier: %d"
+            " | max_items: %d\n"
             , target->is_wall ? 1 : 0, target->max_creatures
-            , target->num_creatures, target->movement_modifier);
+            , target->num_creatures, target->movement_modifier
+            , target->max_items);
+
         debug_material(target->material, tabs + 1, format);
-        (void) fprintf(format, "\n");
+
+        // print creatures
         for (int i = 0; i < target->max_creatures; i++) {
             debug_creature(target->creatures[i], tabs + 1, format);
+        }
+
+        // print items
+        for (int i = 0; i < target->max_creatures; i++) {
+            debug_item(target->items[i], tabs + 1, format);
         }
     }
     
@@ -163,10 +173,6 @@ void debug_grid(struct grid *target, int tabs, FILE *format)
             debug_square(&target->squares[i][j], tabs + 1, format);
         }
     }
-    (void) fprintf(format, "\n");
-
-    // check the squares and print them
-
 }
 
 void mvprintw_square(int y, int x, struct square *target

@@ -23,7 +23,7 @@ error:
     return;
 }
 
-void debug_item(struct item *target, int tabs, FILE *format)
+void debug_item(/*@null@*/ struct item *target, int tabs, FILE *format)
     // prints an item
 {
     PRINT_TABS(tabs);
@@ -45,5 +45,4 @@ void debug_item(struct item *target, int tabs, FILE *format)
         // TODO not complete
         debug_item(target->inventory[i], tabs + 1, format);
     }
-    fprintf(format, "\n");
 }

@@ -54,8 +54,7 @@ error:
 }
 
 void debug_campaign(struct campaign *target, FILE *format)
-// TODO: implement {} and tabs by passing a var for the number of tabs
-    //to print
+    // prints debug info for every camapgin
 {
     fprintf(format, "CAMPAIGN | ");
     if (target == NULL) {
@@ -192,6 +191,9 @@ error:
     return;
 }
 
+// NOTE: all loading functions are essentially the same. This is bad
+    // practice but I can make it better when I have the time
+    // to think about it
 void load_grid_material_ptrs(struct campaign *target_campaign
     , FILE *restrict material_file)
     // loads the material and creature values for a grid
@@ -310,6 +312,71 @@ void load_grid_creature_ptrs(struct campaign *target_campaign
                 , &target_campaign->creature_list[creatures_index]);
         }
         creatures_index++;
+    }
+
+    free(char_buffer);
+}
+
+void load_grid_item_ptrs(struct campaign *target_campaign
+    , FILE *restrict item_file)
+{
+    struct grid *target_grid = &target_campaign->encounter_grid;
+    char *char_buffer;
+    size_t char_buffer_len = 10; // an initial size
+    ssize_t nread = -1;
+    long index_val = -1;
+    struct coord grid_pos = {0, 0}; // position in the grid
+    int items_index = -1;
+
+    // ----- init char_buffer
+    char_buffer = calloc(char_buffer_len, sizeof(char));
+    if (char_buffer == NULL)
+        return;
+
+    char_buffer = memset(char_buffer, 0, sizeof(char_buffer));
+
+    // ----- read from file
+    while (true) {
+        // ----- read a line from the file
+        nread = getline(&char_buffer, &char_buffer_len, item_file);
+        //printf("nread is %d\n", nread);
+
+        // ----- break out of reading when EOF found
+        if (nread == -1)
+            break;
+
+        // ----- when an empty line is found (which means to
+            // move to the next square in the grid)
+        if (char_buffer[0] == '\n') {
+            grid_pos.x++;
+            items_index = 0;
+
+            // --- check when to move to the next array
+            if (grid_pos.x == target_grid->max_x) {
+                grid_pos.y++;
+                grid_pos.x = 0;
+            }
+            continue;
+        }
+
+        // --- get index
+        index_val = strtol(char_buffer, NULL, 10);
+
+        // --- set the material
+        if (index_val == -1) { // set to NULL when its -1
+            printf("setting [%d][%d] to NULL\n", grid_pos.y, grid_pos.x);
+            target_grid->squares[grid_pos.y][grid_pos.x]
+              .items[items_index] = NULL;
+
+        } else { // set to the index of the material_list
+            target_grid->squares[grid_pos.y][grid_pos.x]
+                .items[items_index]
+                = &target_campaign->item_list[items_index];
+
+            printf("setting [%d][%d] to %p\n", grid_pos.y, grid_pos.x
+                , &target_campaign->item_list[items_index]);
+        }
+        items_index++;
     }
 
     free(char_buffer);
