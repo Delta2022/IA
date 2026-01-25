@@ -1,4 +1,6 @@
 #include "main.h"
+#include <math.h>
+#include <float.h>
 
 #if S_SPLINT_S
     extern ssize_t getline(/*@out@*/ char **restrict lineptr
@@ -37,7 +39,7 @@ int init_campaign(/*@out@*/ struct campaign *target)
 
     // --- init all creatures
     for (int i = 0; i < target->creature_list_len; i++) {
-        init_creature(&target->creature_list[i]);
+        (void) init_creature(&target->creature_list[i]);
     }
 
     // --- init all items
@@ -88,73 +90,106 @@ void debug_campaign(struct campaign *target, FILE *format)
     }
 }
 
-static void save_square_ptrs(struct square *target_square
-    , struct campaign *target_campaign
-    , FILE *restrict material_file
-    , FILE *restrict creature_file)
+typedef /*@null@*/ void * null_void_ptr;
+
+// TODO; generalize by casting void and requesting array pos -> creature and item just run through loop
+static int find_index(/*@null@*/ void *target_ptr
+    , void *array_start_ptr, int array_len
+    , size_t value_size)
+    // returns the index of the target pointer in the array pointer
+    // by using pointer arithmetic
+    // NOTE: target_array must be an array of pointers to the positions
+    // prints the index of the pointer in the array in a line in the
+    // file
+    // ALSO NOTE: this errors properly because I feel that this
+        // is really easy to error with
+    // ----- returns -----
+    // 0 or positive: index of the pointer
+    // -1: target_ptr is null
+    // -2: calculated index isn't an integer (likely due to incorrect
+        // input pointers)
+    // -3: calculated index is larger than the length
+        // of the array
 {
-    bool is_material_printed = false;
-    bool is_creature_printed = false;
-
-    // ----- print the index of the material in the material_list
-        // into the material file
-    if (target_square->material == NULL) {
-        fprintf(material_file, "-1\n");
-        is_material_printed = true;
-    }
-    for (int i = 0; i < target_campaign->material_list_len; i++) {
-        if (&target_campaign->material_list[i]
-            == target_square->material) {
-            fprintf(material_file, "%d\n", i);
-            is_material_printed = true;
-            break;
-        }
+    double index_val = -1;
+    // print -1 when null
+    if (target_ptr == NULL) {
+        return -1;
     }
 
-    if (!is_material_printed) {
-        fprintf(material_file, "-2\n");
+    // pointer arithmetic to the rescue
+    index_val = (target_ptr - array_start_ptr) / (double) value_size;
+
+    // checks
+    // DBL_EPSILON is used since comparing to zero is dangerous
+    if (index_val < 0 || index_val - floor(index_val) > DBL_EPSILON) {
+        log_err("calculations resulted in an error."
+            " (index calculations for %p and %p with size %d gives"
+            " an index of %f which isn't an integer when it should)\n"
+            , target_ptr, array_start_ptr, value_size, index_val);
+        return -2;
+    } else if ((int) index_val >= array_len) {
+        log_err("index calculated (%d) was bigger than array length"
+            " (%d)\n", (int) index_val, array_len);
+        return -3;
     }
 
-    // ----- go through every creature in the square
-        // and search for it in the creature_list
-    for (int i = 0; i < target_square->max_creatures; i++) {
-        is_creature_printed = false;
-        if (target_square->creatures[i] == NULL) {
-            fprintf(creature_file, "-1\n");
-            continue;
-        }
-
-        for (int j = 0; j < target_campaign->creature_list_len; j++) {
-            if (&target_campaign->creature_list[j]
-                == target_square->creatures[i]) {
-                // only print the index to file
-                fprintf(creature_file, "%d\n", i);
-                is_creature_printed = true;
-                break;
-            }
-        }
-
-        if (!is_creature_printed) {
-            fprintf(creature_file, "-2\n");
-        }
-    }
-    fprintf(creature_file, "\n");
+    return (int) index_val;
 }
 
 void save_grid_ptrs(struct campaign *target_campaign
     , FILE *restrict material_file
     , FILE *restrict creature_file)
     // saves the material and creatures on a grid by saving its
+    // NOTE: this function can detect errors
     // index into a file
+    // TODO do proper error handling
 {
     struct grid *target_grid = &target_campaign->encounter_grid;
+    /*@null@*/ struct square *target_square = NULL;
+    int pointer_index = -1;
+
     for (int i = 0; i < target_grid->max_y; i++) {
         for (int j = 0; j < target_grid->max_x; j++) {
             // squares[i][j]
-            save_square_ptrs(&target_grid->squares[i][j]
-                , target_campaign, material_file, creature_file);
+            target_square = &target_grid->squares[i][j];
+
+            // save the material in its file
+            pointer_index = find_index(target_square->material
+                , target_campaign->material_list
+                , target_campaign->material_list_len
+                , sizeof(struct material));
+
+            check(pointer_index >= -1, "error when calculating"
+                " material pointer on square [%d][%d] (pointer is %d)"
+                , i, j, pointer_index);
+
+            fprintf(material_file, "%d\n", pointer_index);
+
+            // save every creature, ensuring to seperate using a
+                // newline
+            for (int creature_index = 0
+                ; creature_index < target_square->max_creatures
+                ; creature_index++) {
+                pointer_index = find_index(
+                    target_square->creatures[creature_index]
+                    , target_campaign->creature_list
+                    , target_campaign->creature_list_len
+                    , sizeof(struct creature));
+
+                check(pointer_index >= -1, "error when calculating"
+                    " creature pointer on square [%d][%d]"
+                    " (creature #%d) (pointer is %d)", i, j
+                    , creature_index, pointer_index);
+
+                fprintf(creature_file, "%d\n", pointer_index);
+            }
+            fprintf(creature_file, "\n");
         }
     }
+
+error:
+    return;
 }
 
 void load_grid_material_ptrs(struct campaign *target_campaign

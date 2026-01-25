@@ -4,7 +4,7 @@ FILES = main.c campaign.c grid.c note.c main.h menus.c creature.c get_multi_inpu
 	gcc -gdwarf $@.c -o $@ -lpanel -lmenu -lncurses
 
 main: $(FILES)
-	gcc -gdwarf $(FILES) -o main -lpanel -lmenu -lncurses
+	gcc -gdwarf $(FILES) -o main -lpanel -lmenu -lncurses -lm
 
 splint:
 	splint -incondefs +loopexec $(FILES)

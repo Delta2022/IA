@@ -8,7 +8,7 @@ static void load_debug();
 int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
 {
     // TODO change integer returns to void if not tracked
-    load_debug();
+    save_debug();
     return 0;
 }
 
@@ -80,10 +80,10 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     temp.material_list[1].print_char = '"';
 
     (void) start_encounter(&temp);
-    (void) creature_creation_menu(&temp);
+    //(void) creature_creation_menu(&temp);
     (void) endwin();
 
-    debug_campaign(&temp, stdout);
+    //debug_campaign(&temp, stdout);
 
     // NOTE: keep opening and writing and closing files
         // seperate from the normal code, as it may cause a seg fault
@@ -109,6 +109,8 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     (void) fclose(mat_save_file);
     (void) fclose(c_save_file);
     (void) fclose(save_file);
+
+    debug_campaign(&temp, stdout);
 }
 
 /*@unused@*/ static void load_debug()

@@ -3,6 +3,7 @@
 
 int init_p_note(/*@out@*/ struct p_note *target)
     // initializes a grid
+        // assumes the p_note was memset to 0 already
     // ----- returns -----
     // 0: normal
     // -1: error
@@ -15,8 +16,8 @@ int init_p_note(/*@out@*/ struct p_note *target)
         " initialize).");
 
     // ----- set/initalize all values to their defaults
-    target->x = 0;
-    target->y = 0;
+    //target->x = 0;
+    //target->y = 0;
 
     foutput = init_note(&target->note);
     check(foutput == 0, "init_note failed with code %d", foutput);

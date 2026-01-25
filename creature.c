@@ -1,6 +1,7 @@
 #include "main.h"
 
 int init_creature(/*@out@*/ struct creature *target)
+    // inits a creature
     // assumes target is already memset to 0 beforehand
 {
     if (target == NULL) {
