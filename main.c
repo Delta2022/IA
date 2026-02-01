@@ -4,12 +4,31 @@ static void menus_debug();
 static void creature_debug();
 static void save_debug();
 static void load_debug();
+static void test_debug();
 
 int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
 {
     // TODO change integer returns to void if not tracked
-    save_debug();
+    test_debug();
     return 0;
+}
+
+/*@unused@*/ static void test_debug()
+{
+    struct campaign temp;
+    (void) init_campaign(&temp);
+
+    // ----- start ncurses
+    (void) initscr();
+    (void) cbreak();
+    (void) noecho();
+    (void) keypad(stdscr, true);
+
+    int c = item_creation_menu(&temp);
+
+    (void) endwin();
+
+    printf("return is %d\n", c);
 }
 
 /*@unused@*/ static void creature_debug()

@@ -92,9 +92,8 @@ void debug_campaign(struct campaign *target, FILE *format)
 typedef /*@null@*/ void * null_void_ptr;
 
 // TODO; generalize by casting void and requesting array pos -> creature and item just run through loop
-static int find_index(/*@null@*/ void *target_ptr
-    , void *array_start_ptr, int array_len
-    , size_t value_size)
+static int find_index(/*@null@*/ void *target_ptr, void *array_start_ptr
+    , int array_len, size_t value_size)
     // returns the index of the target pointer in the array pointer
     // by using pointer arithmetic
     // NOTE: target_array must be an array of pointers to the positions

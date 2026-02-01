@@ -13,12 +13,14 @@ static char *start_menu_options[] = {
 
 int start_menu()
     // contained start menu for the main function
+    // returns -1 if the menu fails to be created
 {
     // ----- init
     ITEM **start_menu_items;
     MENU *start_menu;
     int n_choices = 0;
     int c = 0;
+    int return_val = 0;
     /*@unused@*/ ITEM *cur_item = NULL;
     /*@unused@*/ int menu_index = -1;
 
@@ -46,6 +48,10 @@ int start_menu()
 
     // create menu
     start_menu = new_menu((ITEM **) start_menu_items);
+    if (start_menu == NULL) {
+        return_val = -1;
+        goto null_menu_exit;
+    }
 
     (void) post_menu(start_menu);
     (void) refresh();
@@ -71,13 +77,14 @@ int start_menu()
     (void) unpost_menu(start_menu);
     (void) free_menu(start_menu);
 
+null_menu_exit:
     for (int i = 0; i < (int) n_choices + 1; i++) {
         (void) free_item(start_menu_items[i]);
     }
     
     free(start_menu_items);
 
-    return 0;
+    return return_val;
 }
 
 int start_campaign(/*@unused@*/ struct campaign *target_campaign)
@@ -114,6 +121,7 @@ int start_campaign(/*@unused@*/ struct campaign *target_campaign)
 
 int start_encounter(struct campaign *target_campaign)
     // TODO: allow support for large grids (scrolling)
+    // returns -1 if menu is null
 {
     struct grid *target_grid = &target_campaign->encounter_grid;
     struct material *mat_list = target_campaign->material_list;
@@ -128,10 +136,11 @@ int start_encounter(struct campaign *target_campaign)
     WINDOW *seperator;
     ITEM **menu_items;
     MENU *materials_menu;
-    int half_length = COLS / 2;
+    int half_length = COLS / 2; //TODO try making this a macro
     int c = -1;
     int cur_index = 0;
     ITEM *cur_item;
+    int return_val = 0;
 
     struct coord grid_end = {0, 0};
 
@@ -167,7 +176,8 @@ int start_encounter(struct campaign *target_campaign)
         , sizeof(*menu_items));
 
     if (menu_items == NULL) {
-        return -1;
+        return_val = -1;
+        goto null_menu_exit;
     }
 
     // set the items
@@ -178,6 +188,7 @@ int start_encounter(struct campaign *target_campaign)
     
     // define the menu
     materials_menu = new_menu((ITEM **)menu_items);
+    if (materials_menu == NULL) goto null_menu_exit;
 
     (void) set_menu_win(materials_menu, menu_win);
     (void) set_menu_sub(materials_menu, sub_win);
@@ -255,6 +266,7 @@ int start_encounter(struct campaign *target_campaign)
     // ----- free menu itmes
     (void) unpost_menu(materials_menu);
     (void) free_menu(materials_menu);
+null_menu_exit:
     for (int i = 0; i < mat_list_len; i++) {
         (void) free_item(menu_items[i]);
     }
@@ -270,7 +282,7 @@ int start_encounter(struct campaign *target_campaign)
     (void) erase();
     (void) refresh();
 
-    return 0;
+    return return_val;
 }
 
 int creature_creation_menu(struct campaign *target_campaign)
@@ -288,6 +300,7 @@ int creature_creation_menu(struct campaign *target_campaign)
 
     // get_multi_input argument values
     int text_pos[3] = {1, 3, 5};
+    // NOTE: accessing note.string like this shouldn't be done
     char *dest[3] 
         = {creature_list[0].name, print_char_string
             , creature_list[0].note.string};
@@ -354,3 +367,485 @@ end:
     return 0;
 }
 
+// a calloc'd array of possibly null ITEM pointers
+typedef /*@only@*/ pos_null_ITEM_ptr * calloc_null_ITEM_ptr;
+
+// possibly null struct item pointer
+typedef /*@null@*/ struct item * pos_null_item_ptr;
+
+static void create_menu(/*@out@*/ calloc_null_ITEM_ptr item_array[]
+    , /*@out@*/ MENU **dest_menu, pos_null_item_ptr *source_array
+    , int source_array_len, const char *null_name)
+    // item_array must be array of length 2
+    // dest_menu is a pointer to pointer to the menu because
+    // dest_menu has to be pass by reference (aka the menu initialized
+    // here moves onto the bigger scope) but new_menu
+    // only returns pointer to menu, so I have to add another
+    // pointer
+    // null_name is the name given to places in the source array that are
+    // null. These are items, so they must be freed
+{
+    *dest_menu = NULL;
+    
+    // ----- initialize item arrays
+    for (int i = 0; i < 2; i++) {
+        item_array[i] = NULL; // prevent unallocated data
+            // from showing up
+
+        // +1 to ensure that the last value can be null (which is
+        // required for the menu)
+        item_array[i] = calloc((size_t)source_array_len + 1
+        , sizeof(*item_array));
+
+        if (item_array[i] == NULL) {
+            // TODO expand this
+            (void) endwin();
+            exit(EXIT_FAILURE);
+        }
+
+        item_array[i] = memset(item_array[i], 0, (source_array_len + 1)
+            * sizeof(*item_array[i]));
+    }
+
+    // --- initialize items into the 0 position and store in the 
+        // item array
+    for (int i = 0; i < source_array_len; i++) {
+        if (source_array[i] == NULL) {
+            item_array[0][i] = new_item(null_name, "");
+        } else if (source_array[i]->name[0] == '\0') {
+            // debug
+            item_array[0][i] = new_item("<no name>", "");
+        } else {
+            item_array[0][i] = new_item(source_array[i]->name, "");
+        }
+        // check if an item is created
+        if (item_array[0][i] == NULL) {
+            (void) endwin();
+            exit(EXIT_FAILURE);
+        }
+    }
+
+
+    // --- create menu
+    *dest_menu = new_menu((ITEM **) item_array[0]);
+
+    if (dest_menu == NULL) {
+        (void) endwin();
+        exit(EXIT_FAILURE);
+    }
+}
+
+// TODO make item inventory stuff its own function (I will need it more than once)
+int item_creation_menu(struct campaign *target_campaign)
+// initializes values for items
+// generally this isn't named very well, but inv = item inventory menu
+    // and sel = item selection menu
+// returns
+// 0: normal
+// -1: error when allocating for item array
+// -2: error when allocating items
+// -3: error when allocating menu
+{
+    int return_val = 0;
+    struct item *target_item;
+    char print_char_string[2]; // a string to store the print char
+        // , which will then be converted into just a char
+    (void) memset(print_char_string, 0, sizeof(print_char_string));
+    char *pointer_array[3];
+    int text_pos[3];
+    int max_lens[3];
+    int c = 0;
+
+    // ----- set up get_multi_input
+    while (true) {
+        target_item = &target_campaign->item_list
+            [target_campaign->next_empty_item++];
+
+        // NOTE: accessing note.string like this shouldn't be done
+        pointer_array[0] = target_item->name;
+        pointer_array[1] = print_char_string;
+        pointer_array[2] = target_item->note.string;
+        
+        text_pos[0] = 1;
+        text_pos[1] = 3;
+        text_pos[2] = 5;
+
+        max_lens[0] = MAX_CHAR;
+        max_lens[1] = 2;
+        max_lens[2] = MAX_CHAR;
+
+        (void) mvprintw(0, 0, "Name: ");
+        (void) mvprintw(2, 0, "Char: ");
+        (void) mvprintw(4, 0, "Notes: ");
+
+        (void) get_multi_input(pointer_array, 3, max_lens, text_pos);
+
+        c = getch();
+
+        if (c == KEY_F(2)) {
+            break;
+        }
+        (void) erase();
+    }
+
+    // TODO convert print_char_string properly
+
+    // ----- create menus
+    // TODO create a function that makes this cleaner
+    WINDOW *seperator_win; // seperators
+    WINDOW *sel_win; // item list to add to window
+    WINDOW *sel_sub; 
+    WINDOW *inv_win; // item list for inventory
+    WINDOW *inv_sub; // item list for inventory
+    int half_length = COLS / 2;
+
+    seperator_win = newwin(0, 0, 0, 0);
+    sel_win = newwin(0, half_length, 0, 0);
+    sel_sub = derwin(sel_win, 0, 0, 1, 0);
+    inv_win = newwin(0, half_length - 1, 0, half_length + 1);
+    inv_sub = derwin(inv_win, 0, 0, 1, 0);
+
+    // --- add seperator
+    mvwvline(seperator_win, 0, half_length, ACS_VLINE, LINES);
+
+    // ----- null name
+    const char *null_name = "<null>";
+    // ----- create item selection menu
+    calloc_null_ITEM_ptr sel_array[2];
+    int sel_array_len = target_campaign->item_list_len;
+    pos_null_item_ptr sel_source_array[sel_array_len];
+    int selected_sel_array = 0;
+
+    (void) memset(sel_source_array, 0, sizeof(sel_source_array));
+    
+    //int sel_array_next_empty = target_campaign->next_empty_item;
+    // NOTE: length is the full length, but this may include NULL pointers
+    // next_empty gives the length of the filled out portion
+
+    MENU *sel_menu = NULL;
+
+    // --- create an array of pointers for create_menu
+        // from the campaign's item list
+
+    for (int i = 0; i < sel_array_len; i++) {
+        // check if an item is invalid
+        if (target_campaign->item_list[i].name[0] != '\0') {
+            sel_source_array[i] = &target_campaign->item_list[i];
+        } else {
+            sel_source_array[i] = NULL;
+        }
+    }
+
+    create_menu(sel_array, &sel_menu, sel_source_array
+        , sel_array_len, null_name);
+
+    (void) set_menu_win(sel_menu, sel_win);
+    (void) set_menu_sub(sel_menu, sel_sub);
+    (void) post_menu(sel_menu);
+
+    // ----- create item inventory menu
+    calloc_null_ITEM_ptr inv_array[2];
+    int inv_array_len = target_item->inventory_len;
+    int inv_array_next_empty = target_item->num_inv_items;
+    int selected_inv_array = 0;
+
+    MENU *inv_menu = NULL;
+    create_menu(inv_array, &inv_menu, target_item->inventory
+        , target_item->inventory_len, null_name);
+
+    (void) set_menu_win(inv_menu, inv_win);
+    (void) set_menu_sub(inv_menu, inv_sub);
+    (void) post_menu(inv_menu);
+
+    //(void) box(sel_win, 0, 0);
+    //(void) box(sel_sub, 0, 0);
+    //(void) box(inv_win, 0, 0);
+
+    // ----- refresh screen
+    (void) wnoutrefresh(stdscr);
+    (void) wnoutrefresh(seperator_win);
+    (void) wnoutrefresh(inv_win);
+    (void) wnoutrefresh(inv_sub);
+    (void) wnoutrefresh(sel_win);
+    (void) wnoutrefresh(sel_sub);
+    (void) doupdate();
+
+    // ----- input loop
+    int selected_menu_index = 0;
+        // the index of menu_list that the cursor menu is on
+        // sel_menu on left and inv_menu on right
+    MENU *menu_list[2] = {sel_menu, inv_menu};
+        // set up pointers for easy access of both menus
+        // in the input logic
+    /*@null@*/ ITEM *selected_item = NULL;
+    int selected_item_index = 0;
+    int dest_index = 0;
+    /*@null@*/ const char *selected_item_name = NULL;
+    /*@null@*/ ITEM *temp_storage = NULL; // stores the
+        // null item whose place is taken when
+        // an item is selected
+    int return_1 = 0; // debug
+    int return_2 = 0;
+        
+    while (true) {
+
+        c = getch();
+
+        // exit when the exit key is pressed
+        if (c == KEY_F(2)) {
+            break;
+        }
+
+        switch (c) {
+            // scroll up or down the menu
+            case KEY_UP:
+                (void) menu_driver(menu_list[selected_menu_index]
+                    , REQ_UP_ITEM);
+                break;
+            case KEY_DOWN:
+                (void) menu_driver(menu_list[selected_menu_index]
+                    , REQ_DOWN_ITEM);
+                break;
+            // change to the left or right menu
+            case KEY_LEFT:
+            case KEY_RIGHT:
+                // sets selected_menu_index to the other value
+                    // (0 -> 1 and 1 -> 0)
+                selected_menu_index = 1 - selected_menu_index;
+                break;
+            case 32: // space
+                // could be made more clean but its fine
+                // perhaps do some array stuff again
+                if (selected_menu_index == 0) {
+                    // move the selected one from sel to inv
+
+                    // debug
+                    (void) wmove(sel_win, LINES - 1, 0);
+                    (void) wclrtoeol(sel_win);
+                    (void) wmove(inv_win, LINES - 1, 0);
+                    (void) wclrtoeol(inv_win);
+
+                    if (inv_array_next_empty == inv_array_len) {
+                        (void) mvwprintw(inv_win, LINES - 1, 0
+                            , "is full");
+                        continue;
+                    }
+                    selected_item = current_item(sel_menu);
+                    if (selected_item == NULL) {
+                        continue;
+                    } 
+                    selected_item_name = item_name(selected_item);
+
+                    if (selected_item_name == NULL) {
+                        continue;
+                    }
+                    // TODO treat the null_name items differently
+                        // (aka delete them when switching)
+                    // skip if the item if it is null
+                    if (selected_item_name == null_name) {
+                        continue;
+                    }
+
+                    selected_item_index = item_index(selected_item);
+
+                    // NOTE: apparently ncurses does not allow moving
+                        // a null item from one array to another???
+                        // it returns -4 with NO documentation for
+                        // what the -4 acutally means
+                    // save the old null item at the position
+                        // that is being written to
+                        // so it isn't lost
+                        // NOTE: it isn't freed here because
+                        // it is connected to a menu
+
+                        // TODO may require creating a new menu every time
+                        // as this null item stored in temp_storage can't be
+                        // freed until the menu is freed
+                        // maybe look into moving it between arrays in a different way?
+                    temp_storage = inv_array[selected_inv_array]
+                        [inv_array_next_empty];
+
+                    // SPLINT_NOTE: selected_item is technically
+                        // dependent, but the storage exists
+                        // here so there shouldn't be any issues
+                        // but splint thinks there is one.
+                        // my temp solution is to add temp to current_item
+                    // add the selected item to the inventory
+                    inv_array[selected_inv_array]
+                        [inv_array_next_empty++] = selected_item;
+
+                    // clear the opposite array of sel
+                    sel_array[1 - selected_sel_array] = memset(
+                        sel_array[1 - selected_sel_array], 0
+                        , sizeof(*sel_array) * sel_array_len);
+
+                    // copy the selected array to its opposite array
+                    // but skip the selected item
+                    // TODO create a new null item
+                    dest_index = 0;
+                    for (int i = 0; i < sel_array_len; i++) {
+                        if (i != selected_item_index) {
+                            sel_array[1 - selected_sel_array]
+                                [dest_index++]
+                                = sel_array[selected_sel_array]
+                                    [i];
+                        }
+                    }
+
+                    // store the saved null item in the last position
+                    sel_array[1 - selected_sel_array][dest_index]
+                        = temp_storage;
+                    
+                    // set the new selected_sel_array
+                    selected_sel_array = 1 - selected_sel_array;
+                    (void) unpost_menu(sel_menu);
+                    return_1 = set_menu_items(sel_menu
+                        , (ITEM **) sel_array[selected_sel_array]);
+                    return_2 = post_menu(sel_menu);
+                    (void) mvwprintw(sel_win, LINES - 3, 0
+                        , "name: \"%s\"", item_name(temp_storage));
+
+                    (void) mvwprintw(sel_win, LINES - 4, 0
+                        , "return is %d", return_1);
+                    switch (return_1) {
+                        case E_OK:
+                            (void) mvwprintw(sel_win, LINES - 1, 0
+                                , "E_OK return");
+                            break;
+                        case E_BAD_ARGUMENT:
+                            (void) mvwprintw(sel_win, LINES - 1, 0
+                                , "E_BAD_ARGUMENT return");
+                            break;
+                        case E_NOT_CONNECTED:
+                            (void) mvwprintw(sel_win, LINES - 1, 0
+                                , "E_NOT_CONNECTED return");
+                            break;
+                        case E_POSTED:
+                            (void) mvwprintw(sel_win, LINES - 1, 0
+                                , "E_POSTED return");
+                            break;
+                        case E_SYSTEM_ERROR:
+                            (void) mvwprintw(sel_win, LINES - 1, 0
+                                , "E_SYSTEM_ERROR return");
+                            break;
+                            
+                        default:
+                            (void) mvwprintw(sel_win, LINES - 1, 0
+                                , "bad return (%d)", return_1);
+                    }
+
+                    (void) unpost_menu(inv_menu);
+                    return_1 = set_menu_items(inv_menu
+                        , (ITEM **) inv_array[selected_inv_array]);
+                    (void) post_menu(inv_menu);
+
+                    switch (return_1) {
+                        case E_OK:
+                            (void) mvwprintw(inv_win, LINES - 1, 0
+                                , "E_OK return");
+                            break;
+                        case E_BAD_ARGUMENT:
+                            (void) mvwprintw(inv_win, LINES - 1, 0
+                                , "E_BAD_ARGUMENT return");
+                            break;
+                        case E_NOT_CONNECTED:
+                            (void) mvwprintw(inv_win, LINES - 1, 0
+                                , "E_NOT_CONNECTED return");
+                            break;
+                        case E_POSTED:
+                            (void) mvwprintw(inv_win, LINES - 1, 0
+                                , "E_POSTED return");
+                            break;
+                        case E_SYSTEM_ERROR:
+                            (void) mvwprintw(inv_win, LINES - 1, 0
+                                , "E_SYSTEM_ERROR return");
+                            break;
+                            
+                    }
+                    //return_2 = free_item(temp_storage);
+                    switch (return_2) {
+                        case E_OK:
+                            (void) mvwprintw(sel_win, LINES - 2, 0
+                                , "E_OK return");
+                            break;
+                        case E_BAD_ARGUMENT:
+                            (void) mvwprintw(sel_win, LINES - 2, 0
+                                , "E_BAD_ARGUMENT return");
+                            break;
+                        case E_NOT_CONNECTED:
+                            (void) mvwprintw(sel_win, LINES - 2, 0
+                                , "E_NOT_CONNECTED return");
+                            break;
+                        case E_POSTED:
+                            (void) mvwprintw(sel_win, LINES - 2, 0
+                                , "E_POSTED return");
+                            break;
+                        case E_SYSTEM_ERROR:
+                            (void) mvwprintw(sel_win, LINES - 2, 0
+                                , "E_SYSTEM_ERROR return");
+                            break;
+                        case E_CONNECTED:
+                            (void) mvwprintw(sel_win, LINES - 2, 0
+                                , "E_CONNECTED return");
+                            break;
+                        case E_BAD_STATE:
+                            (void) mvwprintw(sel_win, LINES - 2, 0
+                                , "E_BAD_STATE return");
+                            break;
+                        default:
+                            (void) mvwprintw(sel_win, LINES - 2, 0
+                                , "bad return");
+                    }
+                } else {
+                    // move the selected one from inv to sel
+
+                }
+                break;
+        }
+        (void) pos_menu_cursor(menu_list[selected_menu_index]);
+        (void) wnoutrefresh(stdscr);
+        (void) wnoutrefresh(seperator_win);
+        (void) wnoutrefresh(inv_win);
+        (void) wnoutrefresh(inv_sub);
+        (void) wnoutrefresh(sel_win);
+        (void) wnoutrefresh(sel_sub);
+        (void) doupdate();
+    }
+
+    // ----- free menu itmes
+    (void) unpost_menu(sel_menu);
+    (void) free_menu(sel_menu);
+    (void) unpost_menu(inv_menu);
+    (void) free_menu(inv_menu);
+
+exit:
+    // NOTE: all the allocated items will exist between the selected
+        // inv_array and the selected sel_array
+        // since no items are created or destroyed when moving between
+        // inv_array[0] to inv_array[1] (same with sel_array)
+    for (int j = 0; j < inv_array_len; j++) {
+        if (inv_array[selected_inv_array][j] != NULL)
+            (void) free_item(inv_array[selected_inv_array][j]);
+    }
+    free(inv_array[0]);
+    free(inv_array[1]);
+
+    for (int j = 0; j < sel_array_len; j++) {
+        if (sel_array[selected_sel_array][j] != NULL)
+            (void) free_item(sel_array[selected_sel_array][j]);
+    }
+    free(sel_array[0]);
+    free(sel_array[1]);
+
+    // ----- delete all windows
+    (void) delwin(seperator_win);
+    (void) delwin(sel_win);
+    (void) delwin(inv_win);
+    (void) delwin(sel_sub);
+    (void) delwin(inv_sub);
+
+    // ----- clear screen
+    (void) erase();
+    (void) refresh();
+    return return_val;
+}

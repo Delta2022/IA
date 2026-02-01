@@ -72,6 +72,7 @@ H_SEP_POS	main_menu.c	/^#define H_SEP_POS /;"	d	file:
 MAX_CHAR	main.h	/^#define MAX_CHAR /;"	d
 MAX_CREATURES	main.h	/^#define MAX_CREATURES /;"	d
 MAX_INVENTORY	main.h	/^#define MAX_INVENTORY /;"	d
+MAX_ITEMS	main.h	/^#define MAX_ITEMS /;"	d
 MAX_NOTE	main.h	/^#define MAX_NOTE /;"	d
 MAX_PNOTES	main.h	/^#define MAX_PNOTES /;"	d
 MAX_SAVED_CREATURES	main.h	/^#define MAX_SAVED_CREATURES /;"	d
@@ -90,6 +91,7 @@ TOGGLE_WALL	main.h	/^#define TOGGLE_WALL /;"	d
 V_SEP_POS	main_menu.c	/^#define V_SEP_POS /;"	d	file:
 campaign	main.h	/^struct campaign {$/;"	s
 coord	main.h	/^struct coord {$/;"	s
+create_menu	menus.c	/^static int create_menu(pos_null_ITEM_ptr *item_array[2]$/;"	f	typeref:typename:int	file:
 creature	main.h	/^struct creature {$/;"	s
 creature_creation_menu	menus.c	/^int creature_creation_menu(struct campaign *target_campaign)$/;"	f	typeref:typename:int
 creature_debug	main.c	/^\/*@unused@*\/ static void creature_debug()$/;"	f	typeref:typename:void	file:
@@ -100,13 +102,13 @@ cursor	main.h	/^    struct coord cursor;$/;"	m	struct:grid_editor	typeref:struct
 debug_campaign	campaign.c	/^void debug_campaign(struct campaign *target, FILE *format)$/;"	f	typeref:typename:void
 debug_creature	creature.c	/^void debug_creature(\/*@null@*\/ struct creature *target, int tabs$/;"	f	typeref:typename:void
 debug_grid	grid.c	/^void debug_grid(struct grid *target, int tabs, FILE *format)$/;"	f	typeref:typename:void
-debug_item	item.c	/^void debug_item(struct item *target, int tabs, FILE *format)$/;"	f	typeref:typename:void
+debug_item	item.c	/^void debug_item(\/*@null@*\/ struct item *target, int tabs, FILE *format)$/;"	f	typeref:typename:void
 debug_material	grid.c	/^void debug_material(\/*@null@*\/ struct material *target$/;"	f	typeref:typename:void
 debug_p_note	note.c	/^void debug_p_note(struct p_note *target, int tabs, FILE *format)$/;"	f	typeref:typename:void
 debug_square	grid.c	/^void debug_square(struct square *target, int tabs, FILE *format)$/;"	f	typeref:typename:void
 desc	main.h	/^    char desc[MAX_CHAR];$/;"	m	struct:material	typeref:typename:char[]
 encounter_grid	main.h	/^    struct grid encounter_grid;$/;"	m	struct:campaign	typeref:struct:grid
-find_index	campaign.c	/^static int find_index(\/*@null@*\/ void *target_ptr$/;"	f	typeref:typename:int	file:
+find_index	campaign.c	/^static int find_index(\/*@null@*\/ void *target_ptr, void *array_start_ptr$/;"	f	typeref:typename:int	file:
 func_pointer	main.h	/^struct func_pointer {$/;"	s
 get_cursor	grid_edit.c	/^struct coord get_cursor(GRID_EDITOR *target)$/;"	f	typeref:struct:coord
 get_multi_input	get_multi_input.c	/^int get_multi_input(char **dest, int num_dest, int *buffer_max_lens$/;"	f	typeref:typename:int
@@ -116,6 +118,7 @@ grid_editor	main.h	/^struct grid_editor {$/;"	s
 grid_editor_driver	grid_edit.c	/^int grid_editor_driver(GRID_EDITOR *target_ge$/;"	f	typeref:typename:int
 grid_end	main.h	/^    struct coord grid_end;$/;"	m	struct:grid_editor	typeref:struct:coord
 grid_start	main.h	/^    struct coord grid_start;$/;"	m	struct:grid	typeref:struct:coord
+has_inventory	main.h	/^    bool has_inventory;$/;"	m	struct:item	typeref:typename:bool
 init_campaign	campaign.c	/^int init_campaign(\/*@out@*\/ struct campaign *target)$/;"	f	typeref:typename:int
 init_creature	creature.c	/^int init_creature(\/*@out@*\/ struct creature *target)$/;"	f	typeref:typename:int
 init_grid	grid.c	/^int init_grid(\/*@out@*\/ struct grid *target)$/;"	f	typeref:typename:int
@@ -129,11 +132,14 @@ inventory	main.h	/^    struct item *inventory[MAX_INVENTORY];$/;"	m	struct:item	
 inventory_len	main.h	/^    int inventory_len;$/;"	m	struct:item	typeref:typename:int
 is_wall	main.h	/^    bool is_wall;$/;"	m	struct:square	typeref:typename:bool
 item	main.h	/^struct item {$/;"	s
+item_creation_menu	menus.c	/^int item_creation_menu(struct campaign *target_campaign)$/;"	f	typeref:typename:int
 item_list	main.h	/^    struct item item_list[MAX_SAVED_ITEMS];$/;"	m	struct:campaign	typeref:struct:item[]
 item_list_len	main.h	/^    int item_list_len;$/;"	m	struct:campaign	typeref:typename:int
+items	main.h	/^    pos_null_item items[MAX_ITEMS]; \/\/ pointer to items in master list$/;"	m	struct:square	typeref:typename:pos_null_item[]
 len	main.h	/^    int len;$/;"	m	struct:note	typeref:typename:int
 load_debug	main.c	/^\/*@unused@*\/ static void load_debug()$/;"	f	typeref:typename:void	file:
 load_grid_creature_ptrs	campaign.c	/^void load_grid_creature_ptrs(struct campaign *target_campaign$/;"	f	typeref:typename:void
+load_grid_item_ptrs	campaign.c	/^void load_grid_item_ptrs(struct campaign *target_campaign$/;"	f	typeref:typename:void
 load_grid_material_ptrs	campaign.c	/^void load_grid_material_ptrs(struct campaign *target_campaign$/;"	f	typeref:typename:void
 main	main.c	/^int main(\/*@unused@*\/ int argc, \/*@unused@*\/ char *argv[])$/;"	f	typeref:typename:int
 main_menu	main_menu.c	/^int main_menu(struct campaign *target_campaign)$/;"	f	typeref:typename:int
@@ -143,6 +149,7 @@ material_list	main.h	/^    struct material material_list[MAX_SAVED_MATERIALS];$/
 material_list_len	main.h	/^    int material_list_len;$/;"	m	struct:campaign	typeref:typename:int
 max_creatures	main.h	/^    int max_creatures; \/\/ maximum amount of creatures that can be added$/;"	m	struct:square	typeref:typename:int
 max_cursor	main.h	/^    struct coord max_cursor;$/;"	m	struct:grid_editor	typeref:struct:coord
+max_items	main.h	/^    int max_items;$/;"	m	struct:square	typeref:typename:int
 max_x	main.h	/^    int max_x;$/;"	m	struct:grid	typeref:typename:int
 max_y	main.h	/^    int max_y;$/;"	m	struct:grid	typeref:typename:int
 menus_debug	main.c	/^\/*@unused@*\/ static void menus_debug()$/;"	f	typeref:typename:void	file:
@@ -155,6 +162,7 @@ name	main.h	/^    char name[MAX_CHAR];$/;"	m	struct:item	typeref:typename:char[]
 name	main.h	/^    char name[MAX_CHAR];$/;"	m	struct:material	typeref:typename:char[]
 name_len	main.h	/^    int name_len;$/;"	m	struct:creature	typeref:typename:int
 name_len	main.h	/^    int name_len;$/;"	m	struct:item	typeref:typename:int
+next_empty_item	main.h	/^    int next_empty_item; \/\/ points to the index of the next empty item$/;"	m	struct:campaign	typeref:typename:int
 note	main.h	/^    struct note note;$/;"	m	struct:campaign	typeref:struct:note
 note	main.h	/^    struct note note;$/;"	m	struct:creature	typeref:struct:note
 note	main.h	/^    struct note note;$/;"	m	struct:item	typeref:struct:note
@@ -163,12 +171,15 @@ note	main.h	/^    struct note note;$/;"	m	struct:p_note	typeref:struct:note
 note	main.h	/^struct note {$/;"	s
 null_void_ptr	campaign.c	/^typedef \/*@null@*\/ void * null_void_ptr;$/;"	t	typeref:typename:void *	file:
 num_creatures	main.h	/^    int num_creatures; \/\/ current number of creatures on this square$/;"	m	struct:square	typeref:typename:int
+num_inv_items	main.h	/^    int num_inv_items; \/\/ number of items in the inventory$/;"	m	struct:item	typeref:typename:int
 old_cursor	main.h	/^    struct coord old_cursor;$/;"	m	struct:grid_editor	typeref:struct:coord
 p_note	main.h	/^struct p_note {$/;"	s
 p_note_len	main.h	/^    int p_note_len;$/;"	m	struct:grid	typeref:typename:int
 p_notes	main.h	/^    struct p_note p_notes[MAX_PNOTES];$/;"	m	struct:grid	typeref:struct:p_note[]
 pointer	main.h	/^    void (*pointer) (void *);$/;"	m	struct:func_pointer	typeref:typename:void (*)(void *)
+pos_null_ITEM_ptr	menus.c	/^typedef \/*@null@*\/ ITEM * pos_null_ITEM_ptr;$/;"	t	typeref:typename:ITEM *	file:
 pos_null_creature	main.h	/^typedef \/*@null@*\/ struct creature * pos_null_creature;$/;"	t	typeref:struct:creature *
+pos_null_item	main.h	/^typedef \/*@null@*\/ struct item * pos_null_item;$/;"	t	typeref:struct:item *
 print_char	main.h	/^    char print_char;$/;"	m	struct:creature	typeref:typename:char
 print_char	main.h	/^    char print_char;$/;"	m	struct:item	typeref:typename:char
 print_char	main.h	/^    char print_char;$/;"	m	struct:material	typeref:typename:char
@@ -185,6 +196,7 @@ start_menu_options	menus.c	/^static char *start_menu_options[] = {$/;"	v	typeref
 string	main.h	/^    char string[MAX_NOTE];$/;"	m	struct:note	typeref:typename:char[]
 target_grid	main.h	/^    \/*@temp@*\/ struct grid *target_grid;$/;"	m	struct:grid_editor	typeref:struct:grid *
 target_win	main.h	/^    \/*@temp@*\/ WINDOW *target_win;$/;"	m	struct:grid_editor	typeref:typename:WINDOW *
+test_debug	main.c	/^\/*@unused@*\/ static void test_debug()$/;"	f	typeref:typename:void	file:
 type	main.h	/^    int type; \/\/ specifies a type of function pointer to convert to$/;"	m	struct:func_pointer	typeref:typename:int
 weight	main.h	/^    int weight;$/;"	m	struct:item	typeref:typename:int
 x	main.h	/^    int x;$/;"	m	struct:coord	typeref:typename:int

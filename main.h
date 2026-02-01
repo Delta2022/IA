@@ -64,8 +64,10 @@ struct item {
     int name_len;
     char print_char;
     int weight;
+    bool has_inventory;
     struct item *inventory[MAX_INVENTORY];
     int inventory_len;
+    int num_inv_items; // number of items in the inventory
 
     struct note note;
 };
@@ -131,10 +133,13 @@ struct campaign {
 
     struct material material_list[MAX_SAVED_MATERIALS];
     int material_list_len;
+    //int next_empty_material;
     struct creature creature_list[MAX_SAVED_CREATURES];
     int creature_list_len;
+    //int next_empty_creature;
     struct item item_list[MAX_SAVED_ITEMS];
     int item_list_len;
+    int next_empty_item; // points to the index of the next empty item
 };
 
 struct grid_editor {
@@ -195,3 +200,4 @@ void load_grid_creature_ptrs(struct campaign *target_campaign
     , FILE *restrict material_file);
 void init_item(/*@out@*/ struct item *target);
 void debug_item(/*@null@*/ struct item *target, int tabs, FILE *format);
+int item_creation_menu(struct campaign *target_campaign);

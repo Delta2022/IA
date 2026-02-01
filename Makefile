@@ -7,13 +7,7 @@ main: $(FILES)
 	gcc -gdwarf $(FILES) -o main -lpanel -lmenu -lncurses -lm
 
 splint:
-	splint -incondefs +loopexec $(FILES)
+	splint +charindex -incondefs +loopexec $(FILES)
 
 ctags: $(FILES)
 	ctags $(FILES)
-
-test: test.c campaign.c grid.c note.c main.h
-	gcc -gdwarf test.c campaign.c grid.c note.c -o test -lpanel -lmenu -lncurses
-
-splint_test:
-	splint -incondefs test.c campaign.c grid.c note.c

@@ -34,9 +34,9 @@ void debug_item(/*@null@*/ struct item *target, int tabs, FILE *format)
     }
 
     fprintf(format, "name: \"%s\" | name_len: %d | print_char: %c"
-        "| weight: %d | inventory_len: %d | note: "
+        "| weight: %d | inventory_len: %d | num_inv_items: %d | note: "
         , target->name, target->name_len, target->print_char
-        , target->weight, target->inventory_len);
+        , target->weight, target->inventory_len, target->num_inv_items);
     print_note(&target->note, format);
 
     fprintf(format, "\n");
