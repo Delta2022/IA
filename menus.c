@@ -1,5 +1,6 @@
 #include "main.h"
 
+
 static char *start_menu_options[] = {
     "Start Campaign",
     "Load Campaign",
@@ -375,15 +376,13 @@ typedef /*@null@*/ struct item * pos_null_item_ptr;
 
 static void create_menu(/*@out@*/ calloc_null_ITEM_ptr item_array[]
     , /*@out@*/ MENU **dest_menu, pos_null_item_ptr *source_array
-    , int source_array_len, const char *null_name)
+    , int source_array_len)
     // item_array must be array of length 2
     // dest_menu is a pointer to pointer to the menu because
     // dest_menu has to be pass by reference (aka the menu initialized
     // here moves onto the bigger scope) but new_menu
     // only returns pointer to menu, so I have to add another
     // pointer
-    // null_name is the name given to places in the source array that are
-    // null. These are items, so they must be freed
 {
     *dest_menu = NULL;
     
@@ -411,7 +410,8 @@ static void create_menu(/*@out@*/ calloc_null_ITEM_ptr item_array[]
         // item array
     for (int i = 0; i < source_array_len; i++) {
         if (source_array[i] == NULL) {
-            item_array[0][i] = new_item(null_name, "");
+            item_array[0][i] = NULL;
+            continue;
         } else if (source_array[i]->name[0] == '\0') {
             // debug
             item_array[0][i] = new_item("<no name>", "");
@@ -433,6 +433,34 @@ static void create_menu(/*@out@*/ calloc_null_ITEM_ptr item_array[]
         (void) endwin();
         exit(EXIT_FAILURE);
     }
+}
+
+static void ncurses_error(WINDOW *win, int y, int x, const char *name, int return_val)
+{
+    char *error_str = "";
+    switch (return_val) {
+        case E_OK:
+            error_str = "E_OK";
+            break;
+        case E_BAD_ARGUMENT:
+            error_str = "E_BAD_ARGUMENT";
+            break;
+        case E_NOT_CONNECTED:
+            error_str = "E_NOT_CONNECTED";
+            break;
+        case E_POSTED:
+            error_str = "E_POSTED";
+            break;
+        case E_SYSTEM_ERROR:
+            error_str = "E_SYSTEM_ERROR";
+            break;
+        case E_CONNECTED:
+            error_str = "E_CONNECTED";
+            break;
+        default:
+            error_str = "unknown error";
+    }
+    (void) mvwprintw(win, y, x, "\"%s\" returned %s (%d)", name, error_str, return_val);
 }
 
 // TODO make item inventory stuff its own function (I will need it more than once)
@@ -508,8 +536,6 @@ int item_creation_menu(struct campaign *target_campaign)
     // --- add seperator
     mvwvline(seperator_win, 0, half_length, ACS_VLINE, LINES);
 
-    // ----- null name
-    const char *null_name = "<null>";
     // ----- create item selection menu
     calloc_null_ITEM_ptr sel_array[2];
     int sel_array_len = target_campaign->item_list_len;
@@ -537,7 +563,7 @@ int item_creation_menu(struct campaign *target_campaign)
     }
 
     create_menu(sel_array, &sel_menu, sel_source_array
-        , sel_array_len, null_name);
+        , sel_array_len);
 
     (void) set_menu_win(sel_menu, sel_win);
     (void) set_menu_sub(sel_menu, sel_sub);
@@ -551,7 +577,7 @@ int item_creation_menu(struct campaign *target_campaign)
 
     MENU *inv_menu = NULL;
     create_menu(inv_array, &inv_menu, target_item->inventory
-        , target_item->inventory_len, null_name);
+        , target_item->inventory_len);
 
     (void) set_menu_win(inv_menu, inv_win);
     (void) set_menu_sub(inv_menu, inv_sub);
@@ -639,31 +665,8 @@ int item_creation_menu(struct campaign *target_campaign)
                     if (selected_item_name == NULL) {
                         continue;
                     }
-                    // TODO treat the null_name items differently
-                        // (aka delete them when switching)
-                    // skip if the item if it is null
-                    if (selected_item_name == null_name) {
-                        continue;
-                    }
 
                     selected_item_index = item_index(selected_item);
-
-                    // NOTE: apparently ncurses does not allow moving
-                        // a null item from one array to another???
-                        // it returns -4 with NO documentation for
-                        // what the -4 acutally means
-                    // save the old null item at the position
-                        // that is being written to
-                        // so it isn't lost
-                        // NOTE: it isn't freed here because
-                        // it is connected to a menu
-
-                        // TODO may require creating a new menu every time
-                        // as this null item stored in temp_storage can't be
-                        // freed until the menu is freed
-                        // maybe look into moving it between arrays in a different way?
-                    temp_storage = inv_array[selected_inv_array]
-                        [inv_array_next_empty];
 
                     // SPLINT_NOTE: selected_item is technically
                         // dependent, but the storage exists
@@ -681,7 +684,6 @@ int item_creation_menu(struct campaign *target_campaign)
 
                     // copy the selected array to its opposite array
                     // but skip the selected item
-                    // TODO create a new null item
                     dest_index = 0;
                     for (int i = 0; i < sel_array_len; i++) {
                         if (i != selected_item_index) {
@@ -691,111 +693,25 @@ int item_creation_menu(struct campaign *target_campaign)
                                     [i];
                         }
                     }
-
-                    // store the saved null item in the last position
-                    sel_array[1 - selected_sel_array][dest_index]
-                        = temp_storage;
                     
-                    // set the new selected_sel_array
-                    selected_sel_array = 1 - selected_sel_array;
                     (void) unpost_menu(sel_menu);
-                    return_1 = set_menu_items(sel_menu
-                        , (ITEM **) sel_array[selected_sel_array]);
-                    return_2 = post_menu(sel_menu);
-                    (void) mvwprintw(sel_win, LINES - 3, 0
-                        , "name: \"%s\"", item_name(temp_storage));
-
-                    (void) mvwprintw(sel_win, LINES - 4, 0
-                        , "return is %d", return_1);
-                    switch (return_1) {
-                        case E_OK:
-                            (void) mvwprintw(sel_win, LINES - 1, 0
-                                , "E_OK return");
-                            break;
-                        case E_BAD_ARGUMENT:
-                            (void) mvwprintw(sel_win, LINES - 1, 0
-                                , "E_BAD_ARGUMENT return");
-                            break;
-                        case E_NOT_CONNECTED:
-                            (void) mvwprintw(sel_win, LINES - 1, 0
-                                , "E_NOT_CONNECTED return");
-                            break;
-                        case E_POSTED:
-                            (void) mvwprintw(sel_win, LINES - 1, 0
-                                , "E_POSTED return");
-                            break;
-                        case E_SYSTEM_ERROR:
-                            (void) mvwprintw(sel_win, LINES - 1, 0
-                                , "E_SYSTEM_ERROR return");
-                            break;
-                            
-                        default:
-                            (void) mvwprintw(sel_win, LINES - 1, 0
-                                , "bad return (%d)", return_1);
-                    }
-
                     (void) unpost_menu(inv_menu);
-                    return_1 = set_menu_items(inv_menu
-                        , (ITEM **) inv_array[selected_inv_array]);
-                    (void) post_menu(inv_menu);
 
-                    switch (return_1) {
-                        case E_OK:
-                            (void) mvwprintw(inv_win, LINES - 1, 0
-                                , "E_OK return");
-                            break;
-                        case E_BAD_ARGUMENT:
-                            (void) mvwprintw(inv_win, LINES - 1, 0
-                                , "E_BAD_ARGUMENT return");
-                            break;
-                        case E_NOT_CONNECTED:
-                            (void) mvwprintw(inv_win, LINES - 1, 0
-                                , "E_NOT_CONNECTED return");
-                            break;
-                        case E_POSTED:
-                            (void) mvwprintw(inv_win, LINES - 1, 0
-                                , "E_POSTED return");
-                            break;
-                        case E_SYSTEM_ERROR:
-                            (void) mvwprintw(inv_win, LINES - 1, 0
-                                , "E_SYSTEM_ERROR return");
-                            break;
-                            
-                    }
-                    //return_2 = free_item(temp_storage);
-                    switch (return_2) {
-                        case E_OK:
-                            (void) mvwprintw(sel_win, LINES - 2, 0
-                                , "E_OK return");
-                            break;
-                        case E_BAD_ARGUMENT:
-                            (void) mvwprintw(sel_win, LINES - 2, 0
-                                , "E_BAD_ARGUMENT return");
-                            break;
-                        case E_NOT_CONNECTED:
-                            (void) mvwprintw(sel_win, LINES - 2, 0
-                                , "E_NOT_CONNECTED return");
-                            break;
-                        case E_POSTED:
-                            (void) mvwprintw(sel_win, LINES - 2, 0
-                                , "E_POSTED return");
-                            break;
-                        case E_SYSTEM_ERROR:
-                            (void) mvwprintw(sel_win, LINES - 2, 0
-                                , "E_SYSTEM_ERROR return");
-                            break;
-                        case E_CONNECTED:
-                            (void) mvwprintw(sel_win, LINES - 2, 0
-                                , "E_CONNECTED return");
-                            break;
-                        case E_BAD_STATE:
-                            (void) mvwprintw(sel_win, LINES - 2, 0
-                                , "E_BAD_STATE return");
-                            break;
-                        default:
-                            (void) mvwprintw(sel_win, LINES - 2, 0
-                                , "bad return");
-                    }
+                    // set the new selected_sel_array
+                    // TODO handle when the item array turns all null
+                    // TODO write a display function to display all of the empty positions
+                    selected_sel_array = 1 - selected_sel_array;
+                    ncurses_error(sel_win, LINES - 1, 0, "set_menu_items(sel_menu)",
+                        set_menu_items(sel_menu, (ITEM **) sel_array[selected_sel_array]));
+
+                    ncurses_error(inv_win, LINES - 1, 0, "set_menu_items(inv_menu)",
+                        set_menu_items(inv_menu, (ITEM **) inv_array[selected_inv_array]));
+
+                    // post
+                    ncurses_error(inv_win, LINES - 2, 0, "post(inv_menu)",
+                        post_menu(inv_menu));
+                    ncurses_error(sel_win, LINES - 2, 0, "post(sel_menu)",
+                        post_menu(sel_menu));
                 } else {
                     // move the selected one from inv to sel
 

@@ -89,9 +89,10 @@ SQUARE_X_LEN	main.h	/^#define SQUARE_X_LEN /;"	d
 SQUARE_Y_LEN	main.h	/^#define SQUARE_Y_LEN /;"	d
 TOGGLE_WALL	main.h	/^#define TOGGLE_WALL /;"	d
 V_SEP_POS	main_menu.c	/^#define V_SEP_POS /;"	d	file:
+calloc_null_ITEM_ptr	menus.c	/^typedef \/*@only@*\/ pos_null_ITEM_ptr * calloc_null_ITEM_ptr;$/;"	t	typeref:typename:pos_null_ITEM_ptr *	file:
 campaign	main.h	/^struct campaign {$/;"	s
 coord	main.h	/^struct coord {$/;"	s
-create_menu	menus.c	/^static int create_menu(pos_null_ITEM_ptr *item_array[2]$/;"	f	typeref:typename:int	file:
+create_menu	menus.c	/^static void create_menu(\/*@out@*\/ calloc_null_ITEM_ptr item_array[]$/;"	f	typeref:typename:void	file:
 creature	main.h	/^struct creature {$/;"	s
 creature_creation_menu	menus.c	/^int creature_creation_menu(struct campaign *target_campaign)$/;"	f	typeref:typename:int
 creature_debug	main.c	/^\/*@unused@*\/ static void creature_debug()$/;"	f	typeref:typename:void	file:
@@ -162,6 +163,7 @@ name	main.h	/^    char name[MAX_CHAR];$/;"	m	struct:item	typeref:typename:char[]
 name	main.h	/^    char name[MAX_CHAR];$/;"	m	struct:material	typeref:typename:char[]
 name_len	main.h	/^    int name_len;$/;"	m	struct:creature	typeref:typename:int
 name_len	main.h	/^    int name_len;$/;"	m	struct:item	typeref:typename:int
+ncurses_error	menus.c	/^static void ncurses_error(WINDOW *win, int y, int x, int return_val)$/;"	f	typeref:typename:void	file:
 next_empty_item	main.h	/^    int next_empty_item; \/\/ points to the index of the next empty item$/;"	m	struct:campaign	typeref:typename:int
 note	main.h	/^    struct note note;$/;"	m	struct:campaign	typeref:struct:note
 note	main.h	/^    struct note note;$/;"	m	struct:creature	typeref:struct:note
@@ -177,9 +179,9 @@ p_note	main.h	/^struct p_note {$/;"	s
 p_note_len	main.h	/^    int p_note_len;$/;"	m	struct:grid	typeref:typename:int
 p_notes	main.h	/^    struct p_note p_notes[MAX_PNOTES];$/;"	m	struct:grid	typeref:struct:p_note[]
 pointer	main.h	/^    void (*pointer) (void *);$/;"	m	struct:func_pointer	typeref:typename:void (*)(void *)
-pos_null_ITEM_ptr	menus.c	/^typedef \/*@null@*\/ ITEM * pos_null_ITEM_ptr;$/;"	t	typeref:typename:ITEM *	file:
 pos_null_creature	main.h	/^typedef \/*@null@*\/ struct creature * pos_null_creature;$/;"	t	typeref:struct:creature *
 pos_null_item	main.h	/^typedef \/*@null@*\/ struct item * pos_null_item;$/;"	t	typeref:struct:item *
+pos_null_item_ptr	menus.c	/^typedef \/*@null@*\/ struct item * pos_null_item_ptr;$/;"	t	typeref:struct:item *	file:
 print_char	main.h	/^    char print_char;$/;"	m	struct:creature	typeref:typename:char
 print_char	main.h	/^    char print_char;$/;"	m	struct:item	typeref:typename:char
 print_char	main.h	/^    char print_char;$/;"	m	struct:material	typeref:typename:char
