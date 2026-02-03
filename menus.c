@@ -374,7 +374,7 @@ typedef /*@only@*/ pos_null_ITEM_ptr * calloc_null_ITEM_ptr;
 // possibly null struct item pointer
 typedef /*@null@*/ struct item * pos_null_item_ptr;
 
-static void create_menu(/*@out@*/ calloc_null_ITEM_ptr item_array[]
+static void init_item_array(/*@out@*/ calloc_null_ITEM_ptr item_array[]
     , /*@out@*/ MENU **dest_menu, pos_null_item_ptr *source_array
     , int source_array_len)
     // item_array must be array of length 2
@@ -427,12 +427,12 @@ static void create_menu(/*@out@*/ calloc_null_ITEM_ptr item_array[]
 
 
     // --- create menu
-    *dest_menu = new_menu((ITEM **) item_array[0]);
+    // *dest_menu = new_menu((ITEM **) item_array[0]);
 
-    if (dest_menu == NULL) {
-        (void) endwin();
-        exit(EXIT_FAILURE);
-    }
+    //if (dest_menu == NULL) {
+    //    (void) endwin();
+    //    exit(EXIT_FAILURE);
+    //}
 }
 
 static void ncurses_error(WINDOW *win, int y, int x, const char *name, int return_val)
@@ -536,6 +536,16 @@ int item_creation_menu(struct campaign *target_campaign)
     // --- add seperator
     mvwvline(seperator_win, 0, half_length, ACS_VLINE, LINES);
 
+    // ----- create items for when the item arrays are empty
+    // TODO generalize this later
+    // NOTE: different arrays are used to prevent issues with
+        // connection
+    pos_null_ITEM_ptr inv_empty_array[2] = {NULL, NULL};
+    pos_null_ITEM_ptr sel_empty_array[2] = {NULL, NULL};
+    
+    inv_empty_array[0] = new_item("<empty>", "");
+    sel_empty_array[0] = new_item("<empty>", "");
+    
     // ----- create item selection menu
     calloc_null_ITEM_ptr sel_array[2];
     int sel_array_len = target_campaign->item_list_len;
@@ -544,7 +554,7 @@ int item_creation_menu(struct campaign *target_campaign)
 
     (void) memset(sel_source_array, 0, sizeof(sel_source_array));
     
-    //int sel_array_next_empty = target_campaign->next_empty_item;
+    int sel_array_next_empty = target_campaign->next_empty_item;
     // NOTE: length is the full length, but this may include NULL pointers
     // next_empty gives the length of the filled out portion
 
@@ -562,8 +572,19 @@ int item_creation_menu(struct campaign *target_campaign)
         }
     }
 
-    create_menu(sel_array, &sel_menu, sel_source_array
+    init_item_array(sel_array, &sel_menu, sel_source_array
         , sel_array_len);
+
+    if (sel_array_next_empty > 0) {
+        sel_menu = new_menu((ITEM **) sel_array[0]);
+    } else {
+        sel_menu = new_menu((ITEM **) sel_empty_array);
+    }
+    
+    if (sel_menu == NULL) {
+        (void) endwin();
+        exit(EXIT_FAILURE);
+    }
 
     (void) set_menu_win(sel_menu, sel_win);
     (void) set_menu_sub(sel_menu, sel_sub);
@@ -576,9 +597,20 @@ int item_creation_menu(struct campaign *target_campaign)
     int selected_inv_array = 0;
 
     MENU *inv_menu = NULL;
-    create_menu(inv_array, &inv_menu, target_item->inventory
+
+    init_item_array(inv_array, &inv_menu, target_item->inventory
         , target_item->inventory_len);
 
+    if (inv_array_next_empty > 0 ) {
+        inv_menu = new_menu((ITEM **) inv_array[0]);
+    } else {
+        inv_menu = new_menu((ITEM **) inv_empty_array);
+    }
+
+    if (inv_menu == NULL) {
+        (void) endwin();
+        exit(EXIT_FAILURE);
+    }
     (void) set_menu_win(inv_menu, inv_win);
     (void) set_menu_sub(inv_menu, inv_sub);
     (void) post_menu(inv_menu);
@@ -651,11 +683,18 @@ int item_creation_menu(struct campaign *target_campaign)
                     (void) wmove(inv_win, LINES - 1, 0);
                     (void) wclrtoeol(inv_win);
 
+                    // skip when the destination is full
                     if (inv_array_next_empty == inv_array_len) {
                         (void) mvwprintw(inv_win, LINES - 1, 0
                             , "is full");
                         continue;
                     }
+
+                    // skip if the source array is empty
+                    if (sel_array_next_empty == 0) {
+                        continue;
+                    }
+
                     selected_item = current_item(sel_menu);
                     if (selected_item == NULL) {
                         continue;
@@ -673,6 +712,7 @@ int item_creation_menu(struct campaign *target_campaign)
                         // here so there shouldn't be any issues
                         // but splint thinks there is one.
                         // my temp solution is to add temp to current_item
+
                     // add the selected item to the inventory
                     inv_array[selected_inv_array]
                         [inv_array_next_empty++] = selected_item;
@@ -684,6 +724,8 @@ int item_creation_menu(struct campaign *target_campaign)
 
                     // copy the selected array to its opposite array
                     // but skip the selected item
+                    // TODO may need a check if selected_item_index
+                        // is within bounds
                     dest_index = 0;
                     for (int i = 0; i < sel_array_len; i++) {
                         if (i != selected_item_index) {
@@ -693,6 +735,7 @@ int item_creation_menu(struct campaign *target_campaign)
                                     [i];
                         }
                     }
+                    sel_array_next_empty--;
                     
                     (void) unpost_menu(sel_menu);
                     (void) unpost_menu(inv_menu);
@@ -701,8 +744,18 @@ int item_creation_menu(struct campaign *target_campaign)
                     // TODO handle when the item array turns all null
                     // TODO write a display function to display all of the empty positions
                     selected_sel_array = 1 - selected_sel_array;
-                    ncurses_error(sel_win, LINES - 1, 0, "set_menu_items(sel_menu)",
-                        set_menu_items(sel_menu, (ITEM **) sel_array[selected_sel_array]));
+
+                    // update the menus
+                    // display the empty array if the item array is empty
+                    if (sel_array_next_empty == 0) {
+                        return_1 = set_menu_items(sel_menu
+                            , (ITEM **) sel_empty_array);
+                    } else {
+                        return_1 = set_menu_items(sel_menu
+                            , (ITEM **) sel_array[selected_sel_array]);
+                    }
+                    ncurses_error(sel_win, LINES - 1, 0, "set_menu_items(sel_menu)"
+                        , return_1);
 
                     ncurses_error(inv_win, LINES - 1, 0, "set_menu_items(inv_menu)",
                         set_menu_items(inv_menu, (ITEM **) inv_array[selected_inv_array]));
@@ -735,6 +788,7 @@ int item_creation_menu(struct campaign *target_campaign)
     (void) free_menu(inv_menu);
 
 exit:
+    // ----- free items
     // NOTE: all the allocated items will exist between the selected
         // inv_array and the selected sel_array
         // since no items are created or destroyed when moving between
@@ -752,6 +806,10 @@ exit:
     }
     free(sel_array[0]);
     free(sel_array[1]);
+
+    // --- free the item in the empty arrays
+    (void) free_item(inv_empty_array[0]);
+    (void) free_item(sel_empty_array[0]);
 
     // ----- delete all windows
     (void) delwin(seperator_win);
