@@ -29,6 +29,7 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     (void) endwin();
 
     printf("return is %d\n", c);
+    debug_campaign(&temp, stdout);
 }
 
 /*@unused@*/ static void creature_debug()

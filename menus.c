@@ -511,9 +511,91 @@ static void ncurses_error(WINDOW *win, int y, int x, const char *name, int retur
     (void) mvwprintw(win, y, x, "\"%s\" returned %s (%d)", name, error_str, return_val);
 }
 
-//static void transfer_item(ITEM *selected_item
-//    , calloc_null_ITEM_ptr dest_array[]
+static void transfer_item(struct changable_menu *source,
+    struct changable_menu *dest, ITEM *target_item)
+{
+    // debug
+    (void) wmove(source->window, LINES - 1, 0);
+    (void) wclrtoeol(source->window);
+    (void) wmove(dest->window, LINES - 1, 0);
+    (void) wclrtoeol(dest->window);
+
+    // skip if the source array is empty
+    if (source->array_next_empty == 0) {
+        return;
+    }
+    // skip when the destination is full
+    if (dest->array_next_empty == dest->array_len) {
+        (void) mvwprintw(dest->window, LINES - 1, 0
+            , "is full");
+        return;
+    }
+
+    // SPLINT_NOTE: target_item is technically
+        // dependent, but the storage exists
+        // here so there shouldn't be any issues
+        // but splint thinks there is one.
+        // my temp solution is to add temp to current_item
+
+    int target_item_index = item_index(target_item);
+    int return_1 = 0;
+
+    // add the selected item to the inventory
+    dest->arrays[dest->selected_array]
+        [dest->array_next_empty] = target_item;
+
+    dest->array_next_empty++;
+
+    // clear the opposite array of sel
+    source->arrays[1 - source->selected_array] = memset(
+        source->arrays[1 - source->selected_array], 0
+        , sizeof(*source->arrays) * source->array_len);
+
+    // copy the selected array to its opposite array
+    // but skip the selected item
+    // TODO may need a check if target_item_index
+        // is within bounds
+    int dest_index = 0;
+    for (int i = 0; i < source->array_len; i++) {
+        if (i != target_item_index) {
+            source->arrays[1 - source->selected_array][dest_index++]
+                = source->arrays[source->selected_array][i];
+        }
+    }
+    source->array_next_empty--;
     
+    (void) unpost_menu(source->menu);
+    (void) unpost_menu(dest->menu);
+
+    // set the new selected_sel_array
+    // TODO write a display function to display
+        // all of the empty positions
+    source->selected_array = 1 - source->selected_array;
+
+    // update the menus
+    // display the empty array if the item array is empty
+    if (source->array_next_empty == 0) {
+        return_1 = set_menu_items(source->menu
+            , (ITEM **) source->empty_array);
+    } else {
+        return_1 = set_menu_items(source->menu
+            , (ITEM **) source->arrays[source->selected_array]);
+    }
+    ncurses_error(source->window, LINES - 1, 0
+        , "set_menu_items(sel_menu)"
+        , return_1);
+
+    ncurses_error(dest->window, LINES - 1, 0
+        , "set_menu_items(dest_menu)",
+        set_menu_items(dest->menu
+            , (ITEM **) dest->arrays[dest->selected_array]));
+
+    // post
+    ncurses_error(dest->window, LINES - 2, 0, "post(dest_menu)",
+        post_menu(dest->menu));
+    ncurses_error(source->window, LINES - 2, 0, "post(sel_menu)",
+        post_menu(source->menu));
+}
 
 static void item_inventory_menu(struct campaign *target_campaign
     , struct item *target_item)
@@ -521,6 +603,8 @@ static void item_inventory_menu(struct campaign *target_campaign
     // and the inventory menu (inv)
     // it allows moving items back and forth between
     // the arrays
+    // TODO save the information into the campaign correctly
+        // use item_userptr to do this
 {
     // ----- init the changable menus
     struct changable_menu sel; // selection menu (list of all items)
@@ -584,42 +668,6 @@ static void item_inventory_menu(struct campaign *target_campaign
     // --- add seperator
     mvwvline(seperator_win, 0, half_length, ACS_VLINE, LINES);
 
-    // ----- create items for when the item arrays are empty
-    // TODO generalize this later
-    // NOTE: different arrays are used to prevent issues with
-        // connection
-    //pos_null_ITEM_ptr inv_empty_array[2] = {NULL, NULL};
-    //pos_null_ITEM_ptr sel_empty_array[2] = {NULL, NULL};
-    //
-    //inv_empty_array[0] = new_item("<empty>", "");
-    //sel_empty_array[0] = new_item("<empty>", "");
-    
-    // ----- create item selection menu
-    //calloc_null_ITEM_ptr sel_array[2];
-    //int sel_array_len = target_campaign->item_list_len;
-
-
-    //calloc_null_ITEM_ptr inv_array[2];
-    //int inv_array_len = target_item->inventory_len;
-    //int inv_array_next_empty = target_item->num_inv_items;
-    //int selected_inv_array = 0;
-
-
-    //MENU *inv_menu = NULL;
-
-
-    //if (inv.array_next_empty > 0 ) {
-    //    inv_menu = new_menu((ITEM **) inv.array[0]);
-    //} else {
-    //    inv_menu = new_menu((ITEM **) inv_empty_array);
-    //}
-
-    //if (inv_menu == NULL) {
-    //    (void) endwin();
-    //    exit(EXIT_FAILURE);
-    //}
-
-
     //(void) box(sel_win, 0, 0);
     //(void) box(sel_sub, 0, 0);
     //(void) box(inv_win, 0, 0);
@@ -641,18 +689,12 @@ static void item_inventory_menu(struct campaign *target_campaign
         // set up pointers for easy access of both menus
         // in the input logic
     /*@null@*/ ITEM *selected_item = NULL;
-    int selected_item_index = 0;
-    int dest_index = 0;
     /*@null@*/ const char *selected_item_name = NULL;
-    /*@null@*/ ITEM *temp_storage = NULL; // stores the
-        // null item whose place is taken when
-        // an item is selected
-    int return_1 = 0; // debug
-    int return_2 = 0;
     int c = 0;
+    struct changable_menu *source;
+    struct changable_menu *dest;
         
     while (true) {
-
         c = getch();
 
         // exit when the exit key is pressed
@@ -682,112 +724,43 @@ static void item_inventory_menu(struct campaign *target_campaign
                 // perhaps do some array stuff again
                 if (selected_menu_index == 0) {
                     // move the selected one from sel to inv
-
-                    // debug
-                    (void) wmove(sel.window, LINES - 1, 0);
-                    (void) wclrtoeol(sel.window);
-                    (void) wmove(inv.window, LINES - 1, 0);
-                    (void) wclrtoeol(inv.window);
-
-                    // skip when the destination is full
-                    if (inv.array_next_empty == inv.array_len) {
-                        (void) mvwprintw(inv.window, LINES - 1, 0
-                            , "is full");
-                        continue;
-                    }
-
-                    // skip if the source array is empty
-                    if (sel.array_next_empty == 0) {
-                        continue;
-                    }
-
-                    selected_item = current_item(sel.menu);
-                    if (selected_item == NULL) {
-                        continue;
-                    } 
-                    selected_item_name = item_name(selected_item);
-
-                    if (selected_item_name == NULL) {
-                        continue;
-                    }
-
-                    selected_item_index = item_index(selected_item);
-
-                    // SPLINT_NOTE: selected_item is technically
-                        // dependent, but the storage exists
-                        // here so there shouldn't be any issues
-                        // but splint thinks there is one.
-                        // my temp solution is to add temp to current_item
-
-                    // add the selected item to the inventory
-                    inv.arrays[inv.selected_array]
-                        [inv.array_next_empty] = selected_item;
-
-                    inv.array_next_empty++;
-
-                    // clear the opposite array of sel
-                    sel.arrays[1 - sel.selected_array] = memset(
-                        sel.arrays[1 - sel.selected_array], 0
-                        , sizeof(*sel.arrays) * sel.array_len);
-
-                    // copy the selected array to its opposite array
-                    // but skip the selected item
-                    // TODO may need a check if selected_item_index
-                        // is within bounds
-                    dest_index = 0;
-                    for (int i = 0; i < sel.array_len; i++) {
-                        if (i != selected_item_index) {
-                            sel.arrays[1 - sel.selected_array]
-                                [dest_index++]
-                                = sel.arrays[sel.selected_array][i];
-                        }
-                    }
-                    sel.array_next_empty--;
-                    
-                    (void) unpost_menu(sel.menu);
-                    (void) unpost_menu(inv.menu);
-
-                    // set the new selected_sel_array
-                    // TODO handle when the item array turns all null
-                    // TODO write a display function to display all of the empty positions
-                    sel.selected_array = 1 - sel.selected_array;
-
-                    // update the menus
-                    // display the empty array if the item array is empty
-                    if (sel.array_next_empty == 0) {
-                        return_1 = set_menu_items(sel.menu
-                            , (ITEM **) sel.empty_array);
-                    } else {
-                        return_1 = set_menu_items(sel.menu
-                            , (ITEM **) sel.arrays[sel.selected_array]);
-                    }
-                    ncurses_error(sel.window, LINES - 1, 0
-                        , "set_menu_items(sel_menu)"
-                        , return_1);
-
-                    ncurses_error(inv.window, LINES - 1, 0
-                        , "set_menu_items(inv_menu)",
-                        set_menu_items(inv.menu
-                            , (ITEM **) inv.arrays[inv.selected_array]));
-
-                    // post
-                    ncurses_error(inv.window, LINES - 2, 0, "post(inv_menu)",
-                        post_menu(inv.menu));
-                    ncurses_error(sel.window, LINES - 2, 0, "post(sel_menu)",
-                        post_menu(sel.menu));
+                    source = &sel;
+                    dest = &inv;
                 } else {
                     // move the selected one from inv to sel
-
+                    source = &inv;
+                    dest = &sel;
                 }
+
+                selected_item = current_item(source->menu);
+                if (selected_item == NULL) {
+                    continue;
+                } 
+                selected_item_name = item_name(selected_item);
+
+                if (selected_item_name == NULL) {
+                    continue;
+                }
+
+                transfer_item(source, dest, selected_item);
                 break;
         }
         (void) pos_menu_cursor(menu_list[selected_menu_index]);
+
         (void) wnoutrefresh(stdscr);
         (void) wnoutrefresh(seperator_win);
-        (void) wnoutrefresh(inv.window);
-        (void) wnoutrefresh(inv.sub_window);
-        (void) wnoutrefresh(sel.window);
-        (void) wnoutrefresh(sel.sub_window);
+        // write to screen such that the cursor is in the right position
+        if (selected_menu_index == 0) {
+            (void) wnoutrefresh(inv.window);
+            (void) wnoutrefresh(inv.sub_window);
+            (void) wnoutrefresh(sel.window);
+            (void) wnoutrefresh(sel.sub_window);
+        } else {
+            (void) wnoutrefresh(sel.window);
+            (void) wnoutrefresh(sel.sub_window);
+            (void) wnoutrefresh(inv.window);
+            (void) wnoutrefresh(inv.sub_window);
+        }
         (void) doupdate();
     }
 
@@ -837,7 +810,6 @@ exit:
 int item_creation_menu(struct campaign *target_campaign)
     // initalizes and defines an item based on user input
 {
-    int return_val = 0;
     struct item *target_item;
     char print_char_string[2]; // a string to store the print char
         // , which will then be converted into just a char

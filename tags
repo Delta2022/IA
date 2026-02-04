@@ -138,7 +138,7 @@ inventory	main.h	/^    struct item *inventory[MAX_INVENTORY];$/;"	m	struct:item	
 inventory_len	main.h	/^    int inventory_len;$/;"	m	struct:item	typeref:typename:int
 is_wall	main.h	/^    bool is_wall;$/;"	m	struct:square	typeref:typename:bool
 item	main.h	/^struct item {$/;"	s
-item_creation_menu	menus.c	/^void item_creation_menu(struct campaign *target_campaign)$/;"	f	typeref:typename:void
+item_creation_menu	menus.c	/^int item_creation_menu(struct campaign *target_campaign)$/;"	f	typeref:typename:int
 item_inventory_menu	menus.c	/^static void item_inventory_menu(struct campaign *target_campaign$/;"	f	typeref:typename:void	file:
 item_list	main.h	/^    struct item item_list[MAX_SAVED_ITEMS];$/;"	m	struct:campaign	typeref:struct:item[]
 item_list_len	main.h	/^    int item_list_len;$/;"	m	struct:campaign	typeref:typename:int
@@ -159,7 +159,7 @@ max_cursor	main.h	/^    struct coord max_cursor;$/;"	m	struct:grid_editor	typere
 max_items	main.h	/^    int max_items;$/;"	m	struct:square	typeref:typename:int
 max_x	main.h	/^    int max_x;$/;"	m	struct:grid	typeref:typename:int
 max_y	main.h	/^    int max_y;$/;"	m	struct:grid	typeref:typename:int
-menu	menus.c	/^    MENU *menu; \/\/ associated menu$/;"	m	struct:changable_menu	typeref:typename:MENU *	file:
+menu	menus.c	/^    \/*@owned@*\/ MENU *menu; \/\/ associated menu$/;"	m	struct:changable_menu	typeref:typename:MENU *	file:
 menus_debug	main.c	/^\/*@unused@*\/ static void menus_debug()$/;"	f	typeref:typename:void	file:
 movement_modifier	main.h	/^    int movement_modifier; \/\/ usually 1 if in difficult terrain$/;"	m	struct:square	typeref:typename:int
 mvdisplay_square_info	grid.c	/^void mvdisplay_square_info(WINDOW *target_window, int y, int x$/;"	f	typeref:typename:void
@@ -209,6 +209,7 @@ sub_window	menus.c	/^    \/*@temp@*\/ WINDOW *sub_window; \/\/ associated sub wi
 target_grid	main.h	/^    \/*@temp@*\/ struct grid *target_grid;$/;"	m	struct:grid_editor	typeref:struct:grid *
 target_win	main.h	/^    \/*@temp@*\/ WINDOW *target_win;$/;"	m	struct:grid_editor	typeref:typename:WINDOW *
 test_debug	main.c	/^\/*@unused@*\/ static void test_debug()$/;"	f	typeref:typename:void	file:
+transfer_item	menus.c	/^static void transfer_item(struct changable_menu *source,$/;"	f	typeref:typename:void	file:
 type	main.h	/^    int type; \/\/ specifies a type of function pointer to convert to$/;"	m	struct:func_pointer	typeref:typename:int
 weight	main.h	/^    int weight;$/;"	m	struct:item	typeref:typename:int
 window	menus.c	/^    \/*@temp@*\/ WINDOW *window;$/;"	m	struct:changable_menu	typeref:typename:WINDOW *	file:
