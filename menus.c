@@ -457,12 +457,14 @@ static void set_changable_menu(struct changable_menu *target
             target->arrays[0][i]
                 = new_item(source_array[i]->name, "");
         }
+
         // check if an item is created
         if (target->arrays[0][i] == NULL) {
             (void) endwin();
             log_err("can't allocate item");
             exit(EXIT_FAILURE);
         }
+        (void) set_item_userptr(target->arrays[0][i], source_array[i]);
     }
 
     if (target->menu != NULL) {
@@ -605,6 +607,13 @@ static void item_inventory_menu(struct campaign *target_campaign
     // the arrays
     // TODO save the information into the campaign correctly
         // use item_userptr to do this
+    // TODO perhaps remove the ability for source to have its item
+        // removed
+    // or manage multiple items in the item creation menu
+        // (aka. items can be duplicated when creating items, but
+        // they can't be duplicated here)
+    // NOTE: this only saves for the item inventory
+        // i may need better checks to ensure items are unique
 {
     // ----- init the changable menus
     struct changable_menu sel; // selection menu (list of all items)
@@ -770,6 +779,20 @@ static void item_inventory_menu(struct campaign *target_campaign
     (void) unpost_menu(inv.menu);
     (void) free_menu(inv.menu);
 
+    // ----- transfer the inventory into the correct position
+    /*@null@*/ struct item *storage_ptr = NULL;
+    for (int i = 0; i < inv.array_len; i++) {
+        if (inv.arrays[inv.selected_array][i] == NULL) {
+            continue;
+        }
+        storage_ptr = item_userptr(inv.arrays[inv.selected_array][i]);
+
+        if (storage_ptr == NULL) {
+            continue;
+        }
+        target_item->inventory[i] = storage_ptr;
+    }
+
 exit:
     // ----- free items
     // NOTE: all the allocated items will exist between the selected
@@ -845,12 +868,13 @@ int item_creation_menu(struct campaign *target_campaign)
 
         c = getch();
 
+        // ----- deal with inventory
+        item_inventory_menu(target_campaign, target_item);
+
         if (c == KEY_F(2)) {
-            item_inventory_menu(target_campaign, target_item);
             break;
         }
         (void) erase();
-        // ----- deal with inventory
     }
     
     return 0;

@@ -33,4 +33,6 @@ typedef /*@null@*/ ITEM * pos_null_ITEM_ptr;
     // NOTE: temp may be wrong here (see SPLINT_NOTE in menus.c)
     extern /*@null@*/ /*@temp@*/ ITEM *current_item(const MENU *menu);
     extern int set_menu_items(MENU *menu, pos_null_ITEM_ptr *items);
+    extern /*@null@*/ void *item_userptr(const ITEM *item);
+    extern int set_item_userptr(ITEM *item, /*@null@*/ void *userptr);
 #endif

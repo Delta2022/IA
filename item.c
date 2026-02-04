@@ -43,6 +43,11 @@ void debug_item(/*@null@*/ struct item *target, int tabs, FILE *format)
 
     for (int i = 0; i < target->inventory_len; i++) {
         // TODO not complete
+        if (target == target->inventory[i]) {
+            PRINT_TABS(tabs + 1);
+            fprintf(format, "ITEM | <this item> (aborting printing)\n");
+            continue;
+        }
         debug_item(target->inventory[i], tabs + 1, format);
     }
 }
