@@ -1,4 +1,4 @@
-#include "main.h"
+#include "../include/main.h"
 
 int get_multi_input(char **dest, int num_dest, int *buffer_max_lens
     , int *text_pos)

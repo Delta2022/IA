@@ -1,4 +1,4 @@
-#include "main.h"
+#include "../include/main.h"
 
 void init_item(/*@out@*/ struct item *target)
     // assumes the target is set to null beforehand

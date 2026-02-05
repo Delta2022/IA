@@ -1,6 +1,7 @@
-#include "main.h"
+#include "../include/main.h"
 #include <math.h>
 #include <float.h>
+// test
 
 #if S_SPLINT_S
     extern ssize_t getline(/*@out@*/ char **restrict lineptr

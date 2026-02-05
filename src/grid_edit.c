@@ -1,4 +1,4 @@
-#include "main.h"
+#include "../include/main.h"
 
 int init_grid_editor(/*@out@*/GRID_EDITOR *target_ge
     , struct grid *target_grid

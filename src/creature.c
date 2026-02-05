@@ -1,4 +1,4 @@
-#include "main.h"
+#include "../include/main.h"
 
 int init_creature(/*@out@*/ struct creature *target)
     // inits a creature

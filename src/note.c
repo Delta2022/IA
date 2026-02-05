@@ -1,4 +1,4 @@
-#include "main.h"
+#include "../include/main.h"
 // TODO encapsulate note
 
 int init_p_note(/*@out@*/ struct p_note *target)

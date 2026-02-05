@@ -1,4 +1,4 @@
-#include "main.h"
+#include "../include/main.h"
 
 int init_grid(/*@out@*/ struct grid *target)
     // initializes a grid. Assumes the grid was memset

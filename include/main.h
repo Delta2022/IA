@@ -201,3 +201,5 @@ void load_grid_creature_ptrs(struct campaign *target_campaign
 void init_item(/*@out@*/ struct item *target);
 void debug_item(/*@null@*/ struct item *target, int tabs, FILE *format);
 int item_creation_menu(struct campaign *target_campaign);
+void item_inventory_menu(struct campaign *target_campaign
+    , struct item *target_item);

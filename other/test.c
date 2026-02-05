@@ -1,4 +1,4 @@
-#include "main.h"
+#include "../include/main.h"
 // TODO make print functions
 
 int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])

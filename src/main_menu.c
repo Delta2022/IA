@@ -1,4 +1,4 @@
-#include "main.h"
+#include "../include/main.h"
 
 // these place the vertical and horizontal seperator in the window
     // the position is the distance from 0, 0

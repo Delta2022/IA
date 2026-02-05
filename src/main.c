@@ -1,16 +1,23 @@
-#include "main.h"
+#include "../include/main.h"
 
 static void menus_debug();
 static void creature_debug();
 static void save_debug();
 static void load_debug();
 static void test_debug();
+static void application();
 
 int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
 {
     // TODO change integer returns to void if not tracked
     test_debug();
     return 0;
+}
+
+/*@unused@*/ static void application()
+    // this is the actual application
+{
+    (void) start_menu();
 }
 
 /*@unused@*/ static void test_debug()
