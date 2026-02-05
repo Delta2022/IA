@@ -34,7 +34,7 @@ $(DIR_OBJ)/%.o: $(DIR_SOURCE)/%.c
 # $(CC) $(CFLAGS) -c $(DIR_SOURCE)/%.c -o $(DIR_OBJ)/%.o $(LINKS)
 
 splint:
-	splint +charindex -incondefs +loopexec $(INCL_FILES) $(FILES)
+	splint +charindex -incondefs +loopexec $(INCL_FILES) $(SOURCES)
 
 ctags: $(FILES)
-	ctags $(FILES)
+	ctags $(SOURCES) $(INCL_FILES)
