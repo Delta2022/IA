@@ -116,6 +116,7 @@ struct grid {
 
     struct p_note p_notes[MAX_PNOTES];
     int p_note_len;
+    int p_note_next_empty;
 
     int x_scale; // the ft that a square is (normally 5ft)
     int y_scale;
@@ -203,3 +204,7 @@ void debug_item(/*@null@*/ struct item *target, int tabs, FILE *format);
 int item_creation_menu(struct campaign *target_campaign);
 void item_inventory_menu(struct campaign *target_campaign
     , struct item *target_item);
+void save_item_inventory(struct campaign *target_campaign
+    , FILE *restrict item_file);
+void load_item_inventory(struct campaign *target_campaign
+    , FILE *restrict item_file);

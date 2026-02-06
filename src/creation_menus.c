@@ -132,3 +132,30 @@ int item_creation_menu(struct campaign *target_campaign)
     
     return 0;
 }
+
+void p_note_creation_menu(struct campaign *target_campaign
+    , struct coord position)
+    // theoretically works
+{
+    /*@null@*/ struct p_note *target_p_note = NULL;
+    /*@null@*/ struct grid *target_grid = NULL;
+    
+    target_grid = &target_campaign->encounter_grid;
+    target_p_note = &target_grid
+        ->p_notes[target_grid->p_note_next_empty++];
+
+    if (target_p_note == NULL) {
+        return;
+    }
+    // set the coordinates
+    target_p_note->x = position.x;
+    target_p_note->y = position.y;
+
+    char *pointer_array[1] = {target_p_note->note.string};
+    int text_pos[1] = {0};
+    int max_lens[1] = {target_p_note->note.len};
+
+    (void) get_multi_input(pointer_array, 1, max_lens, text_pos);
+
+    (void) erase();
+}

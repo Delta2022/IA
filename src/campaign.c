@@ -191,9 +191,100 @@ error:
     return;
 }
 
+void save_item_inventory(struct campaign *target_campaign
+    , FILE *restrict item_file)
+{
+    /*@null@*/ struct item *target_item = NULL;
+    int pointer_index = 0;
+    // ----- save item list
+    for (int i = 0; i < target_campaign->item_list_len; i++) {
+        target_item = &target_campaign->item_list[i];
+
+        for (int j = 0; j < target_item->inventory_len; j++) {
+            pointer_index = find_index(target_item->inventory[j]
+                , target_campaign->item_list
+                , target_campaign->item_list_len, sizeof(struct item));
+
+            check(pointer_index >= -1, "error when calculating"
+                " item pointer on inventory[%d] in item #%d"
+                " (pointer is %d)", j, i, pointer_index);
+
+            fprintf(item_file, "%d\n", pointer_index);
+        }
+        fprintf(item_file, "\n");
+    }
+error:
+    return;
+}
+
 // NOTE: all loading functions are essentially the same. This is bad
     // practice but I can make it better when I have the time
     // to think about it
+void load_item_inventory(struct campaign *target_campaign
+    , FILE *restrict item_file)
+    // TODO generalize from items to anything else with an inventory
+{
+    char *char_buffer;
+    size_t char_buffer_len = 10; // an initial size
+    ssize_t nread = -1;
+    long index_val = -1; // index sourced from the file
+
+    int inventory_index = 0;
+    int item_list_index = 0;
+    /*@null@*/ struct item *target_item = NULL;
+
+    // ----- init char_buffer
+    char_buffer = calloc(char_buffer_len, sizeof(char));
+    if (char_buffer == NULL)
+        return;
+
+    char_buffer = memset(char_buffer, 0, sizeof(char_buffer));
+
+    // ----- read from file
+    while (true) {
+        target_item = &target_campaign->item_list[item_list_index];
+        // ----- read a line from the file
+        nread = getline(&char_buffer, &char_buffer_len, item_file);
+        //printf("nread is %d\n", nread);
+
+        // ----- break out of reading when EOF found
+        if (nread == -1)
+            break;
+
+        if (char_buffer[0] == '\n') {
+            inventory_index = 0;
+            item_list_index++;
+            continue;
+        }
+
+        // --- get index
+        index_val = strtol(char_buffer, NULL, 10);
+        printf("index_val is %d, char_buffer is \"%s\"\n", (int) index_val
+            , char_buffer);
+
+        // --- set the item in the inventory 
+        if (index_val == -1) { // set to NULL when its -1
+            target_item->inventory[inventory_index] = NULL;
+            printf("setting item_list[%d].inventory[%d] to NULL\n"
+                , item_list_index, inventory_index);
+        } else { // set the pointer to the index from the file
+            target_item->inventory[inventory_index]
+                = &target_campaign->item_list[index_val];
+            printf("setting item_list[%d].inventory[%d] to %p\n"
+                , item_list_index, inventory_index
+                , &target_campaign->material_list[index_val]);
+        }
+        inventory_index++;
+
+        // --- check when to move to the next array
+        //if (inventory_index >= target_item->inventory_len) {
+            // TODO maybe check, since this should never run
+        //}
+    }
+
+    free(char_buffer);
+}
+
 void load_grid_material_ptrs(struct campaign *target_campaign
     , FILE *restrict material_file)
     // loads the material and creature values for a grid

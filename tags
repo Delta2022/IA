@@ -159,6 +159,8 @@ load_debug	src/main.c	/^\/*@unused@*\/ static void load_debug()$/;"	f	typeref:ty
 load_grid_creature_ptrs	src/campaign.c	/^void load_grid_creature_ptrs(struct campaign *target_campaign$/;"	f	typeref:typename:void
 load_grid_item_ptrs	src/campaign.c	/^void load_grid_item_ptrs(struct campaign *target_campaign$/;"	f	typeref:typename:void
 load_grid_material_ptrs	src/campaign.c	/^void load_grid_material_ptrs(struct campaign *target_campaign$/;"	f	typeref:typename:void
+load_item_debug	src/main.c	/^\/*@unused@*\/ static void load_item_debug()$/;"	f	typeref:typename:void	file:
+load_item_inventory	src/campaign.c	/^void load_item_inventory(struct campaign *target_campaign$/;"	f	typeref:typename:void
 log_err	include/dbg.h	/^#define log_err(/;"	d
 log_info	include/dbg.h	/^#define log_info(/;"	d
 log_warn	include/dbg.h	/^#define log_warn(/;"	d
@@ -197,7 +199,9 @@ num_creatures	include/main.h	/^    int num_creatures; \/\/ current number of cre
 num_inv_items	include/main.h	/^    int num_inv_items; \/\/ number of items in the inventory$/;"	m	struct:item	typeref:typename:int
 old_cursor	include/main.h	/^    struct coord old_cursor;$/;"	m	struct:grid_editor	typeref:struct:coord
 p_note	include/main.h	/^struct p_note {$/;"	s
+p_note_creation_menu	src/creation_menus.c	/^void p_note_creation_menu(struct campaign *target_campaign$/;"	f	typeref:typename:void
 p_note_len	include/main.h	/^    int p_note_len;$/;"	m	struct:grid	typeref:typename:int
+p_note_next_empty	include/main.h	/^    int p_note_next_empty;$/;"	m	struct:grid	typeref:typename:int
 p_notes	include/main.h	/^    struct p_note p_notes[MAX_PNOTES];$/;"	m	struct:grid	typeref:struct:p_note[]
 pointer	include/main.h	/^    void (*pointer) (void *);$/;"	m	struct:func_pointer	typeref:typename:void (*)(void *)
 pos_null_ITEM_ptr	include/splint_redefs.h	/^typedef \/*@null@*\/ ITEM * pos_null_ITEM_ptr;$/;"	t	typeref:typename:ITEM *
@@ -211,6 +215,7 @@ print_grid	src/grid.c	/^int print_grid(struct grid *target_grid, WINDOW *target_
 print_note	src/note.c	/^void print_note(struct note *target, FILE *format)$/;"	f	typeref:typename:void
 save_debug	src/main.c	/^\/*@unused@*\/ static void save_debug()$/;"	f	typeref:typename:void	file:
 save_grid_ptrs	src/campaign.c	/^void save_grid_ptrs(struct campaign *target_campaign$/;"	f	typeref:typename:void
+save_inventories	src/campaign.c	/^void save_inventories(struct campaign *target_campaign$/;"	f	typeref:typename:void
 selected_array	src/item_inventory_menu.c	/^    int selected_array;$/;"	m	struct:changable_menu	typeref:typename:int	file:
 sentinel	include/dbg.h	/^#define sentinel(/;"	d
 set_changable_menu	src/item_inventory_menu.c	/^static void set_changable_menu(struct changable_menu *target$/;"	f	typeref:typename:void	file:

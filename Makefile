@@ -1,6 +1,8 @@
 # makefiletutorial.com
 # software.codidact.com/posts/292774
 
+# note: all paths are grounded at the position of the Makefile
+
 CC = gcc
 CFLAGS = -gdwarf
 LINKS = -lm -lpanel -lmenu -lncurses
@@ -11,7 +13,10 @@ DIR_SOURCE = src
 DIR_OBJ = build
 
 # create a list of all of the source files
-# this is only to create the variable OBJECTS
+# this is used to create the variable OBJECTS
+# this is used instead of wildcarding $(DIR_OBJ)/*.o
+# to ensure that new files create an object file
+# automatically
 SOURCES := $(wildcard $(DIR_SOURCE)/*.c)
 
 # create a list of all of the object files from the source files
@@ -21,7 +26,7 @@ OBJECTS := $(patsubst $(DIR_SOURCE)/%.c,$(DIR_OBJ)/%.o,$(SOURCES))
 	$(CC) $(CFLAGS) $@.c -o $@ $(LINKS)
 	mv $@ bin
 
-# all depends on all of the objects, so all objects have to be
+# all depends on all of the objects, so all .c files have to be
 # turned into objects
 all: ./bin/main $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJECTS) -o bin/main $(LINKS)
@@ -38,3 +43,5 @@ splint:
 
 ctags: $(FILES)
 	ctags $(SOURCES) $(INCL_FILES)
+vim:
+	vim $(SOURCES) $(INCL_FILES)

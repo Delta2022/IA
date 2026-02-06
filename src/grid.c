@@ -154,11 +154,12 @@ void debug_grid(struct grid *target, int tabs, FILE *format)
         return;
     }
     fprintf(format, "x_scale: %d | y_scale: %d | max_y: %d"
-        " | max_x: %d | grid_start: (%d, %d) | p_note_len: %d\n"
+        " | max_x: %d | grid_start: (%d, %d) | p_note_len: %d"
+        " | p_note_next_empty: %d\n"
         , target->x_scale, target->y_scale
         , target->max_y, target->max_x
         , target->grid_start.y, target->grid_start.x
-        , target->p_note_len);
+        , target->p_note_len, target->p_note_next_empty);
 
     // print the p_notes
     for (int i = 0; i < target->p_note_len; i++) {

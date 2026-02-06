@@ -6,6 +6,7 @@ static void save_debug();
 static void load_debug();
 static void test_debug();
 static void application();
+static void load_item_debug();
 
 int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
 {
@@ -36,6 +37,14 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     (void) endwin();
 
     printf("return is %d\n", c);
+    FILE *item_save_file = fopen("i.save", "w");
+
+    if (item_save_file == NULL) {
+        return;
+    }
+
+    save_item_inventory(&temp, item_save_file);
+
     debug_campaign(&temp, stdout);
 }
 
@@ -138,6 +147,21 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     (void) fclose(save_file);
 
     debug_campaign(&temp, stdout);
+}
+
+/*@unused@*/ static void load_item_debug()
+{
+    struct campaign temp;
+    (void) init_campaign(&temp);
+
+    FILE *save_file = fopen("i.save", "r");
+    if (save_file == NULL) {
+        exit(EXIT_FAILURE);
+    }
+    
+    load_item_inventory(&temp, save_file);
+
+    (void) fclose(save_file);
 }
 
 /*@unused@*/ static void load_debug()
