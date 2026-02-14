@@ -1,0 +1,21 @@
+==2690== Memcheck, a memory error detector
+==2690== Copyright (C) 2002-2024, and GNU GPL'd, by Julian Seward et al.
+==2690== Using Valgrind-3.25.1 and LibVEX; rerun with -h for copyright info
+==2690== Command: bin/main
+==2690== Parent PID: 2689
+==2690== 
+==2690== 
+==2690== HEAP SUMMARY:
+==2690==     in use at exit: 237,665 bytes in 353 blocks
+==2690==   total heap usage: 606 allocs, 253 frees, 520,845 bytes allocated
+==2690== 
+==2690== LEAK SUMMARY:
+==2690==    definitely lost: 0 bytes in 0 blocks
+==2690==    indirectly lost: 0 bytes in 0 blocks
+==2690==      possibly lost: 0 bytes in 0 blocks
+==2690==    still reachable: 237,665 bytes in 353 blocks
+==2690==         suppressed: 0 bytes in 0 blocks
+==2690== Rerun with --leak-check=full to see details of leaked memory
+==2690== 
+==2690== For lists of detected and suppressed errors, rerun with: -s
+==2690== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

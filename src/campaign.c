@@ -15,8 +15,7 @@ int init_campaign(/*@out@*/ struct campaign *target)
     // -1: error
 {
     // ----- checks
-    check(target != NULL, "target was NULL (should be campaign to"
-        " initialize).");
+    check(target != NULL, "target was NULL (should be campaign to initialize).");
 
     // ----- zero out the entire campaign
         // (needed for no valgrind errors)
@@ -48,6 +47,11 @@ int init_campaign(/*@out@*/ struct campaign *target)
         init_item(&target->item_list[i]);
     }
 
+    // --- init all materials
+    for (int i = 0; i < target->material_list_len; i++) {
+        init_material(&target->material_list[i]);
+    }
+
     return 0;
 
 error:
@@ -62,8 +66,11 @@ void debug_campaign(struct campaign *target, FILE *format)
         fprintf(format, "<NULL>\n");
     } else {
         fprintf(format, "name: '%s' | creature_list_len: %d"
-            " | material_list_len: %d | note: ", target->name
-            , target->creature_list_len, target->material_list_len);
+            " | material_list_len: %d | item_list_len: %d"
+            " | next_empty_material: %d | next_empty_item: %d | note: "
+            , target->name, target->creature_list_len
+            , target->material_list_len, target->item_list_len
+            , target->next_empty_material, target->next_empty_item);
         print_note(&target->note, format);
         
         (void) fprintf(format, "\n");

@@ -45,3 +45,7 @@ ctags: $(FILES)
 	ctags $(SOURCES) $(INCL_FILES)
 vim:
 	vim $(SOURCES) $(INCL_FILES)
+valgrind:
+	valgrind --log-file=debug.log bin/main
+gdb:
+	sudo gdb bin/main

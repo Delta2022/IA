@@ -35,10 +35,10 @@
 #define PLACE_CHAR      9
 #define TOGGLE_WALL     10
 
-struct func_pointer {
-    void (*pointer) (void *);
-    int type; // specifies a type of function pointer to convert to
-};
+//struct func_pointer {
+//    void (*pointer) (void *);
+//    int type; // specifies a type of function pointer to convert to
+//};
 
 struct coord {
     int y;
@@ -100,7 +100,9 @@ struct p_note {
 
 struct material {
     char name[MAX_CHAR];
+    int name_len;
     char desc[MAX_CHAR];
+    int desc_len;
     char print_char;
 
     struct note note;
@@ -134,7 +136,7 @@ struct campaign {
 
     struct material material_list[MAX_SAVED_MATERIALS];
     int material_list_len;
-    //int next_empty_material;
+    int next_empty_material;
     struct creature creature_list[MAX_SAVED_CREATURES];
     int creature_list_len;
     //int next_empty_creature;
@@ -208,3 +210,6 @@ void save_item_inventory(struct campaign *target_campaign
     , FILE *restrict item_file);
 void load_item_inventory(struct campaign *target_campaign
     , FILE *restrict item_file);
+int run_main_menu_function(int function_index
+    , struct campaign *target_campaign);
+void material_creation_menu(struct campaign *target_campaign);

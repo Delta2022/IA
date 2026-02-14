@@ -1,3 +1,4 @@
+// TODO: test material creation
 #include "../include/main.h"
 
 static void menus_debug();
@@ -11,14 +12,34 @@ static void load_item_debug();
 int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
 {
     // TODO change integer returns to void if not tracked
-    test_debug();
+    application();
     return 0;
 }
 
 /*@unused@*/ static void application()
     // this is the actual application
 {
-    (void) start_menu();
+    struct campaign main_campaign;
+    (void) init_campaign(&main_campaign);
+
+    int function_select = -1;
+    int function_output = 0;
+
+    // ----- start ncurses
+    (void) initscr();
+    (void) cbreak();
+    (void) noecho();
+    (void) keypad(stdscr, true);
+
+    // ----- start menu
+    function_select = start_menu();
+
+    // ----- select and run a function
+    function_output
+        = run_main_menu_function(function_select, &main_campaign);
+    
+    (void) endwin();
+    debug_campaign(&main_campaign, stdout);
 }
 
 /*@unused@*/ static void test_debug()
@@ -77,14 +98,15 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     (void) init_campaign(&temp);
 
     // ----- init materials
-    (void) snprintf(temp.material_list[0].name, MAX_CHAR, "ground");
-    (void) snprintf(temp.material_list[0].desc, MAX_CHAR, "this is gorund");
-    temp.material_list[0].print_char = '_';
+    //(void) snprintf(temp.material_list[0].name, MAX_CHAR, "ground");
+    //(void) snprintf(temp.material_list[0].desc, MAX_CHAR, "this is gorund");
+    //temp.material_list[0].print_char = '_';
 
-    (void) snprintf(temp.material_list[1].name, MAX_CHAR, "vegitation");
-    (void) snprintf(temp.material_list[1].desc, MAX_CHAR, "this is veg");
-    temp.material_list[1].print_char = '"';
+    //(void) snprintf(temp.material_list[1].name, MAX_CHAR, "vegitation");
+    //(void) snprintf(temp.material_list[1].desc, MAX_CHAR, "this is veg");
+    //temp.material_list[1].print_char = '"';
     
+    (void) material_creation_menu(&temp);
     (void) start_encounter(&temp);
     (void) creature_creation_menu(&temp);
 

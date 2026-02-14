@@ -272,7 +272,7 @@ int get_multi_input(char **dest, int num_dest, int *buffer_max_lens
         // copy to dest (safely)
         (void) strncpy(dest[i], buffers[i]
             , (size_t)buffer_max_lens[i]);
-        dest[i][max_buffer_len] = '\0';
+        dest[i][buffer_max_lens[i] - 1] = '\0';
 
         //(void) mvprintw(i + 10, 0, "%s", buffers[i]);
     }
