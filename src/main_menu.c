@@ -6,6 +6,11 @@
 #define H_SEP_POS LINES * 2 / 3
 
 int main_menu(struct campaign *target_campaign)
+    // ----- returns -----
+    // 0: exit
+    // 1: creature creation
+    // 2: p-note creation
+    // 3: item creation
 {
     // grid window
     // command list window
@@ -16,6 +21,7 @@ int main_menu(struct campaign *target_campaign)
     // horizontal seperator
 
     // REMEMBER TO ERASE AND FREE WINDOWS at hte end
+    int return_val = 0;
     int c = -1;
     struct coord grid_end;
     WINDOW *grid_win;
@@ -56,7 +62,7 @@ int main_menu(struct campaign *target_campaign)
     // -- draw an intersect point
     (void) mvwprintw(h_sep, 0, V_SEP_POS, "+");
 
-    do {
+    while (true) {
         // ----- update the data section
         struct coord cursor = get_cursor(&grid_editor);
         (void) werase(data_win);
@@ -78,9 +84,14 @@ int main_menu(struct campaign *target_campaign)
 
         // ----- process input
         c = getch();
+        if (c == KEY_F(2)) {
+            return_val = 0;
+            break;
+        }
         switch (c) {
             case KEY_UP:
-                (void) grid_editor_driver(&grid_editor, NULL, CURSOR_UP);
+                (void) grid_editor_driver(&grid_editor, NULL
+                    , CURSOR_UP);
                 break;
             case KEY_DOWN:
                 (void) grid_editor_driver(&grid_editor, NULL
@@ -99,20 +110,33 @@ int main_menu(struct campaign *target_campaign)
                 (void) grid_editor_driver(&grid_editor, NULL, MOVE_UP);
                 break;
             case 'd': // move grid left
-                (void) grid_editor_driver(&grid_editor, NULL, MOVE_LEFT);
+                (void) grid_editor_driver(&grid_editor, NULL
+                    , MOVE_LEFT);
                 break;
             case 'a': // move grid right
-                (void) grid_editor_driver(&grid_editor, NULL, MOVE_RIGHT);
+                (void) grid_editor_driver(&grid_editor, NULL
+                    , MOVE_RIGHT);
                 break;
             case 's': // move grid down
-                (void) grid_editor_driver(&grid_editor, NULL, MOVE_DOWN);
+                (void) grid_editor_driver(&grid_editor, NULL
+                    , MOVE_DOWN);
+                break;
+            case 'c': // new creature
+                return_val = 1;
+                goto exit;
+            case 'p': // new p-note
+                return_val = 2;
+                goto exit;
+            case 'i': // new item
+                return_val = 3;
+                goto exit;
+            case 'q': // campaign info
                 break;
         }
+    }
 
-    } while (c != KEY_F(2));
-
+exit:
     // ----- delete windows
-    (void) delwin(stdscr);
     (void) delwin(grid_win);
     (void) delwin(v_sep);
     (void) delwin(h_sep);
@@ -121,8 +145,9 @@ int main_menu(struct campaign *target_campaign)
     // ----- clear screen
     (void) erase();
     (void) refresh();
+    (void) curs_set(1);
 
-    return 0;
+    return return_val;
 }
 
 

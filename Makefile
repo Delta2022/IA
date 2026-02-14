@@ -7,7 +7,7 @@ CC = gcc
 CFLAGS = -gdwarf
 LINKS = -lm -lpanel -lmenu -lncurses
 
-INCL_FILES = $(wildcard include/*.h)
+INCL_FILES := $(wildcard include/*.h)
 
 DIR_SOURCE = src
 DIR_OBJ = build
@@ -26,14 +26,16 @@ OBJECTS := $(patsubst $(DIR_SOURCE)/%.c,$(DIR_OBJ)/%.o,$(SOURCES))
 	$(CC) $(CFLAGS) $@.c -o $@ $(LINKS)
 	mv $@ bin
 
-# all depends on all of the objects, so all .c files have to be
-# turned into objects
-all: ./bin/main $(OBJECTS)
+# bin/main depends on all of the objects, so all .c files have to be
+# turned into objects as a prerequisite
+bin/main: $(INCL_FILES) $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJECTS) -o bin/main $(LINKS)
 
-# create an individual rule for every object that depends on
+# create an individual rule for every object file that depends on
 # its respective source file
-$(DIR_OBJ)/%.o: $(DIR_SOURCE)/%.c
+# every object file depends on the header files, so if the
+# header file is changed, then every .o file should be recompiled
+$(DIR_OBJ)/%.o: $(DIR_SOURCE)/%.c $(INCL_FILES)
 	$(CC) $(CFLAGS) -c $< -o $@ $(LINKS)
 # should expand to
 # $(CC) $(CFLAGS) -c $(DIR_SOURCE)/%.c -o $(DIR_OBJ)/%.o $(LINKS)
@@ -45,3 +47,7 @@ ctags: $(FILES)
 	ctags $(SOURCES) $(INCL_FILES)
 vim:
 	vim $(SOURCES) $(INCL_FILES)
+valgrind:
+	valgrind --log-file=debug.log bin/main
+gdb:
+	sudo gdb bin/main

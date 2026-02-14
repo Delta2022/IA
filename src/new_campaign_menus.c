@@ -2,6 +2,7 @@
 
 int start_campaign(/*@unused@*/ struct campaign *target_campaign)
     // campaign has to be initialized and defined
+    // prompts the user for inputs regarding the campaign
 {
     char note_temp[MAX_CHAR];
     (void) memset(note_temp, 0, sizeof(note_temp));
@@ -26,14 +27,15 @@ int start_campaign(/*@unused@*/ struct campaign *target_campaign)
     strncpy(target_campaign->note.string, note_temp
         , (size_t) target_campaign->note.len);
     target_campaign->note.string[target_campaign->note.len - 1] = '\0';
-    (void) getch();
 
+    (void) erase();
     return 0;
 }
 
 
 int start_encounter(struct campaign *target_campaign)
     // TODO: allow support for large grids (scrolling)
+    // paints the grid with materials
     // returns -1 if menu is null
 {
     struct grid *target_grid = &target_campaign->encounter_grid;
@@ -85,8 +87,7 @@ int start_encounter(struct campaign *target_campaign)
 
     // ----- create menu for materials
     // define the item array
-    menu_items = calloc((size_t) mat_list_len + 1
-        , sizeof(*menu_items));
+    menu_items = calloc((size_t) mat_list_len + 1, sizeof(*menu_items));
 
     if (menu_items == NULL) {
         return_val = -1;
@@ -95,8 +96,7 @@ int start_encounter(struct campaign *target_campaign)
 
     // set the items
     for (int i = 0; i < mat_list_len; i++) {
-        menu_items[i] = new_item(mat_list[i].name
-            , mat_list[i].desc);
+        menu_items[i] = new_item(mat_list[i].name, mat_list[i].desc);
     }
     
     // define the menu

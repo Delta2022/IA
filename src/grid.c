@@ -72,6 +72,7 @@ error:
 
 int init_material(/*@out@*/ struct material *target)
     // initializes a material 
+    // assumes that the material has already been set to 0
     // ----- returns -----
     // 0: normal
     // -1: error
@@ -84,9 +85,11 @@ int init_material(/*@out@*/ struct material *target)
     int foutput = 0;
     
     // ----- set/initalize all values to their defaults
-    (void) memset(target->name, 0, sizeof(target->name));
-    (void) memset(target->desc, 0, sizeof(target->desc));
-    target->print_char = '\0';
+    //(void) memset(target->name, 0, sizeof(target->name));
+    //(void) memset(target->desc, 0, sizeof(target->desc));
+    //target->print_char = '\0';
+    target->name_len = ARRAY_LEN(target->name);
+    target->desc_len = ARRAY_LEN(target->desc);
 
     foutput = init_note(&target->note);
     check(foutput == 0, "init_note failed with code %d", foutput);
@@ -105,9 +108,10 @@ void debug_material(/*@null@*/ struct material *target
     if (target == NULL) {
         fprintf(format, "<NULL>\n");
     } else {
-        fprintf(format, "name: \"%s\" | desc: \"%s\""
-            " | char: '%c' | note: "
-            , target->name, target->desc, target->print_char);
+        fprintf(format, "name: \"%s\" | name_len: %d | desc: \"%s\""
+            " | desc_len: %d | char: '%c' | note: "
+            , target->name, target->name_len, target->desc
+            , target->desc_len, target->print_char);
         print_note(&target->note, format);
         (void) fprintf(format, "\n");
     }
@@ -154,11 +158,12 @@ void debug_grid(struct grid *target, int tabs, FILE *format)
         return;
     }
     fprintf(format, "x_scale: %d | y_scale: %d | max_y: %d"
-        " | max_x: %d | grid_start: (%d, %d) | p_note_len: %d"
-        " | p_note_next_empty: %d\n"
+        " | max_x: %d | grid_start: (%d, %d) | cursor: (%d, %d)"
+        " | p_note_len: %d | p_note_next_empty: %d\n"
         , target->x_scale, target->y_scale
         , target->max_y, target->max_x
         , target->grid_start.y, target->grid_start.x
+        , target->cursor.x, target->cursor.y
         , target->p_note_len, target->p_note_next_empty);
 
     // print the p_notes

@@ -8,7 +8,7 @@ int init_grid_editor(/*@out@*/GRID_EDITOR *target_ge
     // grid_end is the point that the grid should stop printing
 {
     // ----- define cleaner variables to use
-    struct coord *cursor = &target_ge->cursor;
+    struct coord *cursor = &target_grid->cursor;
     struct coord *old_cursor = &target_ge->old_cursor;
 
     struct coord *max_cursor = &target_ge->max_cursor;
@@ -59,7 +59,7 @@ int grid_editor_driver(GRID_EDITOR *target_ge
     WINDOW *target_win = target_ge->target_win;
     struct grid *target_grid = target_ge->target_grid;
 
-    struct coord *cursor = &target_ge->cursor;
+    struct coord *cursor = &target_grid->cursor;
     struct coord *old_cursor = &target_ge->old_cursor;
 
     struct coord *max_cursor = &target_ge->max_cursor;
@@ -226,7 +226,7 @@ struct coord get_cursor(GRID_EDITOR *target)
     // returns the cursor position of the target in the grid (not where
     // it is on screen)
 {
-    struct coord *cursor = &target->cursor;
+    struct coord *cursor = &target->target_grid->cursor;
     struct coord *grid_start = &target->target_grid->grid_start;
     struct coord return_val = {cursor->y - grid_start->y
         , cursor->x - grid_start->x};

@@ -1,0 +1,21 @@
+==8468== Memcheck, a memory error detector
+==8468== Copyright (C) 2002-2024, and GNU GPL'd, by Julian Seward et al.
+==8468== Using Valgrind-3.25.1 and LibVEX; rerun with -h for copyright info
+==8468== Command: bin/main
+==8468== Parent PID: 8467
+==8468== 
+==8468== 
+==8468== HEAP SUMMARY:
+==8468==     in use at exit: 234,282 bytes in 342 blocks
+==8468==   total heap usage: 570 allocs, 228 frees, 516,663 bytes allocated
+==8468== 
+==8468== LEAK SUMMARY:
+==8468==    definitely lost: 0 bytes in 0 blocks
+==8468==    indirectly lost: 0 bytes in 0 blocks
+==8468==      possibly lost: 0 bytes in 0 blocks
+==8468==    still reachable: 234,282 bytes in 342 blocks
+==8468==         suppressed: 0 bytes in 0 blocks
+==8468== Rerun with --leak-check=full to see details of leaked memory
+==8468== 
+==8468== For lists of detected and suppressed errors, rerun with: -s
+==8468== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

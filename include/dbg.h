@@ -1,20 +1,6 @@
 #ifndef __dbg_h__
 #define __dbg_h__
 
-#ifdef S_SPLINT_S
-// do not define dbg.h macros for splint
-#define log_err(M, ...)
-#define debug(M, ...)
-#define clean_errno()
-#define log_warn(M, ...)
-#define log_info(M, ...)
-#define check(A, M, ...)
-#define sentinel(M, ...)
-#define check_mem(A)
-#define check_debug(A, M, ...)
-
-#else
-
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
@@ -31,6 +17,31 @@
 #define KCYAN "\0"
 #endif
 
+/**
+ * checks if A is a valid pointer to memory.
+ * It just runs check with the input "Out of memory."
+ * Inputs: A | The statement that should be true
+ */
+#define check_mem(A) check((A), "Out of memory.")
+/**
+ * shows the string that errno outputs. If errno is 0, it
+ * prints "None"
+ */
+#define clean_errno() (errno == 0 ? "None" : strerror(errno))
+
+
+#ifdef S_SPLINT_S
+// do not define dbg.h macros for splint
+    // or define them in a splint friendly way
+#define log_err(M, ...)
+#define debug(M, ...)
+#define log_warn(M, ...)
+#define log_info(M, ...)
+#define check(A, M, ...) {if (!(A)) {goto error;}}
+#define sentinel(M, ...) {goto error;}
+#define check_debug(A, M, ...) {if (!(A)) {goto error;}}
+
+#else
 //TODO: Add function to output of the debug, log_err and log_warn
 
 #ifdef NDEBUG
@@ -47,11 +58,6 @@
         __FILE__, __func__, __LINE__, ##__VA_ARGS__)
 #endif
 
-/**
- * shows the string that errno outputs. If errno is 0, it
- * prints "None"
- */
-#define clean_errno() (errno == 0 ? "None" : strerror(errno))
 
 /**
  * gives an error. can be coloured if COLOURS is defined
@@ -96,12 +102,6 @@
 #define sentinel(M, ...) { log_err(M, ##__VA_ARGS__);\
     errno=0; goto error; }
 
-/**
- * checks if A is a valid pointer to memory.
- * It just runs check with the input "Out of memory."
- * Inputs: A | The statement that should be true
- */
-#define check_mem(A) check((A), "Out of memory.")
 
 /**
  * just check but it uses debug instead of log error

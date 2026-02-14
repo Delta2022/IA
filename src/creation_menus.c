@@ -152,10 +152,57 @@ void p_note_creation_menu(struct campaign *target_campaign
     target_p_note->y = position.y;
 
     char *pointer_array[1] = {target_p_note->note.string};
-    int text_pos[1] = {0};
+    int text_pos[1] = {1};
     int max_lens[1] = {target_p_note->note.len};
 
+    (void) mvprintw(0, 0, "Notes");
     (void) get_multi_input(pointer_array, 1, max_lens, text_pos);
+
+    (void) erase();
+}
+
+void material_creation_menu(struct campaign *target_campaign)
+{
+    /*@null@*/ struct material *target_material = NULL;
+    int c = 0;
+
+    while (true) {
+        // check if there is space
+        if (target_campaign->next_empty_material
+            == target_campaign->material_list_len) {
+            break;
+        }
+
+        target_material = &target_campaign->material_list
+            [target_campaign->next_empty_material++];
+
+        char print_char_string[2];
+        (void) memset(print_char_string, 0, sizeof(*print_char_string));
+
+        char *pointer_array[4] = {target_material->name
+            , target_material->desc, print_char_string
+            , target_material->note.string};
+        int max_lens[4] = {target_material->name_len
+            , target_material->desc_len, 2, target_material->note.len};
+        int text_pos[4] = {1, 3, 5, 7};
+
+        (void) mvprintw(0, 0, "Name");
+        (void) mvprintw(2, 0, "Description");
+        (void) mvprintw(4, 0, "Print character");
+        (void) mvprintw(6, 0, "Notes");
+
+        (void) get_multi_input(pointer_array, 4, max_lens, text_pos);
+
+        // move convert print_char_string from a string into a character
+        target_material->print_char = print_char_string[0];
+
+        // prompt the user
+        c = getch();
+
+        if (c == KEY_F(2)) {
+            break;
+        }
+    }
 
     (void) erase();
 }
