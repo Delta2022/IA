@@ -7,12 +7,11 @@ static void save_debug();
 static void load_debug();
 static void test_debug();
 static void application();
-static void load_item_debug();
 
 int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
 {
     // TODO change integer returns to void if not tracked
-    application();
+    load_debug();
     return 0;
 }
 
@@ -39,6 +38,8 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
         = run_main_menu_function(function_select, &main_campaign);
     
     (void) endwin();
+
+    // saving
     debug_campaign(&main_campaign, stdout);
 }
 
@@ -137,7 +138,7 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     (void) snprintf(temp.material_list[1].desc, MAX_CHAR, "this is veg");
     temp.material_list[1].print_char = '"';
 
-    (void) start_encounter(&temp);
+    //(void) start_encounter(&temp);
     //(void) creature_creation_menu(&temp);
     (void) endwin();
 
@@ -146,44 +147,10 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     // NOTE: keep opening and writing and closing files
         // seperate from the normal code, as it may cause a seg fault
         // from stream corruption??
-    FILE *c_save_file = fopen("c.save", "w");
-    FILE *mat_save_file = fopen("m.save", "w");
-    FILE *save_file = fopen("save.save", "w");
-    if (c_save_file == NULL) {
-        exit(EXIT_FAILURE);
-    }
-    if (mat_save_file == NULL) {
-        exit(EXIT_FAILURE);
-    }
-    if (save_file == NULL) {
-        exit(EXIT_FAILURE);
-    }
-
-    // save the data
-    // TODO make saving not save the old pointers
-    save_grid_ptrs(&temp, mat_save_file, c_save_file);
-    (void) fwrite(&temp, sizeof(temp), 1, save_file);
-
-    (void) fclose(mat_save_file);
-    (void) fclose(c_save_file);
-    (void) fclose(save_file);
+    save_campaign(&temp, "bin/bin.save"
+        , "bin/m.save", "bin/c.save", "bin/i.save");
 
     debug_campaign(&temp, stdout);
-}
-
-/*@unused@*/ static void load_item_debug()
-{
-    struct campaign temp;
-    (void) init_campaign(&temp);
-
-    FILE *save_file = fopen("i.save", "r");
-    if (save_file == NULL) {
-        exit(EXIT_FAILURE);
-    }
-    
-    load_item_inventory(&temp, save_file);
-
-    (void) fclose(save_file);
 }
 
 /*@unused@*/ static void load_debug()
@@ -191,30 +158,8 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     struct campaign temp;
     (void) init_campaign(&temp);
 
-    FILE *c_save_file = fopen("c.save", "r");
-    FILE *mat_save_file = fopen("m.save", "r");
-    FILE *save_file = fopen("save.save", "r");
-    if (c_save_file == NULL) {
-        exit(EXIT_FAILURE);
-    }
-    if (mat_save_file == NULL) {
-        exit(EXIT_FAILURE);
-    }
-    if (save_file == NULL) {
-        exit(EXIT_FAILURE);
-    }
-    
-    // ----- read from file
-    (void) fread(&temp, sizeof(temp), 1, save_file);
-    printf("----- materials\n");
-    load_grid_material_ptrs(&temp, mat_save_file);
-    printf("----- creatures\n");
-    load_grid_creature_ptrs(&temp, c_save_file);
-
-    (void) fclose(mat_save_file);
-    (void) fclose(c_save_file);
-    (void) fclose(save_file);
-
+    load_campaign(&temp, "bin/bin.save"
+        , "bin/m.save", "bin/c.save", "bin/i.save");
     // ----- start ncurses
     (void) initscr();
     (void) cbreak();

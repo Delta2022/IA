@@ -14,8 +14,8 @@
 #define MAX_SAVED_CREATURES 10
 #define MAX_SAVED_MATERIALS 10
 #define MAX_SAVED_ITEMS 10
-#define GRID_X 3
-#define GRID_Y 2
+#define GRID_X 5
+#define GRID_Y 7
 #define PRINT_TABS(t) \
     {for (int p = 0; p < t; p++) (void) putchar('\t');}
 #define MAX_INVENTORY 3
@@ -216,3 +216,9 @@ int run_main_menu_function(int function_index
 void material_creation_menu(struct campaign *target_campaign);
 void p_note_creation_menu(struct campaign *target_campaign
     , struct coord position);
+void load_campaign(struct campaign *target_campaign
+    , const char *binary_save_path, const char *material_save_path
+    , const char *creature_save_path, const char *item_save_path);
+void save_campaign(struct campaign *target_campaign
+    , const char *binary_save_path, const char *material_save_path
+    , const char *creature_save_path, const char *item_save_path);

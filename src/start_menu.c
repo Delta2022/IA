@@ -132,7 +132,6 @@ int run_main_menu_function(int function_index
             }
             break;
         case LOAD_CAMPAIGN:
-            // TODO
             break;
         case EXIT:
             return -1;

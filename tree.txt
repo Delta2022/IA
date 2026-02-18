@@ -1,0 +1,55 @@
+.
+├── bin
+│   ├── c.save
+│   ├── key_finder
+│   ├── main
+│   ├── m.save
+│   ├── save.save
+│   └── test
+├── build
+│   ├── campaign.o
+│   ├── creation_menus.o
+│   ├── creature.o
+│   ├── get_multi_input.o
+│   ├── grid_edit.o
+│   ├── grid.o
+│   ├── item_inventory_menu.o
+│   ├── item.o
+│   ├── main_menu.o
+│   ├── main.o
+│   ├── new_campaign_menus.o
+│   ├── note.o
+│   └── start_menu.o
+├── c.save
+├── debug.log
+├── include
+│   ├── dbg.h
+│   ├── main.h
+│   └── splint_redefs.h
+├── i.save
+├── Makefile
+├── m.save
+├── other
+│   ├── key_finder.c
+│   ├── test1.c
+│   └── test.c
+├── save.save
+├── src
+│   ├── campaign.c
+│   ├── creation_menus.c
+│   ├── creature.c
+│   ├── get_multi_input.c
+│   ├── grid.c
+│   ├── grid_edit.c
+│   ├── item.c
+│   ├── item_inventory_menu.c
+│   ├── main.c
+│   ├── main_menu.c
+│   ├── new_campaign_menus.c
+│   ├── note.c
+│   └── start_menu.c
+├── tags
+├── tree.txt
+└── very_important_token.txt
+
+6 directories, 47 files

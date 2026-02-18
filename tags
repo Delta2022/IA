@@ -115,7 +115,7 @@ creature_debug	src/main.c	/^\/*@unused@*\/ static void creature_debug()$/;"	f	ty
 creature_list	include/main.h	/^    struct creature creature_list[MAX_SAVED_CREATURES];$/;"	m	struct:campaign	typeref:struct:creature[]
 creature_list_len	include/main.h	/^    int creature_list_len;$/;"	m	struct:campaign	typeref:typename:int
 creatures	include/main.h	/^    pos_null_creature creatures[MAX_CREATURES]; \/\/ pointer to$/;"	m	struct:square	typeref:typename:pos_null_creature[]
-cursor	include/main.h	/^    struct coord cursor;$/;"	m	struct:grid_editor	typeref:struct:coord
+cursor	include/main.h	/^    struct coord cursor;$/;"	m	struct:grid	typeref:struct:coord
 debug	include/dbg.h	/^#define debug(/;"	d
 debug_campaign	src/campaign.c	/^void debug_campaign(struct campaign *target, FILE *format)$/;"	f	typeref:typename:void
 debug_creature	src/creature.c	/^void debug_creature(\/*@null@*\/ struct creature *target, int tabs$/;"	f	typeref:typename:void
@@ -158,11 +158,11 @@ item_list	include/main.h	/^    struct item item_list[MAX_SAVED_ITEMS];$/;"	m	str
 item_list_len	include/main.h	/^    int item_list_len;$/;"	m	struct:campaign	typeref:typename:int
 items	include/main.h	/^    pos_null_item items[MAX_ITEMS]; \/\/ pointer to items in master list$/;"	m	struct:square	typeref:typename:pos_null_item[]
 len	include/main.h	/^    int len;$/;"	m	struct:note	typeref:typename:int
+load_campaign	src/campaign.c	/^void load_campaign() {$/;"	f	typeref:typename:void
 load_debug	src/main.c	/^\/*@unused@*\/ static void load_debug()$/;"	f	typeref:typename:void	file:
 load_grid_creature_ptrs	src/campaign.c	/^void load_grid_creature_ptrs(struct campaign *target_campaign$/;"	f	typeref:typename:void
 load_grid_item_ptrs	src/campaign.c	/^void load_grid_item_ptrs(struct campaign *target_campaign$/;"	f	typeref:typename:void
 load_grid_material_ptrs	src/campaign.c	/^void load_grid_material_ptrs(struct campaign *target_campaign$/;"	f	typeref:typename:void
-load_item_debug	src/main.c	/^\/*@unused@*\/ static void load_item_debug()$/;"	f	typeref:typename:void	file:
 load_item_inventory	src/campaign.c	/^void load_item_inventory(struct campaign *target_campaign$/;"	f	typeref:typename:void
 log_err	include/dbg.h	/^#define log_err(/;"	d
 log_info	include/dbg.h	/^#define log_info(/;"	d
@@ -219,6 +219,7 @@ print_char	include/main.h	/^    char print_char;$/;"	m	struct:material	typeref:t
 print_grid	src/grid.c	/^int print_grid(struct grid *target_grid, WINDOW *target_window$/;"	f	typeref:typename:int
 print_note	src/note.c	/^void print_note(struct note *target, FILE *format)$/;"	f	typeref:typename:void
 run_main_menu_function	src/start_menu.c	/^int run_main_menu_function(int function_index$/;"	f	typeref:typename:int
+save_campaign	src/campaign.c	/^void save_campaign() {$/;"	f	typeref:typename:void
 save_debug	src/main.c	/^\/*@unused@*\/ static void save_debug()$/;"	f	typeref:typename:void	file:
 save_grid_ptrs	src/campaign.c	/^void save_grid_ptrs(struct campaign *target_campaign$/;"	f	typeref:typename:void
 save_item_inventory	src/campaign.c	/^void save_item_inventory(struct campaign *target_campaign$/;"	f	typeref:typename:void

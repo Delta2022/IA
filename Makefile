@@ -51,3 +51,5 @@ valgrind:
 	valgrind --log-file=debug.log bin/main
 gdb:
 	sudo gdb bin/main
+clear:
+	rm build/*

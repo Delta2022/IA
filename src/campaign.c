@@ -479,3 +479,56 @@ void load_grid_item_ptrs(struct campaign *target_campaign
 
     free(char_buffer);
 }
+
+void save_campaign(struct campaign *target_campaign
+    , const char *binary_save_path, const char *material_save_path
+    , const char *creature_save_path, const char *item_save_path)
+{
+    FILE *item_save_file = fopen(item_save_path, "w");
+    FILE *creature_save_file = fopen(creature_save_path, "w");
+    FILE *material_save_file = fopen(material_save_path, "w");
+    FILE *binary_save_file = fopen(binary_save_path, "w");
+    if (item_save_file == NULL || creature_save_file == NULL
+        || material_save_file == NULL || binary_save_file == NULL) {
+        exit(EXIT_FAILURE);
+    }
+
+    // save the data
+    save_grid_ptrs(target_campaign, material_save_file, creature_save_file);
+    //save_item_inventory(target_campaign, item_save_file);
+    (void) fwrite(target_campaign, sizeof(*target_campaign), 1
+        , binary_save_file);
+
+    (void) fclose(material_save_file);
+    (void) fclose(creature_save_file);
+    (void) fclose(binary_save_file);
+    (void) fclose(item_save_file);
+}
+
+void load_campaign(struct campaign *target_campaign
+    , const char *binary_save_path, const char *material_save_path
+    , const char *creature_save_path, const char *item_save_path)
+{
+    FILE *item_save_file = fopen(item_save_path, "r");
+    FILE *creature_save_file = fopen(creature_save_path, "r");
+    FILE *material_save_file = fopen(material_save_path, "r");
+    FILE *binary_save_file = fopen(binary_save_path, "r");
+
+    if (item_save_file == NULL || creature_save_file == NULL
+        || material_save_file == NULL || binary_save_file == NULL) {
+        exit(EXIT_FAILURE);
+    }
+    
+    // ----- read from file
+    (void) fread(target_campaign, sizeof(*target_campaign), 1
+        , binary_save_file);
+
+    load_grid_material_ptrs(target_campaign, material_save_file);
+    load_grid_creature_ptrs(target_campaign, creature_save_file);
+    //load_item_inventory(target_campaign, item_save_file);
+
+    (void) fclose(material_save_file);
+    (void) fclose(creature_save_file);
+    (void) fclose(binary_save_file);
+    (void) fclose(item_save_file);
+}
