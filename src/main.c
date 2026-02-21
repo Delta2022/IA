@@ -11,7 +11,8 @@ static void application();
 int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
 {
     // TODO change integer returns to void if not tracked
-    load_debug();
+    // TODO finish item_inventory_menu
+    application();
     return 0;
 }
 
@@ -65,7 +66,7 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
         return;
     }
 
-    save_item_inventory(&temp, item_save_file);
+    //save_item_inventory(&temp, item_save_file);
 
     debug_campaign(&temp, stdout);
 }
@@ -147,10 +148,7 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     // NOTE: keep opening and writing and closing files
         // seperate from the normal code, as it may cause a seg fault
         // from stream corruption??
-    save_campaign(&temp, "bin/bin.save"
-        , "bin/m.save", "bin/c.save", "bin/i.save");
-
-    debug_campaign(&temp, stdout);
+    save_campaign(&temp);
 }
 
 /*@unused@*/ static void load_debug()
@@ -158,8 +156,7 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     struct campaign temp;
     (void) init_campaign(&temp);
 
-    load_campaign(&temp, "bin/bin.save"
-        , "bin/m.save", "bin/c.save", "bin/i.save");
+    load_campaign(&temp);
     // ----- start ncurses
     (void) initscr();
     (void) cbreak();

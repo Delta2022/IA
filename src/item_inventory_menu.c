@@ -3,9 +3,6 @@
 // a calloc'd array of possibly null ITEM pointers
 typedef /*@only@*/ pos_null_ITEM_ptr * calloc_null_ITEM_ptr;
 
-// possibly null struct item pointer
-typedef /*@null@*/ struct item * pos_null_item_ptr;
-
 struct changable_menu {
     /*@temp@*/ WINDOW *window;
     /*@temp@*/ WINDOW *sub_window; // associated sub window
@@ -231,14 +228,22 @@ static void transfer_item(struct changable_menu *source,
         post_menu(source->menu));
 }
 
-void item_inventory_menu(struct campaign *target_campaign
-    , struct item *target_item)
+struct seperated_inventory {
+    /*@temp@*/ pos_null_item_ptr *inventory;
+    /*@temp@*/ int *inventory_len;
+    /*@temp@*/ int *num_inv_items;
+};
+
+void inventory_menu(struct campaign *target_campaign
+    , /*@null@*/ struct item *target_item
+    , /*@null@*/ struct creature *target_creature)
     // displays two menus, the item selection menu (sel)
     // and the inventory menu (inv)
-    // it allows moving items back and forth between
-    // the arrays
-    // TODO save the information into the campaign correctly
-        // use item_userptr to do this
+    // it allows moving items back and forth between the arrays
+    // target_item and target_creature are mutually exlcusive. One
+        // has to be NULL
+        // or else it returns
+
     // TODO perhaps remove the ability for source to have its item
         // removed
     // or manage multiple items in the item creation menu
@@ -246,13 +251,35 @@ void item_inventory_menu(struct campaign *target_campaign
         // they can't be duplicated here)
     // NOTE: this only saves for the item inventory
         // i may need better checks to ensure items are unique
+    // essentially xoring target_item and target_creature
 {
+    if (target_item == NULL && target_creature == NULL) {
+        return;
+    } else if (target_item != NULL && target_creature != NULL) {
+        return;
+    }
+    // ----- create a seperated_inventory from either target_item
+        // or target_creature
+    struct seperated_inventory target_inventory;
+
+    if (target_item != NULL) {
+        target_inventory.inventory = target_item->inventory;
+        target_inventory.inventory_len = &target_item->inventory_len;
+        target_inventory.num_inv_items = &target_item->num_inv_items;
+    } else if (target_creature != NULL) {
+        target_inventory.inventory = target_creature->inventory;
+        target_inventory.inventory_len = &target_creature->inventory_len;
+        target_inventory.num_inv_items = &target_creature->num_inv_items;
+    } else {
+        return;
+    }
+
     // ----- init the changable menus
     struct changable_menu sel; // selection menu (list of all items)
     struct changable_menu inv; // inventory menu (list of items in
         // inventory)
     init_changable_menu(&sel, target_campaign->item_list_len);
-    init_changable_menu(&inv, target_item->inventory_len);
+    init_changable_menu(&inv, *target_inventory.inventory_len);
 
     // ----- define the changable menu sel
     sel.array_next_empty = target_campaign->next_empty_item;
@@ -281,11 +308,11 @@ void item_inventory_menu(struct campaign *target_campaign
     set_changable_menu(&sel, sel_source_array);
 
     // ----- define the changable menu inv
-    inv.array_len = target_item->inventory_len;
-    inv.array_next_empty = target_item->num_inv_items;
+    inv.array_len = *target_inventory.inventory_len;
+    inv.array_next_empty = *target_inventory.num_inv_items;
     inv.selected_array = 0;
 
-    set_changable_menu(&inv, target_item->inventory);
+    set_changable_menu(&inv, target_inventory.inventory);
 
     // ---- windows
     WINDOW *seperator_win; // seperators
@@ -422,8 +449,12 @@ void item_inventory_menu(struct campaign *target_campaign
         if (storage_ptr == NULL) {
             continue;
         }
-        target_item->inventory[i] = storage_ptr;
+        target_inventory.inventory[i] = storage_ptr;
     }
+    // ----- set the inventory's num_inv_items
+        // array_next_empty and the number of items
+        // is the same number
+    *target_inventory.num_inv_items = inv.array_next_empty;
 
 exit:
     // ----- free items

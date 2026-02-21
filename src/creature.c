@@ -11,6 +11,7 @@ int init_creature(/*@out@*/ struct creature *target)
     target->name_len = ARRAY_LEN(target->name);
     //(void) memset(target->name , 0, sizeof(target->name_len));
     //target->print_char = '\0';
+    target->inventory_len = ARRAY_LEN(target->inventory);
 
     (void) init_note(&target->note);
 
@@ -33,4 +34,8 @@ void debug_creature(/*@null@*/ struct creature *target, int tabs
     print_note(&target->note, format);
 
     (void) fprintf(format, "\n");
+    for (int i = 0; i < target->inventory_len; i++) {
+        debug_item(target->inventory[i], tabs + 1, format);
+    }
+
 }

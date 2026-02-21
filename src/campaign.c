@@ -198,12 +198,14 @@ error:
     return;
 }
 
-void save_item_inventory(struct campaign *target_campaign
-    , FILE *restrict item_file)
+static void save_inventories(struct campaign *target_campaign
+    , FILE *restrict item_file, FILE *restrict creature_file)
 {
     /*@null@*/ struct item *target_item = NULL;
+    /*@null@*/ struct creature *target_creature = NULL;
     int pointer_index = 0;
-    // ----- save item list
+    // ----- save item inventories from creatures
+        // in the item list
     for (int i = 0; i < target_campaign->item_list_len; i++) {
         target_item = &target_campaign->item_list[i];
 
@@ -220,6 +222,28 @@ void save_item_inventory(struct campaign *target_campaign
         }
         fprintf(item_file, "\n");
     }
+
+    // ----- save creature inventories from creatures
+        // in the creature list
+        // pretty much the same as the code for an item above
+        // i know this isn't ideal
+    for (int i = 0; i < target_campaign->creature_list_len; i++) {
+        target_creature = &target_campaign->creature_list[i];
+
+        for (int j = 0; j < target_creature->inventory_len; j++) {
+            pointer_index = find_index(target_creature->inventory[j]
+                , target_campaign->creature_list
+                , target_campaign->creature_list_len
+                , sizeof(struct creature));
+
+            check(pointer_index >= -1, "error when calculating"
+                " creature pointer on inventory[%d] in creature #%d"
+                " (pointer is %d)", j, i, pointer_index);
+
+            fprintf(creature_file, "%d\n", pointer_index);
+        }
+        fprintf(creature_file, "\n");
+    }
 error:
     return;
 }
@@ -227,9 +251,82 @@ error:
 // NOTE: all loading functions are essentially the same. This is bad
     // practice but I can make it better when I have the time
     // to think about it
+static void load_creature_inventory(struct campaign *target_campaign
+    , FILE *restrict creature_file)
+    // TODO generalize from items to anything else with an inventory
+    // counts and resets num_inv_items just in case
+{
+    char *char_buffer;
+    size_t char_buffer_len = 10; // an initial size
+    ssize_t nread = -1;
+    long index_val = -1; // index sourced from the file
+
+    int inventory_index = 0;
+    int creature_list_index = 0;
+    /*@null@*/ struct creature *target_creature = NULL;
+    int num_inv_items = 0;
+
+    // ----- init char_buffer
+    char_buffer = calloc(char_buffer_len, sizeof(char));
+    if (char_buffer == NULL)
+        return;
+
+    char_buffer = memset(char_buffer, 0, sizeof(char_buffer));
+
+    // ----- read from file
+    while (true) {
+        target_creature = &target_campaign
+            ->creature_list[creature_list_index];
+        // ----- read a line from the file
+        nread = getline(&char_buffer, &char_buffer_len, creature_file);
+        //printf("nread is %d\n", nread);
+
+        // ----- break out of reading when EOF found
+        if (nread == -1)
+            break;
+
+        if (char_buffer[0] == '\n') {
+            target_creature->num_inv_items = num_inv_items;
+            num_inv_items = 0;
+
+            inventory_index = 0;
+            creature_list_index++;
+            continue;
+        }
+
+        // --- get index
+        index_val = strtol(char_buffer, NULL, 10);
+        //printf("index_val is %d, char_buffer is \"%s\"\n", (int) index_val
+        //    , char_buffer);
+
+        // --- set the item in the inventory 
+        if (index_val == -1) { // set to NULL when its -1
+            target_creature->inventory[inventory_index] = NULL;
+            //printf("setting creature_list[%d].inventory[%d] to NULL\n"
+            //    , creature_list_index, inventory_index);
+        } else { // set the pointer to the index from the file
+            target_creature->inventory[inventory_index]
+                = &target_campaign->item_list[index_val];
+            //printf("setting creature_list[%d].inventory[%d] to %p\n"
+            //    , creature_list_index, inventory_index
+            //    , &target_campaign->material_list[index_val]);
+            num_inv_items++;
+        }
+        inventory_index++;
+
+        // --- check when to move to the next array
+        //if (inventory_index >= target_creature->inventory_len) {
+            // TODO maybe check, since this should never run
+        //}
+    }
+
+    free(char_buffer);
+}
+
 void load_item_inventory(struct campaign *target_campaign
     , FILE *restrict item_file)
     // TODO generalize from items to anything else with an inventory
+    // counts and resets num_inv_items just in case
 {
     char *char_buffer;
     size_t char_buffer_len = 10; // an initial size
@@ -239,6 +336,7 @@ void load_item_inventory(struct campaign *target_campaign
     int inventory_index = 0;
     int item_list_index = 0;
     /*@null@*/ struct item *target_item = NULL;
+    int num_inv_items = 0;
 
     // ----- init char_buffer
     char_buffer = calloc(char_buffer_len, sizeof(char));
@@ -259,6 +357,9 @@ void load_item_inventory(struct campaign *target_campaign
             break;
 
         if (char_buffer[0] == '\n') {
+            target_item->num_inv_items = num_inv_items;
+            num_inv_items = 0;
+
             inventory_index = 0;
             item_list_index++;
             continue;
@@ -266,20 +367,21 @@ void load_item_inventory(struct campaign *target_campaign
 
         // --- get index
         index_val = strtol(char_buffer, NULL, 10);
-        printf("index_val is %d, char_buffer is \"%s\"\n", (int) index_val
-            , char_buffer);
+        //printf("index_val is %d, char_buffer is \"%s\"\n", (int) index_val
+        //    , char_buffer);
 
         // --- set the item in the inventory 
         if (index_val == -1) { // set to NULL when its -1
             target_item->inventory[inventory_index] = NULL;
-            printf("setting item_list[%d].inventory[%d] to NULL\n"
-                , item_list_index, inventory_index);
+            //printf("setting item_list[%d].inventory[%d] to NULL\n"
+            //    , item_list_index, inventory_index);
         } else { // set the pointer to the index from the file
             target_item->inventory[inventory_index]
                 = &target_campaign->item_list[index_val];
-            printf("setting item_list[%d].inventory[%d] to %p\n"
-                , item_list_index, inventory_index
-                , &target_campaign->material_list[index_val]);
+            //printf("setting item_list[%d].inventory[%d] to %p\n"
+            //    , item_list_index, inventory_index
+            //    , &target_campaign->material_list[index_val]);
+            num_inv_items++;
         }
         inventory_index++;
 
@@ -331,12 +433,12 @@ void load_grid_material_ptrs(struct campaign *target_campaign
         // --- set the material
         if (index_val == -1) { // set to NULL when its -1
             target_grid->squares[grid_pos.y][grid_pos.x].material = NULL;
-            printf("setting [%d][%d] to NULL\n", grid_pos.y, grid_pos.x);
+            //printf("setting [%d][%d] to NULL\n", grid_pos.y, grid_pos.x);
         } else { // set to the index of the material_list
             target_grid->squares[grid_pos.y][grid_pos.x].material
                 = &target_campaign->material_list[index_val];
-            printf("setting [%d][%d] to %p\n", grid_pos.y, grid_pos.x
-                , &target_campaign->material_list[index_val]);
+            //printf("setting [%d][%d] to %p\n", grid_pos.y, grid_pos.x
+            //    , &target_campaign->material_list[index_val]);
         }
         grid_pos.x++;
 
@@ -359,7 +461,7 @@ void load_grid_creature_ptrs(struct campaign *target_campaign
     ssize_t nread = -1;
     long index_val = -1;
     struct coord grid_pos = {0, 0}; // position in the grid
-    int creatures_index = -1;
+    int creatures_index = 0;
 
     // ----- init char_buffer
     char_buffer = calloc(char_buffer_len, sizeof(char));
@@ -397,17 +499,17 @@ void load_grid_creature_ptrs(struct campaign *target_campaign
 
         // --- set the material
         if (index_val == -1) { // set to NULL when its -1
-            printf("setting [%d][%d] to NULL\n", grid_pos.y, grid_pos.x);
+            //printf("setting [%d][%d] to NULL\n", grid_pos.y, grid_pos.x);
             target_grid->squares[grid_pos.y][grid_pos.x]
               .creatures[creatures_index] = NULL;
 
         } else { // set to the index of the material_list
             target_grid->squares[grid_pos.y][grid_pos.x]
                 .creatures[creatures_index]
-                = &target_campaign->creature_list[creatures_index];
+                = &target_campaign->creature_list[index_val];
 
-            printf("setting [%d][%d] to %p\n", grid_pos.y, grid_pos.x
-                , &target_campaign->creature_list[creatures_index]);
+            //printf("setting [%d][%d] to %p\n", grid_pos.y, grid_pos.x
+            //    , &target_campaign->creature_list[creatures_index]);
         }
         creatures_index++;
     }
@@ -417,6 +519,7 @@ void load_grid_creature_ptrs(struct campaign *target_campaign
 
 void load_grid_item_ptrs(struct campaign *target_campaign
     , FILE *restrict item_file)
+    // TODO bugged maybe
 {
     struct grid *target_grid = &target_campaign->encounter_grid;
     char *char_buffer;
@@ -480,55 +583,81 @@ void load_grid_item_ptrs(struct campaign *target_campaign
     free(char_buffer);
 }
 
-void save_campaign(struct campaign *target_campaign
-    , const char *binary_save_path, const char *material_save_path
-    , const char *creature_save_path, const char *item_save_path)
+
+void save_campaign(struct campaign *target_campaign)
+    // TODO finish this -> make paths with set names
+    // TODO do dynamic paths later
+    // based on the folder path (use malloc to concat strings)
+    // then implement into save_inventories
+    // saving a campaign will create: bin.save, grid_creature.save
+        // grid_material.save, creature_inv.save, item_inv.save
+    // will save in save folder relative to the Makefile
 {
-    FILE *item_save_file = fopen(item_save_path, "w");
-    FILE *creature_save_file = fopen(creature_save_path, "w");
-    FILE *material_save_file = fopen(material_save_path, "w");
-    FILE *binary_save_file = fopen(binary_save_path, "w");
-    if (item_save_file == NULL || creature_save_file == NULL
-        || material_save_file == NULL || binary_save_file == NULL) {
-        exit(EXIT_FAILURE);
+    // ----- create files
+    // inventory files
+    FILE *item_inv_file = fopen("save/item_inv.save", "w");
+    FILE *creature_inv_file = fopen("save/creature_inv.save", "w");
+
+    // files storing grid position
+    FILE *creature_grid_file = fopen("save/grid_creature.save", "w");
+    FILE *material_grid_file = fopen("save/grid_material.save", "w");
+
+    // binary
+    FILE *binary_file = fopen("save/bin.save", "w");
+    
+    if (item_inv_file == NULL || creature_inv_file == NULL
+        || creature_grid_file == NULL || material_grid_file == NULL
+        || binary_file == NULL) {
+        return;
     }
 
-    // save the data
-    save_grid_ptrs(target_campaign, material_save_file, creature_save_file);
-    //save_item_inventory(target_campaign, item_save_file);
+    // ----- save the data
+    save_grid_ptrs(target_campaign, material_grid_file, creature_grid_file);
+    save_inventories(target_campaign, item_inv_file, creature_inv_file);
     (void) fwrite(target_campaign, sizeof(*target_campaign), 1
-        , binary_save_file);
+        , binary_file);
 
-    (void) fclose(material_save_file);
-    (void) fclose(creature_save_file);
-    (void) fclose(binary_save_file);
-    (void) fclose(item_save_file);
+    // ----- close files
+    (void) fclose(material_grid_file);
+    (void) fclose(creature_grid_file);
+    (void) fclose(item_inv_file);
+    (void) fclose(creature_inv_file);
+    (void) fclose(binary_file);
 }
 
-void load_campaign(struct campaign *target_campaign
-    , const char *binary_save_path, const char *material_save_path
-    , const char *creature_save_path, const char *item_save_path)
+void load_campaign(struct campaign *target_campaign)
 {
-    FILE *item_save_file = fopen(item_save_path, "r");
-    FILE *creature_save_file = fopen(creature_save_path, "r");
-    FILE *material_save_file = fopen(material_save_path, "r");
-    FILE *binary_save_file = fopen(binary_save_path, "r");
+    // ----- create files
+    // inventory files
+    FILE *item_inv_file = fopen("save/item_inv.save", "r");
+    FILE *creature_inv_file = fopen("save/creature_inv.save", "r");
 
-    if (item_save_file == NULL || creature_save_file == NULL
-        || material_save_file == NULL || binary_save_file == NULL) {
-        exit(EXIT_FAILURE);
+    // files storing grid position
+    FILE *creature_grid_file = fopen("save/grid_creature.save", "r");
+    FILE *material_grid_file = fopen("save/grid_material.save", "r");
+
+    // binary
+    FILE *binary_file = fopen("save/bin.save", "r");
+
+    if (item_inv_file == NULL || creature_inv_file == NULL
+        || creature_grid_file == NULL || material_grid_file == NULL
+        || binary_file == NULL) {
+        return;
     }
     
     // ----- read from file
     (void) fread(target_campaign, sizeof(*target_campaign), 1
-        , binary_save_file);
+        , binary_file);
 
-    load_grid_material_ptrs(target_campaign, material_save_file);
-    load_grid_creature_ptrs(target_campaign, creature_save_file);
-    //load_item_inventory(target_campaign, item_save_file);
+    load_grid_material_ptrs(target_campaign, material_grid_file);
+    load_grid_creature_ptrs(target_campaign, creature_grid_file);
+    load_item_inventory(target_campaign, item_inv_file);
+    load_creature_inventory(target_campaign, creature_inv_file);
 
-    (void) fclose(material_save_file);
-    (void) fclose(creature_save_file);
-    (void) fclose(binary_save_file);
-    (void) fclose(item_save_file);
+    // ----- close files
+    (void) fclose(material_grid_file);
+    (void) fclose(creature_grid_file);
+    (void) fclose(item_inv_file);
+    (void) fclose(creature_inv_file);
+    (void) fclose(binary_file);
 }

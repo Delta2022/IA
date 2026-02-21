@@ -1,4 +1,6 @@
 // TODO modularize this when its too difficult
+// TODO shift the order of structures when done such that smaller
+    // values are kept together to save space
 #include <stdio.h>
 #include <stdlib.h>
 #include "splint_redefs.h"
@@ -51,10 +53,21 @@ struct note {
     int len;
 };
 
+// possibly null struct creature pointer
+typedef /*@null@*/ struct creature * pos_null_creature_ptr;
+
+// possibly null struct item pointer
+typedef /*@null@*/ struct item * pos_null_item_ptr;
+
 struct creature {
     char name[MAX_CHAR];
     int name_len;
     char print_char;
+
+    //bool has_inventory; // currently unused
+    pos_null_item_ptr inventory[MAX_INVENTORY];
+    int inventory_len;
+    int num_inv_items; // number of items in the inventory
 
     struct note note;
 };
@@ -64,28 +77,25 @@ struct item {
     int name_len;
     char print_char;
     int weight;
-    bool has_inventory;
-    struct item *inventory[MAX_INVENTORY];
+    //bool has_inventory; // currently unused
+    pos_null_item_ptr inventory[MAX_INVENTORY];
     int inventory_len;
     int num_inv_items; // number of items in the inventory
 
     struct note note;
 };
 
-typedef /*@null@*/ struct creature * pos_null_creature;
-typedef /*@null@*/ struct item * pos_null_item;
-
 struct square {
     /*@null@*/ /*@dependent@*/ struct material *material;
         // pointer to material from master list
     bool is_wall;
-    pos_null_creature creatures[MAX_CREATURES]; // pointer to
+    pos_null_creature_ptr creatures[MAX_CREATURES]; // pointer to
         // creature from master list
     // NOTE: removing max_creatures can save space if needed
     int max_creatures; // maximum amount of creatures that can be added
     int num_creatures; // current number of creatures on this square
 
-    pos_null_item items[MAX_ITEMS]; // pointer to items in master list
+    pos_null_item_ptr items[MAX_ITEMS]; // pointer to items in master list
     int max_items;
     //int num_items; // include if neccessary
     int movement_modifier; // usually 1 if in difficult terrain
@@ -140,7 +150,7 @@ struct campaign {
     int next_empty_material;
     struct creature creature_list[MAX_SAVED_CREATURES];
     int creature_list_len;
-    //int next_empty_creature;
+    int next_empty_creature;
     struct item item_list[MAX_SAVED_ITEMS];
     int item_list_len;
     int next_empty_item; // points to the index of the next empty item
@@ -205,20 +215,17 @@ void load_grid_creature_ptrs(struct campaign *target_campaign
 void init_item(/*@out@*/ struct item *target);
 void debug_item(/*@null@*/ struct item *target, int tabs, FILE *format);
 int item_creation_menu(struct campaign *target_campaign);
-void item_inventory_menu(struct campaign *target_campaign
-    , struct item *target_item);
-void save_item_inventory(struct campaign *target_campaign
-    , FILE *restrict item_file);
+void inventory_menu(struct campaign *target_campaign
+    , /*@null@*/ struct item *target_item
+    , /*@null@*/ struct creature *target_creature);
 void load_item_inventory(struct campaign *target_campaign
+    , FILE *restrict item_file);
+void save_item_inventory(struct campaign *target_campaign
     , FILE *restrict item_file);
 int run_main_menu_function(int function_index
     , struct campaign *target_campaign);
 void material_creation_menu(struct campaign *target_campaign);
 void p_note_creation_menu(struct campaign *target_campaign
     , struct coord position);
-void load_campaign(struct campaign *target_campaign
-    , const char *binary_save_path, const char *material_save_path
-    , const char *creature_save_path, const char *item_save_path);
-void save_campaign(struct campaign *target_campaign
-    , const char *binary_save_path, const char *material_save_path
-    , const char *creature_save_path, const char *item_save_path);
+void load_campaign(struct campaign *target_campaign);
+void save_campaign(struct campaign *target_campaign);

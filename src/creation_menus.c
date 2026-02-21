@@ -5,7 +5,9 @@ int creature_creation_menu(struct campaign *target_campaign)
     // a popup
     // TODO support adding multiple characters
 {
-    struct creature *creature_list = target_campaign->creature_list;
+    //struct creature *creature_list = target_campaign->creature_list;
+    struct creature *target_creature = &target_campaign->creature_list
+            [target_campaign->next_empty_creature++];
     GRID_EDITOR grid_editor;
 
     // ----- initialize info for get_multi_input
@@ -17,8 +19,8 @@ int creature_creation_menu(struct campaign *target_campaign)
     int text_pos[3] = {1, 3, 5};
     // NOTE: accessing note.string like this shouldn't be done
     char *dest[3] 
-        = {creature_list[0].name, print_char_string
-            , creature_list[0].note.string};
+        = {target_creature->name, print_char_string
+            , target_creature->note.string};
     int max_lens[3] = {MAX_CHAR, 2, MAX_CHAR};
 
     (void) mvprintw(0, 0, "Name: ");
@@ -30,9 +32,13 @@ int creature_creation_menu(struct campaign *target_campaign)
 
     // ----- convert the print_char_string into a char and save it into
         // the creature
-    creature_list[0].print_char = print_char_string[0];
+    target_creature->print_char = print_char_string[0];
 
-    // ----- place the character menu
+    // ----- set creature inventory
+    inventory_menu(target_campaign, NULL, target_creature);
+
+
+    // ----- place the character on the grid
     // turn off the cursor because it's interfering with the grid
     (void) curs_set(0);
     int c = 0;
@@ -73,10 +79,11 @@ int creature_creation_menu(struct campaign *target_campaign)
                 break;
             case ' ':
                 (void) grid_editor_driver(&grid_editor
-                    , &creature_list[0].name, PLACE_CHAR);
+                    , &target_creature->name, PLACE_CHAR);
                 goto end;
         }
     } while (c != KEY_F(2));
+
 
 end:
     return 0;
@@ -122,7 +129,7 @@ int item_creation_menu(struct campaign *target_campaign)
         c = getch();
 
         // ----- deal with inventory
-        item_inventory_menu(target_campaign, target_item);
+        inventory_menu(target_campaign, target_item, NULL);
 
         if (c == KEY_F(2)) {
             break;
@@ -202,6 +209,7 @@ void material_creation_menu(struct campaign *target_campaign)
         if (c == KEY_F(2)) {
             break;
         }
+        (void) erase();
     }
 
     (void) erase();

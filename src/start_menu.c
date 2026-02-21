@@ -104,34 +104,16 @@ int run_main_menu_function(int function_index
     // -3: malloc problem
 {
     int return_val = -1;
+    // ----- load or create a new campaign
     switch (function_index) {
+        case LOAD_CAMPAIGN:
+            load_campaign(target_campaign);
+            break;
         case START_CAMPAIGN:
             // ----- initialize the campaign
             (void) start_campaign(target_campaign);
-
             material_creation_menu(target_campaign);
-            
             (void) start_encounter(target_campaign);
-            
-            // ----- main loop
-            while (return_val != 0) {
-                return_val = main_menu(target_campaign);
-
-                switch (return_val) {
-                    case 1:
-                        (void) creature_creation_menu(target_campaign);
-                        break;
-                    case 2:
-                        p_note_creation_menu(target_campaign
-                            , target_campaign->encounter_grid.cursor);
-                        break;
-                    case 3:
-                        (void) item_creation_menu(target_campaign);
-                        break;
-                }
-            }
-            break;
-        case LOAD_CAMPAIGN:
             break;
         case EXIT:
             return -1;
@@ -139,5 +121,25 @@ int run_main_menu_function(int function_index
         default:
             return -2;
     }
+    // ----- main loop
+    while (return_val != 0) {
+        return_val = main_menu(target_campaign);
+
+        // numbers are sourced from the return values of main
+        switch (return_val) {
+            case 1:
+                (void) creature_creation_menu(target_campaign);
+                break;
+            case 2:
+                p_note_creation_menu(target_campaign
+                    , target_campaign->encounter_grid.cursor);
+                break;
+            case 3:
+                (void) item_creation_menu(target_campaign);
+                break;
+        }
+    }
+
+    save_campaign(target_campaign);
     return 0;
 }
