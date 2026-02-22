@@ -2,7 +2,7 @@
 
 int init_grid_editor(/*@out@*/GRID_EDITOR *target_ge
     , struct grid *target_grid
-    , struct coord grid_end, WINDOW *target_win)
+    , struct coord grid_end, WINDOW *target_win, bool is_materials_only)
     // define the starting values for a grid editor based on the
     // target_grid
     // grid_end is the point that the grid should stop printing
@@ -17,7 +17,7 @@ int init_grid_editor(/*@out@*/GRID_EDITOR *target_ge
     target_ge->grid_end = grid_end;
 
     (void) print_grid(target_grid, target_win
-        , *grid_start, grid_end);
+        , *grid_start, grid_end, is_materials_only);
 
     // ----- set inital values
     *cursor = *grid_start;
@@ -45,6 +45,7 @@ int init_grid_editor(/*@out@*/GRID_EDITOR *target_ge
 
     target_ge->target_grid = target_grid;
     target_ge->target_win = target_win;
+    target_ge->is_materials_only = is_materials_only;
     return 0;
 }
 
@@ -67,6 +68,10 @@ int grid_editor_driver(GRID_EDITOR *target_ge
     struct coord *grid_start = &target_grid->grid_start;
     struct coord *grid_end = &target_ge->grid_end;
 
+    // not a pointer because is_materials_only isn't changed
+    bool is_materials_only = target_ge->is_materials_only;
+
+    // -----
     struct square *cursor_square;
 
     struct material *target_material;
@@ -80,25 +85,25 @@ int grid_editor_driver(GRID_EDITOR *target_ge
             grid_start->y++;
             cursor->y++;
             (void) print_grid(target_grid, target_win
-                , *grid_start, *grid_end);
+                , *grid_start, *grid_end, is_materials_only);
             break;
         case MOVE_UP:
             grid_start->y--;
             cursor->y--;
             (void) print_grid(target_grid, target_win
-                , *grid_start, *grid_end);
+                , *grid_start, *grid_end, is_materials_only);
             break;
         case MOVE_LEFT:
             grid_start->x++;
             cursor->x++;
             (void) print_grid(target_grid, target_win
-                , *grid_start, *grid_end);
+                , *grid_start, *grid_end, is_materials_only);
             break;
         case MOVE_RIGHT:
             grid_start->x--;
             cursor->x--;
             (void) print_grid(target_grid, target_win
-                , *grid_start, *grid_end);
+                , *grid_start, *grid_end, is_materials_only);
             break;
 
         // ----- move the cursor
@@ -143,7 +148,7 @@ int grid_editor_driver(GRID_EDITOR *target_ge
             
             // update the square under the cursor
             mvprintw_square(cursor->y, cursor->x
-                , cursor_square, target_win);
+                , cursor_square, target_win, is_materials_only);
             break;
 
         // ----- place character
@@ -176,7 +181,7 @@ int grid_editor_driver(GRID_EDITOR *target_ge
 
             // --- update the square
             mvprintw_square(cursor->y, cursor->x
-                , cursor_square, target_win);
+                , cursor_square, target_win, is_materials_only);
 
             break; 
         
@@ -192,7 +197,7 @@ int grid_editor_driver(GRID_EDITOR *target_ge
 
             cursor_square->is_wall = !(cursor_square->is_wall);
             mvprintw_square(cursor->y, cursor->x
-                , cursor_square, target_win);
+                , cursor_square, target_win, is_materials_only);
             break;
     }
 

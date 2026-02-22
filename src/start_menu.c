@@ -1,4 +1,5 @@
 #include "../include/main.h"
+#include "../include/menu_outputs.h"
 
 static char *start_menu_options[] = {
     "Start Campaign",
@@ -180,17 +181,24 @@ int run_main_menu_function(int function_index
         return_val = main_menu(target_campaign);
 
         // numbers are sourced from the return values of main
+            // definitions are in include/menu_outputs.h
         switch (return_val) {
-            case 1:
+            case CREATURE_CREATION:
                 (void) creature_creation_menu(target_campaign);
                 break;
-            case 2:
+            case P_NOTE_CREATION:
                 p_note_creation_menu(target_campaign
                     , target_campaign->encounter_grid.cursor);
                 break;
-            case 3:
+            case ITEM_CREATION:
                 (void) item_creation_menu(target_campaign);
                 break;
+            case MATERIAL_CREATION:
+                material_creation_menu(target_campaign);
+                (void) start_encounter(target_campaign);
+                break;
+            case REPAINT_MATERIALS:
+                (void) start_encounter(target_campaign);
         }
     }
 

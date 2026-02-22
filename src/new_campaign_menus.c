@@ -11,7 +11,7 @@ int start_campaign(/*@unused@*/ struct campaign *target_campaign)
         return -1;
     }
     
-    // ----- write values to ui.seperator and ui.commands_win
+    // ----- write values to ui.info_win and ui.commands_win
     // info win
     (void) wattron(ui.info_win, A_UNDERLINE);
     (void) mvwprintw(ui.info_win, 0, 0, "Campaign Information");
@@ -65,7 +65,7 @@ int start_encounter(struct campaign *target_campaign)
 {
     // ----- initialize ui
     struct ui_windows ui;
-    if (init_ui(&ui, LINES * 3/4 - 1) == -1) {
+    if (init_ui(&ui, LINES * 3/4 - 2) == -1) {
         return -2;
     }
     
@@ -84,6 +84,7 @@ int start_encounter(struct campaign *target_campaign)
     (void) mvwprintw(ui.commands_win, 2, 30, "space: set square under cursor to selected material");
     (void) mvwprintw(ui.commands_win, 3, 30, "n/p: traverse up/down material options");
     (void) mvwprintw(ui.commands_win, 4, 30, "q: toggle wall at cursor");
+    (void) mvwprintw(ui.commands_win, 5, 30, "F2: submit information");
     // ----- define synonyms that are used in the function
     struct grid *target_grid = &target_campaign->encounter_grid;
     struct material *mat_list = target_campaign->material_list;
@@ -152,7 +153,7 @@ int start_encounter(struct campaign *target_campaign)
     // ----- print the squares
     getmaxyx(grid_win, grid_end.y, grid_end.x);
     (void) init_grid_editor(&grid_editor, target_grid
-        , grid_end, grid_win);
+        , grid_end, grid_win, true);
 
     // ----- create menu for materials
     // define the item array

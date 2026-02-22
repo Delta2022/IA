@@ -182,22 +182,30 @@ void debug_grid(struct grid *target, int tabs, FILE *format)
 }
 
 void mvprintw_square(int y, int x, struct square *target
-    , WINDOW *restrict window)
+    , WINDOW *restrict window, bool is_materials_only)
     // prints a square to a position in a stream
     // TODO allow multi character movement
 {
     char print_char = '\0';
-    if (target->num_creatures > 1) {
+    // multiple creatures
+    if (target->num_creatures > 1 && !is_materials_only) {
         // NOTE: doesn't account for more than 9 but its prob fine
         print_char = (char) target->num_creatures + '0';
+
+    // creature
     } else if (target->num_creatures == 1 
-        && target->creatures[0] != NULL) {
+        && target->creatures[0] != NULL && !is_materials_only) {
         print_char = target->creatures[0]->print_char;
+
+    // wall
     } else if (target->is_wall == true) { // render wall
         print_char = '+';
+
+    // no material
     } else if (target->material == NULL) {
         print_char = '.';
-    } else { // render the right material
+
+    } else { // render the material
         print_char = target->material->print_char;
     }
     (void) mvwprintw(window, y, x, "%c", print_char);
@@ -205,7 +213,8 @@ void mvprintw_square(int y, int x, struct square *target
 }
 
 int print_grid(struct grid *target_grid, WINDOW *target_window
-    , struct coord start_point, struct coord end_point)
+    , struct coord start_point, struct coord end_point
+    , bool is_materials_only)
     // prints a grid starting at the start point, up until
     // the end of the grid
     // TODO can refactor to make it only print between start_point
@@ -235,7 +244,7 @@ int print_grid(struct grid *target_grid, WINDOW *target_window
 
             (void) mvprintw_square(print_pos.y, print_pos.x
                 , &target_grid->squares[i][j]
-                , target_window);
+                , target_window, is_materials_only);
         }
     }
     return 0;    

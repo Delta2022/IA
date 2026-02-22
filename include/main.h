@@ -165,6 +165,7 @@ struct grid_editor {
     struct coord max_cursor;
     struct coord old_cursor;
     struct coord grid_end;
+    bool is_materials_only;
 };
 typedef struct grid_editor GRID_EDITOR;
 
@@ -196,11 +197,12 @@ int get_multi_input(WINDOW *win, char **dest, int num_dest
     , int *buffer_max_lens, int *text_pos);
 int start_encounter(struct campaign *target_campaign);
 void mvprintw_square(int y, int x, struct square *target
-    , WINDOW *restrict window);
+    , WINDOW *restrict window, bool is_materials_only);
 int creature_creation_menu(struct campaign *target_campaign);
 int init_creature(/*@out@*/ struct creature *target);
 int print_grid(struct grid *target_grid, WINDOW *target_window
-    , struct coord start_point, struct coord end_point);
+    , struct coord start_point, struct coord end_point
+    , bool is_materials_only);
 void debug_creature(/*@null@*/ struct creature *target
     , int tabs, FILE *format);
 int grid_editor_driver(GRID_EDITOR *target_ge
@@ -208,7 +210,7 @@ int grid_editor_driver(GRID_EDITOR *target_ge
     , const int action);
 int init_grid_editor(/*@out@*/GRID_EDITOR *target_ge
     , struct grid *target_grid
-    , struct coord grid_end, WINDOW *target_win);
+    , struct coord grid_end, WINDOW *target_win, bool is_materials_only);
 int main_menu(struct campaign *target_campaign);
 void mvdisplay_square_info(WINDOW *target_window, int y, int x
     , struct square *target_square);

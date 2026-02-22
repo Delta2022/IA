@@ -1,4 +1,5 @@
 #include "../include/main.h"
+#include "../include/menu_outputs.h"
 
 // these place the vertical and horizontal seperator in the window
     // the position is the distance from 0, 0
@@ -51,7 +52,7 @@ int main_menu(struct campaign *target_campaign)
     // ----- initialize grid editor 
     getmaxyx(grid_win, grid_end.y, grid_end.x);
     (void) init_grid_editor(&grid_editor
-        , &target_campaign->encounter_grid, grid_end, grid_win);
+        , &target_campaign->encounter_grid, grid_end, grid_win, false);
 
     // check boundaries
     //(void) box(info_win, 0, 0);
@@ -98,6 +99,8 @@ int main_menu(struct campaign *target_campaign)
     (void) mvwprintw(commands_win, 1, 30, "c: create new creature");
     (void) mvwprintw(commands_win, 2, 30, "p: create new positional note");
     (void) mvwprintw(commands_win, 3, 30, "i: create new item");
+    (void) mvwprintw(commands_win, 4, 30, "m: create new material");
+    (void) mvwprintw(commands_win, 5, 30, "M: repaint materials on grid");
 
     while (true) {
         // ----- update the data section
@@ -156,13 +159,19 @@ int main_menu(struct campaign *target_campaign)
                     , MOVE_DOWN);
                 break;
             case 'c': // new creature
-                return_val = 1;
+                return_val = CREATURE_CREATION;
                 goto exit;
             case 'p': // new p-note
-                return_val = 2;
+                return_val = P_NOTE_CREATION;
                 goto exit;
             case 'i': // new item
-                return_val = 3;
+                return_val = ITEM_CREATION;
+                goto exit;
+            case 'm':
+                return_val = MATERIAL_CREATION;
+                goto exit;
+            case 'M':
+                return_val = REPAINT_MATERIALS;
                 goto exit;
             case 'q': // campaign info
                 break;

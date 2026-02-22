@@ -40,7 +40,6 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     
     (void) endwin();
 
-    // saving
     debug_campaign(&main_campaign, stdout);
 }
 

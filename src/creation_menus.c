@@ -91,7 +91,8 @@ int creature_creation_menu(struct campaign *target_campaign)
     int c = 0;
     struct coord window_end = {LINES, COLS};
     (void) init_grid_editor(&grid_editor
-        , &target_campaign->encounter_grid, window_end, ui.main_win);
+        , &target_campaign->encounter_grid, window_end, ui.main_win
+        , false);
 
     while (true) {
         c = wgetch(ui.main_win);
