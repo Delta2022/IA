@@ -6,6 +6,7 @@
 #define H_SEP_POS LINES * 2 / 3
 
 int main_menu(struct campaign *target_campaign)
+    // does NOT use ui_v3
     // ----- returns -----
     // 0: exit
     // 1: creature creation

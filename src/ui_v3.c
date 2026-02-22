@@ -31,12 +31,13 @@ int init_ui(/*@out@*/ struct ui_windows *target_ui_windows
 }
 
 void update_ui(struct ui_windows *target_ui_windows)
+    // only writes to the virtual screen
+    // requires running doupdate() after
 {
     (void) wnoutrefresh(target_ui_windows->seperator);
     (void) wnoutrefresh(target_ui_windows->commands_win);
     (void) wnoutrefresh(target_ui_windows->info_win);
     (void) wnoutrefresh(target_ui_windows->main_win);
-    (void) doupdate();
 }
 
 void del_ui(struct ui_windows *target_ui_windows)

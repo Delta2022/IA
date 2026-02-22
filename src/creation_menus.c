@@ -6,7 +6,28 @@ int creature_creation_menu(struct campaign *target_campaign)
     // TODO add another window for the grid editor, perhaps
     // a popup
     // TODO support adding multiple characters
+    // return of -1 means that the menu couldn't create a ui_windows
 {
+    // ----- initialize windows
+    struct ui_windows ui;
+    if (init_ui(&ui, 0) == -1) {
+        return -1;
+    }
+
+    // ----- write information to info_win and commands_win
+    // info_win
+    (void) wattron(ui.info_win, A_UNDERLINE);
+    (void) mvwprintw(ui.info_win, 0, 0, "Create Creature");
+    (void) wattroff(ui.info_win, A_UNDERLINE);
+
+    // commands_win
+    (void) mvwprintw(ui.commands_win, 0, 0, "Commands");
+    (void) mvwprintw(ui.commands_win, 1, 0, "Up arrow/down arrow:"
+        " traverse through input fields");
+    (void) mvwprintw(ui.commands_win, 2, 0, "F2: submit information");
+    (void) mvwprintw(ui.commands_win, 3, 0, "Note: only characters"
+        " a-z and A-Z are allowed.");
+
     //struct creature *creature_list = target_campaign->creature_list;
     struct creature *target_creature = &target_campaign->creature_list
             [target_campaign->next_empty_creature++];
@@ -25,31 +46,55 @@ int creature_creation_menu(struct campaign *target_campaign)
             , target_creature->note.string};
     int max_lens[3] = {MAX_CHAR, 2, MAX_CHAR};
 
-    (void) mvprintw(0, 0, "Name: ");
-    (void) mvprintw(2, 0, "Char: ");
-    (void) mvprintw(4, 0, "Notes: ");
+    (void) mvwprintw(ui.main_win, 0, 0, "Name: ");
+    (void) mvwprintw(ui.main_win, 2, 0, "Char: ");
+    (void) mvwprintw(ui.main_win, 4, 0, "Notes: ");
 
+    update_ui(&ui);
+    (void) doupdate();
     // ----- get information about the character
-    (void) get_multi_input(stdscr, dest, 3, max_lens, text_pos);
+    (void) get_multi_input(ui.main_win, dest, 3, max_lens, text_pos);
 
     // ----- convert the print_char_string into a char and save it into
         // the creature
     target_creature->print_char = print_char_string[0];
 
+    // ----- delete windows for inventory_menu
+    del_ui(&ui);
     // ----- set creature inventory
     inventory_menu(target_campaign, NULL, target_creature);
 
+    // ----- initialize windows again
+    if (init_ui(&ui, 0) == -1) {
+        return -1;
+    }
 
+    // ----- write information to info_win and commands_win
+    // info_win
+    (void) wattron(ui.info_win, A_UNDERLINE);
+    (void) mvwprintw(ui.info_win, 0, 0, "Place Creature on Grid");
+    (void) wattroff(ui.info_win, A_UNDERLINE);
+
+    // commands_win
+    (void) mvwprintw(ui.commands_win, 0, 0, "Commands");
+    (void) mvwprintw(ui.commands_win, 1, 0, "Arrow keys: move cursor");
+    (void) mvwprintw(ui.commands_win, 2, 0, "WASD: move grid around");
+
+    (void) mvwprintw(ui.commands_win, 3, 0, "space: place creature"
+        " at cursor");
+    (void) mvwprintw(ui.commands_win, 4, 0, "F2: place creature"
+        " at cursor");
+    update_ui(&ui);
     // ----- place the character on the grid
     // turn off the cursor because it's interfering with the grid
     (void) curs_set(0);
     int c = 0;
     struct coord window_end = {LINES, COLS};
     (void) init_grid_editor(&grid_editor
-        , &target_campaign->encounter_grid, window_end, stdscr);
+        , &target_campaign->encounter_grid, window_end, ui.main_win);
 
-    do {
-        c = getch();
+    while (true) {
+        c = wgetch(ui.main_win);
         switch (c) {
             case KEY_UP:
                 (void) grid_editor_driver(&grid_editor, NULL, CURSOR_UP);
@@ -84,10 +129,10 @@ int creature_creation_menu(struct campaign *target_campaign)
                     , &target_creature->name, PLACE_CHAR);
                 goto end;
         }
-    } while (c != KEY_F(2));
-
+    }
 
 end:
+    del_ui(&ui);
     return 0;
 }
 
@@ -95,6 +140,27 @@ end:
 int item_creation_menu(struct campaign *target_campaign)
     // initalizes and defines an item based on user input
 {
+    // ----- init ui
+    struct ui_windows ui;
+    if (init_ui(&ui, 0) == -1) {
+        return -1;
+    }
+
+    // ----- write values to ui.info_win and ui.commands_win
+    // info win
+    (void) wattron(ui.info_win, A_UNDERLINE);
+    (void) mvwprintw(ui.info_win, 0, 0, "Create Item");
+    (void) wattroff(ui.info_win, A_UNDERLINE);
+
+    // commands
+    (void) mvwprintw(ui.commands_win, 0, 0, "Commands");
+    (void) mvwprintw(ui.commands_win, 1, 0, "Up arrow/down arrow:"
+        " traverse through input fields");
+    (void) mvwprintw(ui.commands_win, 2, 0, "F2: submit information");
+    (void) mvwprintw(ui.commands_win, 3, 0, "Note: only characters"
+        " a-z and A-Z are allowed.");
+    update_ui(&ui);
+    // -----
     struct item *target_item;
     char print_char_string[2]; // a string to store the print char
         // , which will then be converted into just a char
@@ -102,42 +168,35 @@ int item_creation_menu(struct campaign *target_campaign)
     char *pointer_array[3];
     int text_pos[3];
     int max_lens[3];
-    int c = 0;
 
     // ----- set up get_multi_input
-    while (true) {
-        target_item = &target_campaign->item_list
-            [target_campaign->next_empty_item++];
+    target_item = &target_campaign->item_list
+        [target_campaign->next_empty_item++];
 
-        // NOTE: accessing note.string like this shouldn't be done
-        pointer_array[0] = target_item->name;
-        pointer_array[1] = print_char_string;
-        pointer_array[2] = target_item->note.string;
-        
-        text_pos[0] = 1;
-        text_pos[1] = 3;
-        text_pos[2] = 5;
+    // NOTE: accessing note.string like this shouldn't be done
+    pointer_array[0] = target_item->name;
+    pointer_array[1] = print_char_string;
+    pointer_array[2] = target_item->note.string;
+    
+    text_pos[0] = 1;
+    text_pos[1] = 3;
+    text_pos[2] = 5;
 
-        max_lens[0] = MAX_CHAR;
-        max_lens[1] = 2;
-        max_lens[2] = MAX_CHAR;
+    max_lens[0] = MAX_CHAR;
+    max_lens[1] = 2;
+    max_lens[2] = MAX_CHAR;
 
-        (void) mvprintw(0, 0, "Name: ");
-        (void) mvprintw(2, 0, "Char: ");
-        (void) mvprintw(4, 0, "Notes: ");
+    (void) mvwprintw(ui.main_win, 0, 0, "Name: ");
+    (void) mvwprintw(ui.main_win, 2, 0, "Char: ");
+    (void) mvwprintw(ui.main_win, 4, 0, "Notes: ");
 
-        (void) get_multi_input(stdscr, pointer_array, 3, max_lens, text_pos);
+    (void) get_multi_input(ui.main_win, pointer_array, 3, max_lens
+        , text_pos);
 
-        c = getch();
-
-        // ----- deal with inventory
-        inventory_menu(target_campaign, target_item, NULL);
-
-        if (c == KEY_F(2)) {
-            break;
-        }
-        (void) erase();
-    }
+    // delete ui for inventory_menu
+    del_ui(&ui);
+    // ----- deal with inventory
+    inventory_menu(target_campaign, target_item, NULL);
     
     return 0;
 }
@@ -146,6 +205,24 @@ void p_note_creation_menu(struct campaign *target_campaign
     , struct coord position)
     // theoretically works
 {
+    // ----- initialize windows
+    struct ui_windows ui;
+    if (init_ui(&ui, 0) == -1) {
+        return;
+    }
+    
+    // info win
+    (void) wattron(ui.info_win, A_UNDERLINE);
+    (void) mvwprintw(ui.info_win, 0, 0, "Positional note creation");
+    (void) wattroff(ui.info_win, A_UNDERLINE);
+
+    // commands
+    (void) mvwprintw(ui.commands_win, 0, 0, "Commands");
+    (void) mvwprintw(ui.commands_win, 1, 0, "F2: submit information");
+    (void) mvwprintw(ui.commands_win, 2, 0, "Note: only characters"
+        " a-z and A-Z are allowed.");
+    update_ui(&ui);
+    // -----
     /*@null@*/ struct p_note *target_p_note = NULL;
     /*@null@*/ struct grid *target_grid = NULL;
     
@@ -164,9 +241,11 @@ void p_note_creation_menu(struct campaign *target_campaign
     int text_pos[1] = {1};
     int max_lens[1] = {target_p_note->note.len};
 
-    (void) mvprintw(0, 0, "Notes");
-    (void) get_multi_input(stdscr, pointer_array, 1, max_lens, text_pos);
+    (void) mvwprintw(ui.main_win, 0, 0, "Notes");
+    (void) get_multi_input(ui.main_win, pointer_array, 1, max_lens
+        , text_pos);
 
+    del_ui(&ui);
     (void) erase();
 }
 
@@ -206,6 +285,7 @@ void material_creation_menu(struct campaign *target_campaign)
             " a-z and A-Z are allowed.");
 
         update_ui(&ui);
+        (void) doupdate();
 
         // ----- get user input for text
         target_material = &target_campaign->material_list
@@ -245,6 +325,7 @@ void material_creation_menu(struct campaign *target_campaign)
             " quit");
 
         update_ui(&ui);
+        (void) doupdate();
         // prompt the user
         c = wgetch(ui.main_win);
 

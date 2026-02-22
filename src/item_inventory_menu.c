@@ -114,7 +114,8 @@ static void set_changable_menu(struct changable_menu *target
     }
 }
 
-static void ncurses_error(WINDOW *win, int y, int x, const char *name, int return_val)
+/*@unused@*/ static void ncurses_error(WINDOW *win, int y, int x
+    , const char *name, int return_val)
 {
     char *error_str = "";
     switch (return_val) {
@@ -158,7 +159,9 @@ static void transfer_item(struct changable_menu *source,
     // skip when the destination is full
     if (dest->array_next_empty == dest->array_len) {
         (void) mvwprintw(dest->window, LINES - 1, 0
-            , "is full");
+            , "inventory is full");
+        (void) wnoutrefresh(dest->window);
+        (void) doupdate();
         return;
     }
 
@@ -212,20 +215,24 @@ static void transfer_item(struct changable_menu *source,
         return_1 = set_menu_items(source->menu
             , (ITEM **) source->arrays[source->selected_array]);
     }
-    ncurses_error(source->window, LINES - 1, 0
-        , "set_menu_items(sel_menu)"
-        , return_1);
+    //ncurses_error(source->window, LINES - 1, 0
+    //    , "set_menu_items(sel_menu)"
+    //    , return_1);
 
-    ncurses_error(dest->window, LINES - 1, 0
-        , "set_menu_items(dest_menu)",
-        set_menu_items(dest->menu
-            , (ITEM **) dest->arrays[dest->selected_array]));
+    //ncurses_error(dest->window, LINES - 1, 0
+    //    , "set_menu_items(dest_menu)",
+    //    set_menu_items(dest->menu
+    //        , (ITEM **) dest->arrays[dest->selected_array]));
+    (void) set_menu_items(dest->menu
+        , (ITEM **) dest->arrays[dest->selected_array]);
 
     // post
-    ncurses_error(dest->window, LINES - 2, 0, "post(dest_menu)",
-        post_menu(dest->menu));
-    ncurses_error(source->window, LINES - 2, 0, "post(sel_menu)",
-        post_menu(source->menu));
+    //ncurses_error(dest->window, LINES - 2, 0, "post(dest_menu)",
+    //    post_menu(dest->menu));
+    (void) post_menu(dest->menu);
+    //ncurses_error(source->window, LINES - 2, 0, "post(sel_menu)",
+    //    post_menu(source->menu));
+    (void) post_menu(source->menu);
 }
 
 struct seperated_inventory {
@@ -258,6 +265,11 @@ void inventory_menu(struct campaign *target_campaign
     } else if (target_item != NULL && target_creature != NULL) {
         return;
     }
+    // ----- init ui
+    struct ui_windows ui;
+    if (init_ui(&ui, 0) == -1) {
+        return;
+    }
     // ----- create a seperated_inventory from either target_item
         // or target_creature
     struct seperated_inventory target_inventory;
@@ -274,6 +286,24 @@ void inventory_menu(struct campaign *target_campaign
         return;
     }
 
+    // ----- write information to info_win and commands_win
+    // info_win
+    (void) wattron(ui.info_win, A_UNDERLINE);
+    (void) mvwprintw(ui.info_win, 0, 0, "Assign Items to Inventory");
+    (void) wattroff(ui.info_win, A_UNDERLINE);
+    // commands_win
+    (void) mvwprintw(ui.commands_win, 0, 0, "Commands");
+    (void) mvwprintw(ui.commands_win, 1, 0, "Up arrow/down arrow:"
+        " traverse through items");
+    (void) mvwprintw(ui.commands_win, 2, 0, "Left arrow/right arrow:"
+        " switch between possible items to add to inventory (left) and"
+        " items in the inventory (right)");
+    (void) mvwprintw(ui.commands_win, 3, 0, "space: move item from one"
+        " place to the other");
+    (void) mvwprintw(ui.commands_win, 4, 0, "F2: submit information");
+
+    update_ui(&ui);
+    (void) doupdate();
     // ----- init the changable menus
     struct changable_menu sel; // selection menu (list of all items)
     struct changable_menu inv; // inventory menu (list of items in
@@ -314,16 +344,20 @@ void inventory_menu(struct campaign *target_campaign
 
     set_changable_menu(&inv, target_inventory.inventory);
 
-    // ---- windows
+    // ---- make windows (sel's windows and inv's windows)
     WINDOW *seperator_win; // seperators
     int half_length = COLS / 2;
 
-    seperator_win = newwin(0, 0, 0, 0);
-    sel.window = newwin(0, half_length, 0, 0);
+    seperator_win = derwin(ui.main_win, 0, 0, 0, 0);
+    sel.window = derwin(ui.main_win, 0, half_length, 0, 0);
     sel.sub_window = derwin(sel.window, 0, 0, 1, 0);
-    inv.window = newwin(0, half_length - 1, 0, half_length + 1);
+    inv.window = derwin(ui.main_win, 0, half_length - 1, 0
+        , half_length + 1);
     inv.sub_window = derwin(inv.window, 0, 0, 1, 0);
 
+    // ----- write values to inv and sel
+    (void) mvwprintw(sel.window, 0, 0, "Possible Items to Add");
+    (void) mvwprintw(inv.window, 0, 0, "Inventory");
     // ----- post values (not ideal programming)
     (void) set_menu_win(sel.menu, sel.window);
     (void) set_menu_sub(sel.menu, sel.sub_window);
@@ -342,6 +376,7 @@ void inventory_menu(struct campaign *target_campaign
 
     // ----- refresh screen
     (void) wnoutrefresh(stdscr);
+    update_ui(&ui);
     (void) wnoutrefresh(seperator_win);
     (void) wnoutrefresh(inv.window);
     (void) wnoutrefresh(inv.sub_window);
@@ -363,7 +398,7 @@ void inventory_menu(struct campaign *target_campaign
     struct changable_menu *dest;
         
     while (true) {
-        c = getch();
+        c = wgetch(ui.main_win);
 
         // exit when the exit key is pressed
         if (c == KEY_F(2)) {
@@ -416,6 +451,7 @@ void inventory_menu(struct campaign *target_campaign
         (void) pos_menu_cursor(menu_list[selected_menu_index]);
 
         (void) wnoutrefresh(stdscr);
+        update_ui(&ui);
         (void) wnoutrefresh(seperator_win);
         // write to screen such that the cursor is in the right position
         if (selected_menu_index == 0) {
@@ -487,7 +523,8 @@ exit:
     (void) delwin(sel.sub_window);
     (void) delwin(inv.sub_window);
 
+    del_ui(&ui);
+
     // ----- clear screen
     (void) erase();
-    (void) refresh();
 }

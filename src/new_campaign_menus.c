@@ -27,6 +27,7 @@ int start_campaign(/*@unused@*/ struct campaign *target_campaign)
 
     // ----- update screen
     update_ui(&ui);
+    (void) doupdate();
     // ----- get input from user
     char note_temp[MAX_CHAR];
     (void) memset(note_temp, 0, sizeof(note_temp));

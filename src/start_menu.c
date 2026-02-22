@@ -102,6 +102,7 @@ int start_menu()
     (void) post_menu(start_menu);
 
     update_ui(&ui);
+    (void) doupdate();
 
     do {
         c = wgetch(ui.main_win);
@@ -114,7 +115,8 @@ int start_menu()
                 (void) menu_driver(start_menu, REQ_UP_ITEM);
                 break;
         }
-        (void) update_ui(&ui);
+        update_ui(&ui);
+        (void) doupdate();
     } while (c != 10);
 
     // TODO use menu_index to select function
