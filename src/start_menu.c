@@ -6,6 +6,12 @@ static char *start_menu_options[] = {
     "Exit"
 };
 
+static char *start_menu_desc[] = {
+    "Create a new campaign",
+    "Load a saved campaign",
+    "Exit program"
+};
+
 //static func_pointer start_menu_fp[] = {
 //    {}
 //}
@@ -18,6 +24,42 @@ int start_menu()
     // contained start menu for the main function
     // returns -1 if the menu fails to be created
 {
+    // ----- init windows
+    //WINDOW *ui.main_win = newwin(0, COLS * 3/4, 0, 0);
+    //WINDOW *ui.seperator = newwin(0, 1, 0, COLS * 3/4);
+    //WINDOW *ui.commands_win = newwin(0, COLS * 1/4 - 1, 0, COLS * 3/4 + 1);
+
+    struct ui_windows ui;
+    if (init_ui(&ui, 0) == -1) {
+        return -1;
+    }
+    // ----- check dimensions of windows
+    //(void) box(ui.info_win, 0, 0);
+    //(void) box(ui.main_win, 0, 0);
+    //(void) box(ui.seperator, 0, 0);
+    //(void) box(ui.commands_win, 0, 0);
+
+    //wnoutrefresh(stdscr);
+    //wnoutrefresh(ui.info_win);
+    //wnoutrefresh(ui.main_win);
+    //wnoutrefresh(ui.seperator);
+    //wnoutrefresh(ui.commands_win);
+    //doupdate();
+    //getch();
+
+
+    // ----- write values to ui.seperator and ui.commands_win
+    // info win
+    (void) wattron(ui.info_win, A_UNDERLINE);
+    (void) mvwprintw(ui.info_win, 0, 0, "Start Menu");
+    (void) wattroff(ui.info_win, A_UNDERLINE);
+    
+    // commands
+    (void) mvwprintw(ui.commands_win, 0, 0, "Commands:");
+    (void) mvwprintw(ui.commands_win, 1, 0, "Up arrow/down arrow: traverse"
+        " through options");
+    (void) mvwprintw(ui.commands_win, 2, 0, "Enter: choose option");
+
     // ----- init
     ITEM **start_menu_items;
     MENU *start_menu;
@@ -40,7 +82,7 @@ int start_menu()
     // set the items 
     for (int i = 0; i < (int) n_choices; i++) {
         start_menu_items[i] = new_item(start_menu_options[i]
-            , start_menu_options[i]);
+            , start_menu_desc[i]);
     }
 
     // menu requires this to work
@@ -54,10 +96,15 @@ int start_menu()
         exit(EXIT_FAILURE);
     }
 
+    (void) set_menu_win(start_menu, ui.main_win);
+    (void) set_menu_sub(start_menu, ui.main_win);
+
     (void) post_menu(start_menu);
-    (void) refresh();
+
+    update_ui(&ui);
+
     do {
-        c = getch();
+        c = wgetch(ui.main_win);
 
         switch (c) {
             case KEY_DOWN:
@@ -67,6 +114,7 @@ int start_menu()
                 (void) menu_driver(start_menu, REQ_UP_ITEM);
                 break;
         }
+        (void) update_ui(&ui);
     } while (c != 10);
 
     // TODO use menu_index to select function
@@ -87,6 +135,10 @@ int start_menu()
     }
     
     free(start_menu_items);
+
+    del_ui(&ui);
+
+    (void) erase();
 
     return current_item_index;
 }

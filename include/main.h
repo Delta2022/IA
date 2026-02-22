@@ -37,6 +37,7 @@
 #define PLACE_CHAR      9
 #define TOGGLE_WALL     10
 
+
 //struct func_pointer {
 //    void (*pointer) (void *);
 //    int type; // specifies a type of function pointer to convert to
@@ -167,6 +168,13 @@ struct grid_editor {
 };
 typedef struct grid_editor GRID_EDITOR;
 
+struct ui_windows {
+    /*@temp@*/ WINDOW *info_win;
+    /*@temp@*/ WINDOW *main_win;
+    /*@temp@*/ WINDOW *seperator;
+    /*@temp@*/ WINDOW *commands_win;
+};
+
 int init_campaign(/*@out@*/ struct campaign *target);
 int init_grid(/*@out@*/ struct grid *target);
 int init_square(/*@out@*/ struct square *target);
@@ -184,8 +192,8 @@ void debug_material(/*@null@*/ struct material *target
     , int tabs, FILE *format);
 int start_menu();
 int start_campaign(struct campaign *target_campaign);
-int get_multi_input(char **dest, int num_dest, int *buffer_lens
-    , int *text_pos);
+int get_multi_input(WINDOW *win, char **dest, int num_dest
+    , int *buffer_max_lens, int *text_pos);
 int start_encounter(struct campaign *target_campaign);
 void mvprintw_square(int y, int x, struct square *target
     , WINDOW *restrict window);
@@ -229,3 +237,7 @@ void p_note_creation_menu(struct campaign *target_campaign
     , struct coord position);
 void load_campaign(struct campaign *target_campaign);
 void save_campaign(struct campaign *target_campaign);
+int init_ui(/*@out@*/ struct ui_windows *target_ui_windows
+    , int main_win_space);
+void update_ui(struct ui_windows *target_ui_windows);
+void del_ui(struct ui_windows *target_ui_windows);

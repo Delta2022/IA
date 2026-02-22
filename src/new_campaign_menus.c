@@ -1,9 +1,33 @@
 #include "../include/main.h"
 
+#define MAIN_WIN_SPACE LINES * 3/4
 int start_campaign(/*@unused@*/ struct campaign *target_campaign)
     // campaign has to be initialized and defined
     // prompts the user for inputs regarding the campaign
 {
+    // ----- initialize windows
+    struct ui_windows ui;
+    if (init_ui(&ui, 0) == -1) {
+        return -1;
+    }
+    
+    // ----- write values to ui.seperator and ui.commands_win
+    // info win
+    (void) wattron(ui.info_win, A_UNDERLINE);
+    (void) mvwprintw(ui.info_win, 0, 0, "Campaign Information");
+    (void) wattroff(ui.info_win, A_UNDERLINE);
+
+    // commands
+    (void) mvwprintw(ui.commands_win, 0, 0, "Commands");
+    (void) mvwprintw(ui.commands_win, 1, 0, "Up arrow/down arrow:"
+        " traverse through input fields");
+    (void) mvwprintw(ui.commands_win, 2, 0, "F2: submit information");
+    (void) mvwprintw(ui.commands_win, 3, 0, "Note: only characters"
+        " a-z and A-Z are allowed.");
+
+    // ----- update screen
+    update_ui(&ui);
+    // ----- get input from user
     char note_temp[MAX_CHAR];
     (void) memset(note_temp, 0, sizeof(note_temp));
 
@@ -14,13 +38,10 @@ int start_campaign(/*@unused@*/ struct campaign *target_campaign)
     int max_lens[2] = {MAX_CHAR, MAX_CHAR};
 
     (void) clear(); // clear stdscr from the menu in start_menu
-    (void) mvprintw(0, 0, "Name: ");
-    (void) mvprintw(2, 0, "Notes: ");
+    (void) mvwprintw(ui.main_win, 0, 0, "Name: ");
+    (void) mvwprintw(ui.main_win, 2, 0, "Notes: ");
 
-    (void) mvprintw(LINES - 1, 0, "Press F1 to save values");
-    (void) mvprintw(LINES - 2, 0, "Press F2 to move on");
-
-    (void) get_multi_input(save_ptrs, text_pos_len
+    (void) get_multi_input(ui.main_win, save_ptrs, text_pos_len
         , max_lens, text_pos);
 
     // TODO replace with note setter function when that is done
@@ -28,6 +49,8 @@ int start_campaign(/*@unused@*/ struct campaign *target_campaign)
         , (size_t) target_campaign->note.len);
     target_campaign->note.string[target_campaign->note.len - 1] = '\0';
 
+    del_ui(&ui);
+    
     (void) erase();
     return 0;
 }
@@ -37,7 +60,30 @@ int start_encounter(struct campaign *target_campaign)
     // TODO: allow support for large grids (scrolling)
     // paints the grid with materials
     // returns -1 if menu is null
+    // returns -2 if ui cant be created (newwin failed)
 {
+    // ----- initialize ui
+    struct ui_windows ui;
+    if (init_ui(&ui, LINES * 3/4 - 1) == -1) {
+        return -2;
+    }
+    
+    // ----- fill out commands_win and info_win
+    // info win
+    (void) wattron(ui.info_win, A_UNDERLINE);
+    (void) mvwprintw(ui.info_win, 0, 0, "Material Painting");
+    (void) wattroff(ui.info_win, A_UNDERLINE);
+    // commands_win
+    (void) mvwprintw(ui.commands_win, 0, 0, "The cursor is the highlighted square on the left");
+    (void) mvwprintw(ui.commands_win, 1, 0, "Movement Commands:");
+    (void) mvwprintw(ui.commands_win, 2, 0, "Arrow keys: move cursor");
+    (void) mvwprintw(ui.commands_win, 3, 0, "WASD: move grid around");
+
+    (void) mvwprintw(ui.commands_win, 1, 30, "Commands:");
+    (void) mvwprintw(ui.commands_win, 2, 30, "space: set square under cursor to selected material");
+    (void) mvwprintw(ui.commands_win, 3, 30, "n/p: traverse up/down material options");
+    (void) mvwprintw(ui.commands_win, 4, 30, "q: toggle wall at cursor");
+    // ----- define synonyms that are used in the function
     struct grid *target_grid = &target_campaign->encounter_grid;
     struct material *mat_list = target_campaign->material_list;
     int mat_list_len = target_campaign->material_list_len;
@@ -48,10 +94,11 @@ int start_encounter(struct campaign *target_campaign)
     WINDOW *grid_win;
     WINDOW *menu_win;
     WINDOW *sub_win; // sub_win is the sub window of menu_win
-    WINDOW *seperator;
+    WINDOW *v_seperator;
     ITEM **menu_items;
     MENU *materials_menu;
-    int half_length = COLS / 2; //TODO try making this a macro
+    int half_length = getmaxx(ui.main_win) / 2;
+        //TODO try making this a macro
     int c = -1;
     int cur_index = 0;
     ITEM *cur_item;
@@ -65,16 +112,37 @@ int start_encounter(struct campaign *target_campaign)
 
     // even: (grid|sep|menu) __|_|_
     // odd: (grid|sep|menu) _|_|_
-    grid_win = newwin(0, half_length, 0, 0);
+    grid_win = derwin(ui.main_win, 0, half_length, 0, 0);
     
-    seperator = newwin(0, 1, 0, half_length);
+    v_seperator = derwin(ui.main_win, 0, 1, 0, half_length);
 
-    menu_win = newwin(0, 0, 0, half_length + 1);
+    menu_win = derwin(ui.main_win, 0, 0, 0, half_length + 1);
     sub_win = derwin(menu_win, 0, 0, 1, 0);
+
+    //(void) box(ui.info_win, 0, 0);
+    //(void) box(ui.main_win, 0, 0);
+    //(void) box(ui.seperator, 0, 0);
+    //(void) box(ui.commands_win, 0, 0);
+    //(void) box(grid_win, 0, 0);
+    //(void) box(v_seperator, 0, 0);
+    //(void) box(menu_win, 0, 0);
+    //(void) box(sub_win, 0, 0);
+
+    //wnoutrefresh(stdscr);
+    //wnoutrefresh(ui.info_win);
+    //wnoutrefresh(ui.main_win);
+    //wnoutrefresh(ui.seperator);
+    //wnoutrefresh(ui.commands_win);
+    //wnoutrefresh(grid_win);
+    //wnoutrefresh(v_seperator);
+    //wnoutrefresh(menu_win);
+    //wnoutrefresh(sub_win);
+    //doupdate();
+    //getch();
 
     // ----- render a dividing line on the seperator window
     for (int i = 0; i < LINES; i++) {
-        (void) mvwprintw(seperator, i, 0, "|");
+        (void) mvwprintw(v_seperator, i, 0, "|");
     }
 
     // ----- print menu
@@ -109,14 +177,14 @@ int start_encounter(struct campaign *target_campaign)
 
     // ----- loop for inputs
     do {
-        (void) wnoutrefresh(stdscr);
+        update_ui(&ui);
         (void) wnoutrefresh(grid_win);
-        (void) wnoutrefresh(seperator);
+        (void) wnoutrefresh(v_seperator);
         (void) wnoutrefresh(menu_win);
         (void) doupdate();
 
         // --- process input
-        c = getch();
+        c = wgetch(ui.main_win);
         switch (c) {
             case KEY_UP:
                 (void) grid_editor_driver(&grid_editor, NULL, CURSOR_UP);
@@ -174,7 +242,6 @@ int start_encounter(struct campaign *target_campaign)
                 break;
         }
     } while (c != KEY_F(2));
-        
     
     // ----- free menu itmes
     (void) unpost_menu(materials_menu);
@@ -189,11 +256,10 @@ null_menu_exit:
     (void) delwin(grid_win);
     (void) delwin(sub_win); // sub_win must be freed first
     (void) delwin(menu_win);
-    (void) delwin(seperator);
+    (void) delwin(v_seperator);
 
-    // ----- clear the screen for the next function to use
-    (void) erase();
-    (void) refresh();
+    // ----- free ui windows
+    del_ui(&ui);
 
     return return_val;
 }

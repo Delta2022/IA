@@ -11,7 +11,7 @@ static void application();
 int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
 {
     // TODO change integer returns to void if not tracked
-    // TODO finish item_inventory_menu
+    // TODO finish adding commands_win
     application();
     return 0;
 }

@@ -26,29 +26,49 @@ int main_menu(struct campaign *target_campaign)
     struct coord grid_end;
     WINDOW *grid_win;
     GRID_EDITOR grid_editor;
-    /*@unused@*/ WINDOW *data_win;
+    WINDOW *data_win;
     /*@unused@*/ WINDOW *p_note_win;
 
     WINDOW *v_sep;
     WINDOW *h_sep;
+    WINDOW *info_win;
+    WINDOW *commands_win;
 
     // ----- hide the cursor (its not needed)
     (void) curs_set(0);
     // NOTE newwin positions were found experimentally
         // using box and seeing the result when compiled
-    // ----- init grid_win
-    grid_win = newwin(H_SEP_POS, V_SEP_POS, 0, 0);
+    // ----- init windows (numbers found mostly through trial and error)
+    info_win = newwin(1, 0, 0, 0);
+    grid_win = newwin(H_SEP_POS - 1, V_SEP_POS, 1, 0);
+    data_win = newwin(H_SEP_POS - 1, 0, 1, V_SEP_POS + 1);
 
+    commands_win = newwin(0, V_SEP_POS, H_SEP_POS + 1, 0);
+    v_sep = newwin(0, 1, 1, V_SEP_POS);
+    h_sep = newwin(1, 0, H_SEP_POS, 0);
+
+    // ----- initialize grid editor 
     getmaxyx(grid_win, grid_end.y, grid_end.x);
     (void) init_grid_editor(&grid_editor
         , &target_campaign->encounter_grid, grid_end, grid_win);
 
-    // ----- init data_win
-    data_win = newwin(H_SEP_POS, 0, 0, V_SEP_POS + 1);
-    // ----- init seperator windows
-    // NOTE: for the intersect point, render h_sep above v_sep
-    v_sep = newwin(0, 1, 0, V_SEP_POS);
-    h_sep = newwin(1, 0, H_SEP_POS, 0);
+    // check boundaries
+    //(void) box(info_win, 0, 0);
+    //(void) box(commands_win, 0, 0);
+    //(void) box(grid_win, 0, 0);
+    //(void) box(data_win, 0, 0);
+    //(void) box(v_sep, 0, 0);
+    //(void) box(h_sep, 0, 0);
+
+    //(void) wnoutrefresh(stdscr);
+    //(void) wnoutrefresh(info_win);
+    //(void) wnoutrefresh(commands_win);
+    //(void) wnoutrefresh(grid_win);
+    //(void) wnoutrefresh(v_sep);
+    //(void) wnoutrefresh(h_sep);
+    //(void) wnoutrefresh(data_win);
+    //(void) doupdate();
+    //(void) getch();
 
     // ----- render dividing lines
     for (int i = 0; i < LINES; i++) {
@@ -59,8 +79,24 @@ int main_menu(struct campaign *target_campaign)
         (void) mvwprintw(h_sep, 0, i, "-");
     }
 
-    // -- draw an intersect point
+    // -- draw an intersect point on top
+        // (h_sep is updated after v_sep)
     (void) mvwprintw(h_sep, 0, V_SEP_POS, "+");
+
+    // ----- put info information
+    (void) wattron(info_win, A_UNDERLINE);
+    (void) mvwprintw(info_win, 0, 0, "Main Menu");
+    (void) wattroff(info_win, A_UNDERLINE);
+
+    // ----- put commands information
+    (void) mvwprintw(commands_win, 0, 0, "Movement Commands:");
+    (void) mvwprintw(commands_win, 1, 0, "Arrow keys: move cursor");
+    (void) mvwprintw(commands_win, 2, 0, "WASD: move grid around");
+
+    (void) mvwprintw(commands_win, 0, 30, "Commands:");
+    (void) mvwprintw(commands_win, 1, 30, "c: create new creature");
+    (void) mvwprintw(commands_win, 2, 30, "p: create new positional note");
+    (void) mvwprintw(commands_win, 3, 30, "i: create new item");
 
     while (true) {
         // ----- update the data section
@@ -70,12 +106,9 @@ int main_menu(struct campaign *target_campaign)
             , &target_campaign->encounter_grid
                 .squares[cursor.y][cursor.x]);
         // ----- update the screen
-        //box(grid_win, 0, 0);
-        //box(v_sep, 0, 0);
-        //box(h_sep, 0, 0);
-        //box(data_win, 0, 0);
-
         (void) wnoutrefresh(stdscr);
+        (void) wnoutrefresh(info_win);
+        (void) wnoutrefresh(commands_win);
         (void) wnoutrefresh(grid_win);
         (void) wnoutrefresh(v_sep);
         (void) wnoutrefresh(h_sep);

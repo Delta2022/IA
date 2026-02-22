@@ -75,6 +75,10 @@ KNORMAL	include/dbg.h	/^#define KNORMAL /;"	d
 KRED	include/dbg.h	/^#define KRED /;"	d
 KYELLOW	include/dbg.h	/^#define KYELLOW /;"	d
 LOAD_CAMPAIGN	src/start_menu.c	/^#define LOAD_CAMPAIGN /;"	d	file:
+MAIN_WIN_SPACE	include/main.h	/^#define MAIN_WIN_SPACE /;"	d
+MAIN_WIN_SPACE	src/creation_menus.c	/^#define MAIN_WIN_SPACE /;"	d	file:
+MAIN_WIN_SPACE	src/new_campaign_menus.c	/^#define MAIN_WIN_SPACE /;"	d	file:
+MAIN_WIN_SPACE	src/ui_v3.c	/^#define MAIN_WIN_SPACE /;"	d	file:
 MAX_CHAR	include/main.h	/^#define MAX_CHAR /;"	d
 MAX_CREATURES	include/main.h	/^#define MAX_CREATURES /;"	d
 MAX_INVENTORY	include/main.h	/^#define MAX_INVENTORY /;"	d
@@ -108,6 +112,7 @@ check	include/dbg.h	/^#define check(/;"	d
 check_debug	include/dbg.h	/^#define check_debug(/;"	d
 check_mem	include/dbg.h	/^#define check_mem(/;"	d
 clean_errno	include/dbg.h	/^#define clean_errno(/;"	d
+commands_win	include/main.h	/^    WINDOW *commands_win;$/;"	m	struct:ui_windows	typeref:typename:WINDOW *
 coord	include/main.h	/^struct coord {$/;"	s
 creature	include/main.h	/^struct creature {$/;"	s
 creature_creation_menu	src/creation_menus.c	/^int creature_creation_menu(struct campaign *target_campaign)$/;"	f	typeref:typename:int
@@ -124,19 +129,21 @@ debug_item	src/item.c	/^void debug_item(\/*@null@*\/ struct item *target, int ta
 debug_material	src/grid.c	/^void debug_material(\/*@null@*\/ struct material *target$/;"	f	typeref:typename:void
 debug_p_note	src/note.c	/^void debug_p_note(struct p_note *target, int tabs, FILE *format)$/;"	f	typeref:typename:void
 debug_square	src/grid.c	/^void debug_square(struct square *target, int tabs, FILE *format)$/;"	f	typeref:typename:void
+del_ui	src/ui_v3.c	/^void del_ui(struct ui_windows *target_ui_windows)$/;"	f	typeref:typename:void
 desc	include/main.h	/^    char desc[MAX_CHAR];$/;"	m	struct:material	typeref:typename:char[]
 desc_len	include/main.h	/^    int desc_len;$/;"	m	struct:material	typeref:typename:int
 empty_array	src/item_inventory_menu.c	/^    pos_null_ITEM_ptr empty_array[2]; \/\/ array that displays$/;"	m	struct:changable_menu	typeref:typename:pos_null_ITEM_ptr[2]	file:
 encounter_grid	include/main.h	/^    struct grid encounter_grid;$/;"	m	struct:campaign	typeref:struct:grid
 find_index	src/campaign.c	/^static int find_index(\/*@null@*\/ void *target_ptr, void *array_start_ptr$/;"	f	typeref:typename:int	file:
 get_cursor	src/grid_edit.c	/^struct coord get_cursor(GRID_EDITOR *target)$/;"	f	typeref:struct:coord
-get_multi_input	src/get_multi_input.c	/^int get_multi_input(char **dest, int num_dest, int *buffer_max_lens$/;"	f	typeref:typename:int
+get_multi_input	src/get_multi_input.c	/^int get_multi_input(WINDOW *win, char **dest, int num_dest$/;"	f	typeref:typename:int
 get_note	src/note.c	/^void get_note(struct note *target$/;"	f	typeref:typename:void
 grid	include/main.h	/^struct grid {$/;"	s
 grid_editor	include/main.h	/^struct grid_editor {$/;"	s
 grid_editor_driver	src/grid_edit.c	/^int grid_editor_driver(GRID_EDITOR *target_ge$/;"	f	typeref:typename:int
 grid_end	include/main.h	/^    struct coord grid_end;$/;"	m	struct:grid_editor	typeref:struct:coord
 grid_start	include/main.h	/^    struct coord grid_start;$/;"	m	struct:grid	typeref:struct:coord
+info_win	include/main.h	/^    WINDOW *info_win;$/;"	m	struct:ui_windows	typeref:typename:WINDOW *
 init_campaign	src/campaign.c	/^int init_campaign(\/*@out@*\/ struct campaign *target)$/;"	f	typeref:typename:int
 init_changable_menu	src/item_inventory_menu.c	/^static void init_changable_menu(\/*@out@*\/ struct changable_menu *target$/;"	f	typeref:typename:void	file:
 init_creature	src/creature.c	/^int init_creature(\/*@out@*\/ struct creature *target)$/;"	f	typeref:typename:int
@@ -147,20 +154,23 @@ init_material	src/grid.c	/^int init_material(\/*@out@*\/ struct material *target
 init_note	src/note.c	/^int init_note(\/*@out@*\/ struct note *target)$/;"	f	typeref:typename:int
 init_p_note	src/note.c	/^int init_p_note(\/*@out@*\/ struct p_note *target)$/;"	f	typeref:typename:int
 init_square	src/grid.c	/^int init_square(\/*@out@*\/ struct square *target)$/;"	f	typeref:typename:int
+init_ui	src/ui_v3.c	/^int init_ui(\/*@out@*\/ struct ui_windows *target_ui_windows)$/;"	f	typeref:typename:int
 inventory	include/main.h	/^    pos_null_item_ptr inventory[MAX_INVENTORY];$/;"	m	struct:creature	typeref:typename:pos_null_item_ptr[]
 inventory	include/main.h	/^    pos_null_item_ptr inventory[MAX_INVENTORY];$/;"	m	struct:item	typeref:typename:pos_null_item_ptr[]
+inventory	src/item_inventory_menu.c	/^    \/*@temp@*\/ pos_null_item_ptr *inventory;$/;"	m	struct:seperated_inventory	typeref:typename:pos_null_item_ptr *	file:
 inventory_len	include/main.h	/^    int inventory_len;$/;"	m	struct:creature	typeref:typename:int
 inventory_len	include/main.h	/^    int inventory_len;$/;"	m	struct:item	typeref:typename:int
+inventory_len	src/item_inventory_menu.c	/^    \/*@temp@*\/ int *inventory_len;$/;"	m	struct:seperated_inventory	typeref:typename:int *	file:
+inventory_menu	src/item_inventory_menu.c	/^void inventory_menu(struct campaign *target_campaign$/;"	f	typeref:typename:void
 is_wall	include/main.h	/^    bool is_wall;$/;"	m	struct:square	typeref:typename:bool
 item	include/main.h	/^struct item {$/;"	s
 item_creation_menu	src/creation_menus.c	/^int item_creation_menu(struct campaign *target_campaign)$/;"	f	typeref:typename:int
-item_inventory_menu	src/item_inventory_menu.c	/^void item_inventory_menu(struct campaign *target_campaign$/;"	f	typeref:typename:void
 item_list	include/main.h	/^    struct item item_list[MAX_SAVED_ITEMS];$/;"	m	struct:campaign	typeref:struct:item[]
 item_list_len	include/main.h	/^    int item_list_len;$/;"	m	struct:campaign	typeref:typename:int
 items	include/main.h	/^    pos_null_item_ptr items[MAX_ITEMS]; \/\/ pointer to items in master list$/;"	m	struct:square	typeref:typename:pos_null_item_ptr[]
 len	include/main.h	/^    int len;$/;"	m	struct:note	typeref:typename:int
 load_campaign	src/campaign.c	/^void load_campaign(struct campaign *target_campaign)$/;"	f	typeref:typename:void
-load_creature_inventory	src/campaign.c	/^void load_creature_inventory(struct campaign *target_campaign$/;"	f	typeref:typename:void
+load_creature_inventory	src/campaign.c	/^static void load_creature_inventory(struct campaign *target_campaign$/;"	f	typeref:typename:void	file:
 load_debug	src/main.c	/^\/*@unused@*\/ static void load_debug()$/;"	f	typeref:typename:void	file:
 load_grid_creature_ptrs	src/campaign.c	/^void load_grid_creature_ptrs(struct campaign *target_campaign$/;"	f	typeref:typename:void
 load_grid_item_ptrs	src/campaign.c	/^void load_grid_item_ptrs(struct campaign *target_campaign$/;"	f	typeref:typename:void
@@ -171,6 +181,7 @@ log_info	include/dbg.h	/^#define log_info(/;"	d
 log_warn	include/dbg.h	/^#define log_warn(/;"	d
 main	src/main.c	/^int main(\/*@unused@*\/ int argc, \/*@unused@*\/ char *argv[])$/;"	f	typeref:typename:int
 main_menu	src/main_menu.c	/^int main_menu(struct campaign *target_campaign)$/;"	f	typeref:typename:int
+main_win	include/main.h	/^    WINDOW *main_win;$/;"	m	struct:ui_windows	typeref:typename:WINDOW *
 material	include/main.h	/^    \/*@null@*\/ \/*@dependent@*\/ struct material *material;$/;"	m	struct:square	typeref:struct:material *
 material	include/main.h	/^struct material {$/;"	s
 material_creation_menu	src/creation_menus.c	/^void material_creation_menu(struct campaign *target_campaign)$/;"	f	typeref:typename:void
@@ -194,6 +205,7 @@ name_len	include/main.h	/^    int name_len;$/;"	m	struct:creature	typeref:typena
 name_len	include/main.h	/^    int name_len;$/;"	m	struct:item	typeref:typename:int
 name_len	include/main.h	/^    int name_len;$/;"	m	struct:material	typeref:typename:int
 ncurses_error	src/item_inventory_menu.c	/^static void ncurses_error(WINDOW *win, int y, int x, const char *name, int return_val)$/;"	f	typeref:typename:void	file:
+next_empty_creature	include/main.h	/^    int next_empty_creature;$/;"	m	struct:campaign	typeref:typename:int
 next_empty_item	include/main.h	/^    int next_empty_item; \/\/ points to the index of the next empty item$/;"	m	struct:campaign	typeref:typename:int
 next_empty_material	include/main.h	/^    int next_empty_material;$/;"	m	struct:campaign	typeref:typename:int
 note	include/main.h	/^    struct note note;$/;"	m	struct:campaign	typeref:struct:note
@@ -206,6 +218,7 @@ null_void_ptr	src/campaign.c	/^typedef \/*@null@*\/ void * null_void_ptr;$/;"	t	
 num_creatures	include/main.h	/^    int num_creatures; \/\/ current number of creatures on this square$/;"	m	struct:square	typeref:typename:int
 num_inv_items	include/main.h	/^    int num_inv_items; \/\/ number of items in the inventory$/;"	m	struct:creature	typeref:typename:int
 num_inv_items	include/main.h	/^    int num_inv_items; \/\/ number of items in the inventory$/;"	m	struct:item	typeref:typename:int
+num_inv_items	src/item_inventory_menu.c	/^    \/*@temp@*\/ int *num_inv_items;$/;"	m	struct:seperated_inventory	typeref:typename:int *	file:
 old_cursor	include/main.h	/^    struct coord old_cursor;$/;"	m	struct:grid_editor	typeref:struct:coord
 p_note	include/main.h	/^struct p_note {$/;"	s
 p_note_creation_menu	src/creation_menus.c	/^void p_note_creation_menu(struct campaign *target_campaign$/;"	f	typeref:typename:void
@@ -227,12 +240,15 @@ save_grid_ptrs	src/campaign.c	/^void save_grid_ptrs(struct campaign *target_camp
 save_inventories	src/campaign.c	/^static void save_inventories(struct campaign *target_campaign$/;"	f	typeref:typename:void	file:
 selected_array	src/item_inventory_menu.c	/^    int selected_array;$/;"	m	struct:changable_menu	typeref:typename:int	file:
 sentinel	include/dbg.h	/^#define sentinel(/;"	d
+seperated_inventory	src/item_inventory_menu.c	/^struct seperated_inventory {$/;"	s	file:
+seperator	include/main.h	/^    WINDOW *seperator;$/;"	m	struct:ui_windows	typeref:typename:WINDOW *
 set_changable_menu	src/item_inventory_menu.c	/^static void set_changable_menu(struct changable_menu *target$/;"	f	typeref:typename:void	file:
 square	include/main.h	/^struct square {$/;"	s
 squares	include/main.h	/^    struct square squares[GRID_Y][GRID_X];$/;"	m	struct:grid	typeref:struct:square[][]
 start_campaign	src/new_campaign_menus.c	/^int start_campaign(\/*@unused@*\/ struct campaign *target_campaign)$/;"	f	typeref:typename:int
 start_encounter	src/new_campaign_menus.c	/^int start_encounter(struct campaign *target_campaign)$/;"	f	typeref:typename:int
 start_menu	src/start_menu.c	/^int start_menu()$/;"	f	typeref:typename:int
+start_menu_desc	src/start_menu.c	/^static char *start_menu_desc[] = {$/;"	v	typeref:typename:char * []	file:
 start_menu_options	src/start_menu.c	/^static char *start_menu_options[] = {$/;"	v	typeref:typename:char * []	file:
 string	include/main.h	/^    char string[MAX_NOTE];$/;"	m	struct:note	typeref:typename:char[]
 sub_window	src/item_inventory_menu.c	/^    \/*@temp@*\/ WINDOW *sub_window; \/\/ associated sub window$/;"	m	struct:changable_menu	typeref:typename:WINDOW *	file:
@@ -240,6 +256,8 @@ target_grid	include/main.h	/^    \/*@temp@*\/ struct grid *target_grid;$/;"	m	st
 target_win	include/main.h	/^    \/*@temp@*\/ WINDOW *target_win;$/;"	m	struct:grid_editor	typeref:typename:WINDOW *
 test_debug	src/main.c	/^\/*@unused@*\/ static void test_debug()$/;"	f	typeref:typename:void	file:
 transfer_item	src/item_inventory_menu.c	/^static void transfer_item(struct changable_menu *source,$/;"	f	typeref:typename:void	file:
+ui_windows	include/main.h	/^struct ui_windows {$/;"	s
+update_ui	src/ui_v3.c	/^int update_ui(struct ui_windows *target_ui_windows)$/;"	f	typeref:typename:int
 weight	include/main.h	/^    int weight;$/;"	m	struct:item	typeref:typename:int
 window	src/item_inventory_menu.c	/^    \/*@temp@*\/ WINDOW *window;$/;"	m	struct:changable_menu	typeref:typename:WINDOW *	file:
 x	include/main.h	/^    int x;$/;"	m	struct:coord	typeref:typename:int

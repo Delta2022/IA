@@ -1,5 +1,7 @@
 #include "../include/main.h"
 
+#define MAIN_WIN_SPACE LINES * 3/4
+
 int creature_creation_menu(struct campaign *target_campaign)
     // TODO add another window for the grid editor, perhaps
     // a popup
@@ -28,7 +30,7 @@ int creature_creation_menu(struct campaign *target_campaign)
     (void) mvprintw(4, 0, "Notes: ");
 
     // ----- get information about the character
-    (void) get_multi_input(dest, 3, max_lens, text_pos);
+    (void) get_multi_input(stdscr, dest, 3, max_lens, text_pos);
 
     // ----- convert the print_char_string into a char and save it into
         // the creature
@@ -124,7 +126,7 @@ int item_creation_menu(struct campaign *target_campaign)
         (void) mvprintw(2, 0, "Char: ");
         (void) mvprintw(4, 0, "Notes: ");
 
-        (void) get_multi_input(pointer_array, 3, max_lens, text_pos);
+        (void) get_multi_input(stdscr, pointer_array, 3, max_lens, text_pos);
 
         c = getch();
 
@@ -163,23 +165,49 @@ void p_note_creation_menu(struct campaign *target_campaign
     int max_lens[1] = {target_p_note->note.len};
 
     (void) mvprintw(0, 0, "Notes");
-    (void) get_multi_input(pointer_array, 1, max_lens, text_pos);
+    (void) get_multi_input(stdscr, pointer_array, 1, max_lens, text_pos);
 
     (void) erase();
 }
 
 void material_creation_menu(struct campaign *target_campaign)
 {
+    // ----- initialize windows
+    struct ui_windows ui;
+    if (init_ui(&ui, 0) == -1) {
+        return;
+    }
+
+    // ----- write values to info_win
+    // info_win
+    (void) wattron(ui.info_win, A_UNDERLINE);
+    (void) mvwprintw(ui.info_win, 0, 0, "Create Materials");
+    (void) wattroff(ui.info_win, A_UNDERLINE);
+
+
+    // -----
     /*@null@*/ struct material *target_material = NULL;
     int c = 0;
 
     while (true) {
+
         // check if there is space
         if (target_campaign->next_empty_material
             == target_campaign->material_list_len) {
             break;
         }
 
+        // ----- write commands to commands_win
+        (void) mvwprintw(ui.commands_win, 0, 0, "Commands");
+        (void) mvwprintw(ui.commands_win, 1, 0, "Up arrow/down arrow:"
+            " traverse through input fields");
+        (void) mvwprintw(ui.commands_win, 2, 0, "F2: submit information");
+        (void) mvwprintw(ui.commands_win, 3, 0, "Note: only characters"
+            " a-z and A-Z are allowed.");
+
+        update_ui(&ui);
+
+        // ----- get user input for text
         target_material = &target_campaign->material_list
             [target_campaign->next_empty_material++];
 
@@ -193,24 +221,38 @@ void material_creation_menu(struct campaign *target_campaign)
             , target_material->desc_len, 2, target_material->note.len};
         int text_pos[4] = {1, 3, 5, 7};
 
-        (void) mvprintw(0, 0, "Name");
-        (void) mvprintw(2, 0, "Description");
-        (void) mvprintw(4, 0, "Print character");
-        (void) mvprintw(6, 0, "Notes");
+        (void) mvwprintw(ui.main_win, 0, 0, "Name");
+        (void) mvwprintw(ui.main_win, 2, 0, "Description");
+        (void) mvwprintw(ui.main_win, 4, 0, "Print character");
+        (void) mvwprintw(ui.main_win, 6, 0, "Notes");
 
-        (void) get_multi_input(pointer_array, 4, max_lens, text_pos);
+        (void) get_multi_input(ui.main_win, pointer_array, 4, max_lens
+            , text_pos);
 
         // move convert print_char_string from a string into a character
         target_material->print_char = print_char_string[0];
 
-        // prompt the user
-        c = getch();
+        // ----- get user input for creating more materials
+        // update commands
+        (void) werase(ui.commands_win);
+        (void) mvwprintw(ui.commands_win, 0, 0, "Commands");
+        (void) wattron(ui.commands_win, A_REVERSE);
+        (void) mvwprintw(ui.commands_win, 1, 0, "Keep creating"
+            " materials?");
+        (void) wattroff(ui.commands_win, A_REVERSE);
+        (void) mvwprintw(ui.commands_win, 2, 0, "F2: continue");
+        (void) mvwprintw(ui.commands_win, 3, 0, "any other character:"
+            " quit");
 
-        if (c == KEY_F(2)) {
+        update_ui(&ui);
+        // prompt the user
+        c = wgetch(ui.main_win);
+
+        if (c != KEY_F(2)) {
             break;
         }
-        (void) erase();
+        (void) werase(ui.main_win);
     }
 
-    (void) erase();
+    del_ui(&ui);
 }

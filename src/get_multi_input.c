@@ -1,7 +1,7 @@
 #include "../include/main.h"
 
-int get_multi_input(char **dest, int num_dest, int *buffer_max_lens
-    , int *text_pos)
+int get_multi_input(WINDOW *win, char **dest, int num_dest
+    , int *buffer_max_lens, int *text_pos)
 // TODO make it support other windows
 // TODO support jumping to jumps in the text
 // TODO add wrapping
@@ -65,18 +65,20 @@ int get_multi_input(char **dest, int num_dest, int *buffer_max_lens
 
     // ----- set up the cursor in its correct position 
         // and set cursor.y and cursor.x
-    (void) move(text_pos[0], 0);
-    cursor.y = getcury(stdscr);
-    cursor.x = getcurx(stdscr);
+    (void) wmove(win, text_pos[0], 0);
+    cursor.y = getcury(win);
+    cursor.x = getcurx(win);
 
     // ----- set current values
     current_buffer = buffers[cur_buffer];
     cur_buffer_index = &buffer_indices[cur_buffer];
     cur_buffer_cursor = &buffer_cursors[cur_buffer];
 
+    (void) wrefresh(win);
+
     // ----- input loop
     while (true) {
-        c = getch();
+        c = wgetch(win);
         // ----- exit condition
         if (c == KEY_F(2)) {
             break;
@@ -111,20 +113,20 @@ int get_multi_input(char **dest, int num_dest, int *buffer_max_lens
                     cursor.x--;
 
                     // --- update the screen NOTE: inefficient
-                    (void) move(cursor.y, 0);
-                    (void) clrtoeol();
+                    (void) wmove(win, cursor.y, 0);
+                    (void) wclrtoeol(win);
                     // set the last empty char as \0 for printing
                     current_buffer[*cur_buffer_index] = '\0';
-                    (void) printw("%s", current_buffer);
+                    (void) wprintw(win, "%s", current_buffer);
                     
                     // reset ncurses cursor position to the cursor
-                    (void) move(cursor.y, cursor.x);
+                    (void) wmove(win, cursor.y, cursor.x);
                     break;
                 }
                 
                 // ----- if we are at the end
-                (void) move(cursor.y, --cursor.x);
-                (void) delch();
+                (void) wmove(win, cursor.y, --cursor.x);
+                (void) wdelch(win);
 
                 (*cur_buffer_index)--; // delete a char 
                     // from temp like an hdd deletes data (by just
@@ -147,7 +149,7 @@ int get_multi_input(char **dest, int num_dest, int *buffer_max_lens
                         // new current buffer
                     cursor.y = text_pos[cur_buffer];
                     cursor.x = *cur_buffer_cursor;
-                    (void) move(cursor.y, cursor.x);
+                    (void) wmove(win, cursor.y, cursor.x);
                 }
                 break;
 
@@ -164,7 +166,7 @@ int get_multi_input(char **dest, int num_dest, int *buffer_max_lens
                         // the new current buffer
                     cursor.y = text_pos[cur_buffer];
                     cursor.x = *cur_buffer_cursor;
-                    (void) move(cursor.y, cursor.x);
+                    (void) wmove(win, cursor.y, cursor.x);
                 }
                 break;
 
@@ -174,7 +176,7 @@ int get_multi_input(char **dest, int num_dest, int *buffer_max_lens
 
                     cursor.y = text_pos[cur_buffer];
                     cursor.x = *cur_buffer_cursor;
-                    (void) move(cursor.y, cursor.x);
+                    (void) wmove(win, cursor.y, cursor.x);
                 }
                 break;
                 
@@ -184,7 +186,7 @@ int get_multi_input(char **dest, int num_dest, int *buffer_max_lens
 
                     cursor.y = text_pos[cur_buffer];
                     cursor.x = *cur_buffer_cursor;
-                    (void) move(cursor.y, cursor.x);
+                    (void) wmove(win, cursor.y, cursor.x);
                 }
                 break;
 
@@ -234,16 +236,16 @@ int get_multi_input(char **dest, int num_dest, int *buffer_max_lens
 
                     // reprint on the line
                     current_buffer[*cur_buffer_index] = '\0';
-                    (void) move(cursor.y, 0);
-                    (void) clrtoeol();
-                    (void) printw("%s", current_buffer);
-                    (void) move(cursor.y, cursor.x);
+                    (void) wmove(win, cursor.y, 0);
+                    (void) wclrtoeol(win);
+                    (void) wprintw(win, "%s", current_buffer);
+                    (void) wmove(win, cursor.y, cursor.x);
                     break;
                 }
 
                 // ----- if we are at the end
                 // add to window
-                (void) addch((chtype) c_char);
+                (void) waddch(win, (chtype) c_char);
 
                 // set the current buffer's empty position to the
                     // character and update the buffer's cursor
@@ -260,6 +262,9 @@ int get_multi_input(char **dest, int num_dest, int *buffer_max_lens
         //  , buffer_max_lens[cur_buffer]);
         //(void) move(cursor.y, cursor.x);
         //(void) refresh();
+
+        // ----- refresh screen (maybe not needed?)
+        //wrefresh(win);
     }
 
     // ----- null terminate string and save it to dest
