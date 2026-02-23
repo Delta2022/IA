@@ -661,3 +661,15 @@ void load_campaign(struct campaign *target_campaign)
     (void) fclose(creature_inv_file);
     (void) fclose(binary_file);
 }
+
+void mvwdisplay_campaign_info(WINDOW *win, int y, int x
+    , struct campaign *target_campaign)
+    // displays information about a campaign
+{
+    (void) werase(win);
+    (void) mvwprintw(win, y, x, "Campaign info:");
+    (void) mvwprintw(win, y + 1, x, "Name: \"%s\""
+        , target_campaign->name);
+    (void) mvwprintw(win, y + 2, x, "Notes: \"%s\""
+        , target_campaign->note.string);
+}

@@ -4,7 +4,7 @@
 // these place the vertical and horizontal seperator in the window
     // the position is the distance from 0, 0
 #define V_SEP_POS COLS * 2 / 3
-#define H_SEP_POS LINES * 2 / 3
+#define H_SEP_POS LINES * 2 / 3 - 1
 
 int main_menu(struct campaign *target_campaign)
     // does NOT use ui_v3
@@ -26,16 +26,20 @@ int main_menu(struct campaign *target_campaign)
     int return_val = 0;
     int c = -1;
     struct coord grid_end;
-    WINDOW *grid_win;
     GRID_EDITOR grid_editor;
+    WINDOW *grid_win;
     WINDOW *data_win;
+    WINDOW *info_win;
     /*@unused@*/ WINDOW *p_note_win;
 
     WINDOW *v_sep;
     WINDOW *h_sep;
-    WINDOW *info_win;
+    WINDOW *detailed_data_win;
     WINDOW *commands_win;
 
+    struct coord cursor = {0, 0};
+    /*@null@*/ struct material *target_material = NULL;
+    struct square *target_square;
     // ----- hide the cursor (its not needed)
     (void) curs_set(0);
     // NOTE newwin positions were found experimentally
@@ -43,7 +47,9 @@ int main_menu(struct campaign *target_campaign)
     // ----- init windows (numbers found mostly through trial and error)
     info_win = newwin(1, 0, 0, 0);
     grid_win = newwin(H_SEP_POS - 1, V_SEP_POS, 1, 0);
-    data_win = newwin(H_SEP_POS - 1, 0, 1, V_SEP_POS + 1);
+    data_win = newwin(0, 0, H_SEP_POS + 1, V_SEP_POS + 1);
+    detailed_data_win = newwin(H_SEP_POS - 1, 0, 1, V_SEP_POS + 1);
+    
 
     commands_win = newwin(0, V_SEP_POS, H_SEP_POS + 1, 0);
     v_sep = newwin(0, 1, 1, V_SEP_POS);
@@ -59,6 +65,7 @@ int main_menu(struct campaign *target_campaign)
     //(void) box(commands_win, 0, 0);
     //(void) box(grid_win, 0, 0);
     //(void) box(data_win, 0, 0);
+    //(void) box(detailed_data_win, 0, 0);
     //(void) box(v_sep, 0, 0);
     //(void) box(h_sep, 0, 0);
 
@@ -69,6 +76,7 @@ int main_menu(struct campaign *target_campaign)
     //(void) wnoutrefresh(v_sep);
     //(void) wnoutrefresh(h_sep);
     //(void) wnoutrefresh(data_win);
+    //(void) wnoutrefresh(detailed_data_win);
     //(void) doupdate();
     //(void) getch();
 
@@ -85,34 +93,52 @@ int main_menu(struct campaign *target_campaign)
         // (h_sep is updated after v_sep)
     (void) mvwprintw(h_sep, 0, V_SEP_POS, "+");
 
-    // ----- put info information
-    (void) wattron(info_win, A_UNDERLINE);
-    (void) mvwprintw(info_win, 0, 0, "Main Menu");
-    (void) wattroff(info_win, A_UNDERLINE);
 
     // ----- put commands information
-    (void) mvwprintw(commands_win, 0, 0, "Movement Commands:");
-    (void) mvwprintw(commands_win, 1, 0, "Arrow keys: move cursor");
-    (void) mvwprintw(commands_win, 2, 0, "WASD: move grid around");
-
-    (void) mvwprintw(commands_win, 0, 30, "Commands:");
-    (void) mvwprintw(commands_win, 1, 30, "c: create new creature");
-    (void) mvwprintw(commands_win, 2, 30, "p: create new positional note");
-    (void) mvwprintw(commands_win, 3, 30, "i: create new item");
-    (void) mvwprintw(commands_win, 4, 30, "m: create new material");
-    (void) mvwprintw(commands_win, 5, 30, "M: repaint materials on grid");
 
     while (true) {
+        cursor = get_cursor(&grid_editor);
+        target_square = &target_campaign->encounter_grid
+                .squares[cursor.y][cursor.x];
+        // ----- put info information
+        (void) wmove(info_win, 0, 0);
+        (void) wclrtoeol(info_win);
+        (void) wattron(info_win, A_UNDERLINE);
+        (void) mvwprintw(info_win, 0, 0, "Main Menu");
+        (void) mvwprintw(info_win, 0, V_SEP_POS + 1, "cursor: (%d, %d)"
+            , cursor.x, cursor.y);
+        (void) wattroff(info_win, A_UNDERLINE);
+        (void) mvwprintw(info_win, 0, V_SEP_POS, "|", cursor.x, cursor.y);
         // ----- update the data section
-        struct coord cursor = get_cursor(&grid_editor);
         (void) werase(data_win);
-        mvdisplay_square_info(data_win, 0, 0
-            , &target_campaign->encounter_grid
-                .squares[cursor.y][cursor.x]);
+        mvwdisplay_square_info(data_win, 0, 0
+            , target_square);
+
+        // ----- put command information
+        (void) werase(commands_win);
+        (void) mvwprintw(commands_win, 0, 0, "Movement Commands:");
+        (void) mvwprintw(commands_win, 1, 0, "Arrow keys: move cursor");
+        (void) mvwprintw(commands_win, 2, 0, "WASD: move grid around");
+
+        (void) mvwprintw(commands_win, 0, 30, "Commands:");
+        (void) mvwprintw(commands_win, 1, 30, "c: create new creature");
+        (void) mvwprintw(commands_win, 2, 30, "p: create new positional"
+            " note");
+        (void) mvwprintw(commands_win, 3, 30, "i: create new item");
+        (void) mvwprintw(commands_win, 4, 30, "m: create new material");
+        (void) mvwprintw(commands_win, 5, 30, "e: repaint materials"
+            " on grid");
+        (void) mvwprintw(commands_win, 5, 30, "q: display campaign"
+            " information");
+        (void) mvwprintw(commands_win, 6, 30, "M: display material"
+            " information at cursor");
+        (void) mvwprintw(commands_win, 7, 30, "C: display creature"
+            " information at cursor");
         // ----- update the screen
         (void) wnoutrefresh(stdscr);
         (void) wnoutrefresh(info_win);
         (void) wnoutrefresh(commands_win);
+        (void) wnoutrefresh(detailed_data_win);
         (void) wnoutrefresh(grid_win);
         (void) wnoutrefresh(v_sep);
         (void) wnoutrefresh(h_sep);
@@ -167,23 +193,71 @@ int main_menu(struct campaign *target_campaign)
             case 'i': // new item
                 return_val = ITEM_CREATION;
                 goto exit;
-            case 'm':
+            case 'm': // new material
                 return_val = MATERIAL_CREATION;
                 goto exit;
-            case 'M':
+            case 'e': // repaint material
                 return_val = REPAINT_MATERIALS;
                 goto exit;
             case 'q': // campaign info
+                mvwdisplay_campaign_info(detailed_data_win, 0, 0
+                    , target_campaign);
                 break;
+            case 'o': // move creature
+                return_val = MOVE_CREATURE;
+                goto exit;
+            case 'M': // material info
+                target_material = target_square->material;
+                mvwdisplay_material_info(detailed_data_win, 0, 0
+                    , cursor, target_material);
+                break;
+            case 'C':
+                // not great programming right now
+                // print all characters
+                (void) werase(detailed_data_win);
+                if (target_square->num_creatures == 1) {
+                    mvwdisplay_creature_info(detailed_data_win, 0, 0
+                        , cursor, target_square->creatures[0]);
+                    (void) wnoutrefresh(detailed_data_win);
+                    (void) doupdate();
+                    break;
+                }
+
+                list_square_creatures(detailed_data_win, 0, 0
+                    , target_square);
+                // update commands_win
+                (void) werase(commands_win);
+                (void) mvwprintw(commands_win, 0, 0, "Commands:");
+                (void) wattron(commands_win, A_REVERSE);
+                (void) mvwprintw(commands_win, 1, 0, "type a number"
+                    " to select a character");
+                (void) mvwprintw(commands_win, 2, 0, "type any other"
+                    " character to skip");
+                (void) wattroff(commands_win, A_REVERSE);
+                (void) wnoutrefresh(commands_win);
+                (void) wnoutrefresh(detailed_data_win);
+                (void) doupdate();
+
+                // get input
+                c = getch();
+                c -= (int) '0';
+                if (c < 0 || c >= target_square->num_creatures) {
+                    break;
+                }
+                mvwdisplay_creature_info(detailed_data_win, 0, 0
+                    , cursor, target_square->creatures[c]);
         }
     }
 
 exit:
     // ----- delete windows
+    (void) delwin(info_win);
+    (void) delwin(commands_win);
     (void) delwin(grid_win);
+    (void) delwin(data_win);
+    (void) delwin(detailed_data_win);
     (void) delwin(v_sep);
     (void) delwin(h_sep);
-    (void) delwin(data_win);
     
     // ----- clear screen
     (void) erase();

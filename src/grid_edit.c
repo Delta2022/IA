@@ -46,6 +46,10 @@ int init_grid_editor(/*@out@*/GRID_EDITOR *target_ge
     target_ge->target_grid = target_grid;
     target_ge->target_win = target_win;
     target_ge->is_materials_only = is_materials_only;
+
+    // ----- place cursor
+    mvwchgat(target_win
+        , cursor->y, cursor->x, 1, A_REVERSE, 0, NULL);
     return 0;
 }
 
@@ -199,9 +203,14 @@ int grid_editor_driver(GRID_EDITOR *target_ge
             mvprintw_square(cursor->y, cursor->x
                 , cursor_square, target_win, is_materials_only);
             break;
+        // ----- update entire grid on screen
+        case UPDATE_GRID:
+            (void) print_grid(target_grid, target_win
+                , *grid_start, *grid_end, is_materials_only);
+            break;
     }
 
-    // ----- update the grid
+    // ----- update the cursor 
     mvwchgat(target_win
         , cursor->y, cursor->x, 1, A_REVERSE, 0, NULL);
 

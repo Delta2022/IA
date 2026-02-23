@@ -36,6 +36,7 @@
 #define SET_MAT         8
 #define PLACE_CHAR      9
 #define TOGGLE_WALL     10
+#define UPDATE_GRID     11
 
 
 //struct func_pointer {
@@ -96,6 +97,7 @@ struct square {
     int max_creatures; // maximum amount of creatures that can be added
     int num_creatures; // current number of creatures on this square
 
+    // items are not used right now
     pos_null_item_ptr items[MAX_ITEMS]; // pointer to items in master list
     int max_items;
     //int num_items; // include if neccessary
@@ -212,7 +214,7 @@ int init_grid_editor(/*@out@*/GRID_EDITOR *target_ge
     , struct grid *target_grid
     , struct coord grid_end, WINDOW *target_win, bool is_materials_only);
 int main_menu(struct campaign *target_campaign);
-void mvdisplay_square_info(WINDOW *target_window, int y, int x
+void mvwdisplay_square_info(WINDOW *target_window, int y, int x
     , struct square *target_square);
 struct coord get_cursor(GRID_EDITOR *target);
 void save_grid_ptrs(struct campaign *target_campaign
@@ -243,3 +245,14 @@ int init_ui(/*@out@*/ struct ui_windows *target_ui_windows
     , int main_win_space);
 void update_ui(struct ui_windows *target_ui_windows);
 void del_ui(struct ui_windows *target_ui_windows);
+void mvwdisplay_campaign_info(WINDOW *win, int y, int x
+    , struct campaign *target_campaign);
+void mvwdisplay_material_info(WINDOW *win, int y, int x
+    , struct coord cursor_pos
+    , /*@null@*/ struct material *target_material);
+void mvwdisplay_creature_info(WINDOW *win, int y, int x
+    , struct coord cursor_pos
+    , /*@null@*/ struct creature *target_creature);
+void list_square_creatures(WINDOW *win, int y, int x
+    , struct square *target_square);
+void move_menu(struct campaign *target_campaign);

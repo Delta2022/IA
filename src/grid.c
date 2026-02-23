@@ -250,7 +250,7 @@ int print_grid(struct grid *target_grid, WINDOW *target_window
     return 0;    
 }
 
-void mvdisplay_square_info(WINDOW *target_window, int y, int x
+void mvwdisplay_square_info(WINDOW *target_window, int y, int x
     , struct square *target_square)
     // displays a square's data onto a window at position y, x
     // TODO handle too much data
@@ -283,6 +283,39 @@ void mvdisplay_square_info(WINDOW *target_window, int y, int x
         , target_square->is_wall ? "wall" : "");
 }
 
+void mvwdisplay_material_info(WINDOW *win, int y, int x
+    , struct coord cursor_pos, /*@null@*/ struct material *target_material)
+{
+    (void) werase(win);
+    (void) mvwprintw(win, y, x
+        , "Material info at (%d, %d):", cursor_pos.x, cursor_pos.y);
+    if (target_material == NULL) {
+        (void) mvwprintw(win, y + 1, x, "Nothing there.");
+        return;
+    }
+    (void) mvwprintw(win, y + 1, x
+        , "Name: \"%s\"", target_material->name);
+    (void) mvwprintw(win, y + 2, x
+        , "Description: \"%s\"", target_material->desc);
+    (void) mvwprintw(win, y + 4, x
+        , "Print Character: '%c'", target_material->print_char);
+    (void) mvwprintw(win, y + 5, x
+        , "Notes: \"%s\"", target_material->note.string);
+}
+
+void list_square_creatures(WINDOW *win, int y, int x
+    , struct square *target_square)
+    // lists all of the creatures in a square with its own number
+{
+    for (int i = 0; i < target_square->num_creatures
+        ; i++) {
+        if (target_square->creatures[i] == NULL) {
+            continue;
+        }
+        (void) mvwprintw(win, y + i, x, "%d: %s"
+            , i, target_square->creatures[i]->name);
+    }
+}
 
 /*
 int print_grid(struct grid *target_grid, WINDOW *target_window

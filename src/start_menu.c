@@ -199,9 +199,13 @@ int run_main_menu_function(int function_index
                 break;
             case REPAINT_MATERIALS:
                 (void) start_encounter(target_campaign);
+                break;
+            case MOVE_CREATURE:
+                (void) move_menu(target_campaign);
+                break;
         }
     }
 
-    save_campaign(target_campaign);
+    //save_campaign(target_campaign);
     return 0;
 }
