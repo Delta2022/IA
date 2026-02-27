@@ -116,24 +116,30 @@ int main_menu(struct campaign *target_campaign)
 
         // ----- put command information
         (void) werase(commands_win);
-        (void) mvwprintw(commands_win, 0, 0, "Movement Commands:");
+        (void) mvwprintw(commands_win, 0, 0, "Commands:");
         (void) mvwprintw(commands_win, 1, 0, "Arrow keys: move cursor");
         (void) mvwprintw(commands_win, 2, 0, "WASD: move grid around");
 
+        (void) mvwprintw(commands_win, 3, 0, "o: move creatures around");
+        (void) mvwprintw(commands_win, 4, 0, "m: edit creatures/materials");
+
+        (void) mvwprintw(commands_win, 5, 0, "c: create new creature");
+        (void) mvwprintw(commands_win, 6, 0, "i: create new item");
+        (void) mvwprintw(commands_win, 7, 0, "m: create new material");
+
         (void) mvwprintw(commands_win, 0, 30, "Commands:");
-        (void) mvwprintw(commands_win, 1, 30, "c: create new creature");
-        (void) mvwprintw(commands_win, 2, 30, "p: create new positional"
+        (void) mvwprintw(commands_win, 1, 30, "p: edit/create new positional"
             " note");
-        (void) mvwprintw(commands_win, 3, 30, "i: create new item");
-        (void) mvwprintw(commands_win, 4, 30, "m: create new material");
-        (void) mvwprintw(commands_win, 5, 30, "e: repaint materials"
+        (void) mvwprintw(commands_win, 2, 30, "r: repaint materials"
             " on grid");
-        (void) mvwprintw(commands_win, 5, 30, "q: display campaign"
+        (void) mvwprintw(commands_win, 3, 30, "q: display campaign"
             " information");
-        (void) mvwprintw(commands_win, 6, 30, "M: display material"
+        (void) mvwprintw(commands_win, 4, 30, "M: display material"
             " information at cursor");
-        (void) mvwprintw(commands_win, 7, 30, "C: display creature"
+        (void) mvwprintw(commands_win, 5, 30, "C: display creature"
             " information at cursor");
+        (void) mvwprintw(commands_win, 6, 30, "P: display positional"
+            " note at cursor");
         // ----- update the screen
         (void) wnoutrefresh(stdscr);
         (void) wnoutrefresh(info_win);
@@ -196,7 +202,7 @@ int main_menu(struct campaign *target_campaign)
             case 'm': // new material
                 return_val = MATERIAL_CREATION;
                 goto exit;
-            case 'e': // repaint material
+            case 'r': // repaint material
                 return_val = REPAINT_MATERIALS;
                 goto exit;
             case 'q': // campaign info
@@ -206,6 +212,13 @@ int main_menu(struct campaign *target_campaign)
             case 'o': // move creature
                 return_val = MOVE_CREATURE;
                 goto exit;
+            case 'e': // edit positions
+                return_val = EDIT_MENU;
+                goto exit;
+            case 'P':
+                mvwdisplay_square_note_info(detailed_data_win, 0, 0
+                    , target_square, cursor);
+                break;
             case 'M': // material info
                 target_material = target_square->material;
                 mvwdisplay_material_info(detailed_data_win, 0, 0

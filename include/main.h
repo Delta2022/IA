@@ -102,6 +102,8 @@ struct square {
     int max_items;
     //int num_items; // include if neccessary
     int movement_modifier; // usually 1 if in difficult terrain
+
+    struct note note;
 };
 
 struct p_note {
@@ -130,9 +132,9 @@ struct grid {
     struct coord grid_start;
     struct coord cursor;
 
-    struct p_note p_notes[MAX_PNOTES];
-    int p_note_len;
-    int p_note_next_empty;
+    //struct p_note p_notes[MAX_PNOTES];
+    //int p_note_len;
+    //int p_note_next_empty;
 
     int x_scale; // the ft that a square is (normally 5ft)
     int y_scale;
@@ -200,7 +202,8 @@ int get_multi_input(WINDOW *win, char **dest, int num_dest
 int start_encounter(struct campaign *target_campaign);
 void mvprintw_square(int y, int x, struct square *target
     , WINDOW *restrict window, bool is_materials_only);
-int creature_creation_menu(struct campaign *target_campaign);
+int creature_creation_menu(struct campaign *target_campaign
+    , /*@null@*/ struct creature *target_creature, bool is_skip_placement);
 int init_creature(/*@out@*/ struct creature *target);
 int print_grid(struct grid *target_grid, WINDOW *target_window
     , struct coord start_point, struct coord end_point
@@ -226,7 +229,8 @@ void load_grid_creature_ptrs(struct campaign *target_campaign
     , FILE *restrict material_file);
 void init_item(/*@out@*/ struct item *target);
 void debug_item(/*@null@*/ struct item *target, int tabs, FILE *format);
-int item_creation_menu(struct campaign *target_campaign);
+int item_creation_menu(struct campaign *target_campaign
+    , /*@null@*/ struct item *target_item);
 void inventory_menu(struct campaign *target_campaign
     , /*@null@*/ struct item *target_item
     , /*@null@*/ struct creature *target_creature);
@@ -236,8 +240,9 @@ void save_item_inventory(struct campaign *target_campaign
     , FILE *restrict item_file);
 int run_main_menu_function(int function_index
     , struct campaign *target_campaign);
-void material_creation_menu(struct campaign *target_campaign);
-void p_note_creation_menu(struct campaign *target_campaign
+void material_creation_menu(struct campaign *target_campaign
+    , /*@null@*/ struct material *target_material);
+void square_note_creation_menu(struct campaign *target_campaign
     , struct coord position);
 void load_campaign(struct campaign *target_campaign);
 void save_campaign(struct campaign *target_campaign);
@@ -256,3 +261,10 @@ void mvwdisplay_creature_info(WINDOW *win, int y, int x
 void list_square_creatures(WINDOW *win, int y, int x
     , struct square *target_square);
 void move_menu(struct campaign *target_campaign);
+void edit_menu(struct campaign *target_campaign);
+int change_window(GRID_EDITOR *target, WINDOW *win);
+/*@temp@*/ /*@null@*/ struct p_note *find_p_note(struct grid *target_grid
+    , struct coord target_position);
+struct coord get_grid_cursor(struct grid *target);
+void mvwdisplay_square_note_info(WINDOW *win, int y, int x
+    , struct square *target_square, struct coord cursor_pos);

@@ -271,7 +271,7 @@ static void load_creature_inventory(struct campaign *target_campaign
     if (char_buffer == NULL)
         return;
 
-    char_buffer = memset(char_buffer, 0, sizeof(char_buffer));
+    char_buffer = memset(char_buffer, 0, char_buffer_len * sizeof(*char_buffer));
 
     // ----- read from file
     while (true) {
@@ -343,7 +343,7 @@ void load_item_inventory(struct campaign *target_campaign
     if (char_buffer == NULL)
         return;
 
-    char_buffer = memset(char_buffer, 0, sizeof(char_buffer));
+    char_buffer = memset(char_buffer, 0, char_buffer_len * sizeof(*char_buffer));
 
     // ----- read from file
     while (true) {
@@ -415,7 +415,7 @@ void load_grid_material_ptrs(struct campaign *target_campaign
     if (char_buffer == NULL)
         return;
 
-    char_buffer = memset(char_buffer, 0, sizeof(char_buffer));
+    char_buffer = memset(char_buffer, 0, char_buffer_len * sizeof(*char_buffer));
 
     // ----- read from file
     while (true) {
@@ -468,7 +468,7 @@ void load_grid_creature_ptrs(struct campaign *target_campaign
     if (char_buffer == NULL)
         return;
 
-    char_buffer = memset(char_buffer, 0, sizeof(char_buffer));
+    char_buffer = memset(char_buffer, 0, char_buffer_len * sizeof(*char_buffer));
 
     // ----- read from file
     while (true) {
@@ -534,7 +534,7 @@ void load_grid_item_ptrs(struct campaign *target_campaign
     if (char_buffer == NULL)
         return;
 
-    char_buffer = memset(char_buffer, 0, sizeof(char_buffer));
+    char_buffer = memset(char_buffer, 0, char_buffer_len * sizeof(*char_buffer));
 
     // ----- read from file
     while (true) {

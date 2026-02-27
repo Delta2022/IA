@@ -5,3 +5,4 @@
 #define MATERIAL_CREATION   4
 #define REPAINT_MATERIALS   5
 #define MOVE_CREATURE       6
+#define EDIT_MENU           7

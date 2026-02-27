@@ -2,12 +2,13 @@
 
 int get_multi_input(WINDOW *win, char **dest, int num_dest
     , int *buffer_max_lens, int *text_pos)
-// TODO make it support other windows
+// NOTE: theoretically supports editing values
 // TODO support jumping to jumps in the text
 // TODO add wrapping
-// TODO allow vertical traverse of text
 // TODO rename cur_buffer to be different from current_buffer
+    // prompts the user to input multiple lines of text
     // dest is an array of pointers to the destinations to write to
+        // dest must be a proper string or already zeroed out
     // num_dest is the length of dest 
         //(the number of destinations there are)
     // buffer_max_lens is the maximum number of characters to write 
@@ -63,16 +64,43 @@ int get_multi_input(WINDOW *win, char **dest, int num_dest
     (void) memset(buffer_indices, 0, sizeof(buffer_indices));
     (void) memset(buffer_cursors, 0, sizeof(buffer_cursors));
 
-    // ----- set up the cursor in its correct position 
-        // and set cursor.y and cursor.x
-    (void) wmove(win, text_pos[0], 0);
-    cursor.y = getcury(win);
-    cursor.x = getcurx(win);
-
     // ----- set current values
     current_buffer = buffers[cur_buffer];
     cur_buffer_index = &buffer_indices[cur_buffer];
     cur_buffer_cursor = &buffer_cursors[cur_buffer];
+
+    // ----- copy dest into buffers and find the length
+        // of the copied string
+    for (int i = 0; i < num_text; i++) {
+        // copy value (safely)
+        strncpy(buffers[i], dest[i]
+            , (size_t) buffer_max_lens[i]);
+        dest[i][buffer_max_lens[i] - 1] = '\0';
+
+        // set length
+        buffer_indices[i] = (int) strlen(buffers[i]);
+
+        // set cursor
+        if (buffer_indices[i] == 0) {
+            buffer_cursors[i] = 0;
+            continue;
+        }
+        buffer_cursors[i] = buffer_indices[i] - 1;
+            // cursor will default to the end of the
+            // line as i think that is the most
+            // useful position for the user
+    }
+
+    // ----- print any existing data in dest
+    for (int i = 0; i < num_text; i++) {
+        (void) mvwprintw(win, text_pos[i], 0, "%s", dest[i]);
+    }
+
+    // ----- set up the cursor in its correct position 
+        // and set cursor.y and cursor.x
+    (void) wmove(win, text_pos[0], buffer_cursors[0]);
+    cursor.y = getcury(win);
+    cursor.x = getcurx(win);
 
     (void) wrefresh(win);
 

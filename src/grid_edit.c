@@ -20,7 +20,7 @@ int init_grid_editor(/*@out@*/GRID_EDITOR *target_ge
         , *grid_start, grid_end, is_materials_only);
 
     // ----- set inital values
-    *cursor = *grid_start;
+    // *cursor = *grid_start;
 
     // --- set max_cursor to either the end of the grid (target_grid->max_)
         // OR the given end point to print the grid (grid_end)
@@ -245,4 +245,23 @@ struct coord get_cursor(GRID_EDITOR *target)
     struct coord return_val = {cursor->y - grid_start->y
         , cursor->x - grid_start->x};
     return return_val;
+}
+
+struct coord get_grid_cursor(struct grid *target)
+    // returns the cursor position of the target in the grid (not where
+    // it is on screen)
+{
+    struct coord *cursor = &target->cursor;
+    struct coord *grid_start = &target->grid_start;
+    struct coord return_val = {cursor->y - grid_start->y
+        , cursor->x - grid_start->x};
+    return return_val;
+}
+
+int change_window(GRID_EDITOR *target, WINDOW *win)
+    // returns -1 if win is NULL and 0 otherwise
+{
+    if (win == NULL) return -1;
+    target->target_win = win;
+    return 0;
 }

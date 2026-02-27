@@ -4,7 +4,7 @@
 # note: all paths are grounded at the position of the Makefile
 
 CC = gcc
-CFLAGS = -gdwarf
+CFLAGS = -gdwarf -Wall
 LINKS = -lm -lpanel -lmenu -lncurses
 
 INCL_FILES := $(wildcard include/*.h)

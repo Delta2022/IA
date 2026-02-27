@@ -159,6 +159,7 @@ int run_main_menu_function(int function_index
     // -3: malloc problem
 {
     int return_val = -1;
+    struct coord cursor = {0, 0};
     // ----- load or create a new campaign
     switch (function_index) {
         case LOAD_CAMPAIGN:
@@ -167,7 +168,7 @@ int run_main_menu_function(int function_index
         case START_CAMPAIGN:
             // ----- initialize the campaign
             (void) start_campaign(target_campaign);
-            material_creation_menu(target_campaign);
+            material_creation_menu(target_campaign, NULL);
             (void) start_encounter(target_campaign);
             break;
         case EXIT:
@@ -184,17 +185,19 @@ int run_main_menu_function(int function_index
             // definitions are in include/menu_outputs.h
         switch (return_val) {
             case CREATURE_CREATION:
-                (void) creature_creation_menu(target_campaign);
+                (void) creature_creation_menu(target_campaign, NULL
+                    , false);
                 break;
             case P_NOTE_CREATION:
-                p_note_creation_menu(target_campaign
-                    , target_campaign->encounter_grid.cursor);
+                cursor = get_grid_cursor(&target_campaign->encounter_grid);
+                square_note_creation_menu(target_campaign
+                    , cursor);
                 break;
             case ITEM_CREATION:
-                (void) item_creation_menu(target_campaign);
+                (void) item_creation_menu(target_campaign, NULL);
                 break;
             case MATERIAL_CREATION:
-                material_creation_menu(target_campaign);
+                material_creation_menu(target_campaign, NULL);
                 (void) start_encounter(target_campaign);
                 break;
             case REPAINT_MATERIALS:
@@ -203,6 +206,8 @@ int run_main_menu_function(int function_index
             case MOVE_CREATURE:
                 (void) move_menu(target_campaign);
                 break;
+            case EDIT_MENU:
+                (void) edit_menu(target_campaign);
         }
     }
 

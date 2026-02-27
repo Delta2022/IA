@@ -23,13 +23,14 @@ void move_menu(struct campaign *target_campaign)
     struct square *dest_square;
     //struct coord dest_pos = {0, 0};
     /*@null@*/ struct creature *target_creature = NULL;
-    int temp_index = 0;
+    int temp_index = 0; // used when moving
+        // to remove from a value
     int c = 0;
 
     struct coord cursor = {0, 0};
     struct square *cursor_square;
 
-    // -----
+    // prep for the GRID_EDITOR
     (void) curs_set(0);
     // ----- print squares
     getmaxyx(ui.main_win, grid_end.y, grid_end.x);
@@ -141,7 +142,7 @@ void move_menu(struct campaign *target_campaign)
                         (void) doupdate();
 
                         // get an index from the user to use
-                            c = getch();
+                            c = wgetch(ui.main_win);
                             c -= (int) '0';
                         if (c < 0 || c >= source_square->num_creatures) {
                             // reset

@@ -2,10 +2,17 @@
 
 #define MAIN_WIN_SPACE LINES * 3/4
 
-int creature_creation_menu(struct campaign *target_campaign)
+int creature_creation_menu(struct campaign *target_campaign
+    , /*@null@*/ struct creature *target_creature, bool is_skip_placement)
     // TODO add another window for the grid editor, perhaps
     // a popup
-    // TODO support adding multiple characters
+    // TODO rename to creature_edit_menu or something
+    // prompts the user for information regarding the creature
+    // pointed to by target_creature
+    // if target_creature is null, a new creature is created in the
+    // campaign
+    // the user will not be prompted to place a creature
+    // if skip_placement is true
     // return of -1 means that the menu couldn't create a ui_windows
 {
     // ----- initialize windows
@@ -29,14 +36,19 @@ int creature_creation_menu(struct campaign *target_campaign)
         " a-z and A-Z are allowed.");
 
     //struct creature *creature_list = target_campaign->creature_list;
-    struct creature *target_creature = &target_campaign->creature_list
-            [target_campaign->next_empty_creature++];
+    if (target_creature == NULL) {
+        target_creature = &target_campaign->creature_list
+                [target_campaign->next_empty_creature++];
+    }
     GRID_EDITOR grid_editor;
 
     // ----- initialize info for get_multi_input
     char print_char_string[2]; // a string to store the print char
         // , which will then be converted into just a char
     (void) memset(print_char_string, 0, sizeof(print_char_string));
+
+    // put in the print_char of the creature in case we are editing
+    print_char_string[0] = target_creature->print_char;
 
     // get_multi_input argument values
     int text_pos[3] = {1, 3, 5};
@@ -69,6 +81,10 @@ int creature_creation_menu(struct campaign *target_campaign)
         return -1;
     }
 
+    // ----- skip the placement if is_skip_placement is true
+    if (is_skip_placement) {
+        goto end;
+    }
     // ----- write information to info_win and commands_win
     // info_win
     (void) wattron(ui.info_win, A_UNDERLINE);
@@ -137,9 +153,12 @@ end:
     return 0;
 }
 
-// TODO make item inventory stuff its own function (I will need it more than once)
-int item_creation_menu(struct campaign *target_campaign)
+int item_creation_menu(struct campaign *target_campaign
+    , /*@null@*/ struct item *target_item)
     // initalizes and defines an item based on user input
+    // if target_item is NULL, a new item is created
+    // if it isn't NULL, then target_item is edited
+    // NOTE: only theoretically working
 {
     // ----- init ui
     struct ui_windows ui;
@@ -162,7 +181,6 @@ int item_creation_menu(struct campaign *target_campaign)
         " a-z and A-Z are allowed.");
     update_ui(&ui);
     // -----
-    struct item *target_item;
     char print_char_string[2]; // a string to store the print char
         // , which will then be converted into just a char
     (void) memset(print_char_string, 0, sizeof(print_char_string));
@@ -170,9 +188,15 @@ int item_creation_menu(struct campaign *target_campaign)
     int text_pos[3];
     int max_lens[3];
 
+
     // ----- set up get_multi_input
-    target_item = &target_campaign->item_list
-        [target_campaign->next_empty_item++];
+    if (target_item == NULL)
+        target_item = &target_campaign->item_list
+            [target_campaign->next_empty_item++];
+
+    // ----- copy the print_char of the item to print_char_string in case
+        // the item is being edited
+    print_char_string[0] = target_item->print_char;
 
     // NOTE: accessing note.string like this shouldn't be done
     pointer_array[0] = target_item->name;
@@ -194,7 +218,9 @@ int item_creation_menu(struct campaign *target_campaign)
     (void) get_multi_input(ui.main_win, pointer_array, 3, max_lens
         , text_pos);
 
-    // delete ui for inventory_menu
+    // save print_char
+    target_item->print_char = print_char_string[0];
+    // ----- delete ui for inventory_menu
     del_ui(&ui);
     // ----- deal with inventory
     inventory_menu(target_campaign, target_item, NULL);
@@ -202,9 +228,10 @@ int item_creation_menu(struct campaign *target_campaign)
     return 0;
 }
 
-void p_note_creation_menu(struct campaign *target_campaign
+void square_note_creation_menu(struct campaign *target_campaign
     , struct coord position)
     // theoretically works
+    // creates or edits the note at the coord position
 {
     // ----- initialize windows
     struct ui_windows ui;
@@ -214,7 +241,7 @@ void p_note_creation_menu(struct campaign *target_campaign
     
     // info win
     (void) wattron(ui.info_win, A_UNDERLINE);
-    (void) mvwprintw(ui.info_win, 0, 0, "Positional note creation");
+    (void) mvwprintw(ui.info_win, 0, 0, "Positional Note Creation");
     (void) wattroff(ui.info_win, A_UNDERLINE);
 
     // commands
@@ -224,23 +251,13 @@ void p_note_creation_menu(struct campaign *target_campaign
         " a-z and A-Z are allowed.");
     update_ui(&ui);
     // -----
-    /*@null@*/ struct p_note *target_p_note = NULL;
-    /*@null@*/ struct grid *target_grid = NULL;
     
-    target_grid = &target_campaign->encounter_grid;
-    target_p_note = &target_grid
-        ->p_notes[target_grid->p_note_next_empty++];
+    struct square *target_square = &target_campaign->encounter_grid
+        .squares[position.y][position.x];
 
-    if (target_p_note == NULL) {
-        return;
-    }
-    // set the coordinates
-    target_p_note->x = position.x;
-    target_p_note->y = position.y;
-
-    char *pointer_array[1] = {target_p_note->note.string};
+    char *pointer_array[1] = {target_square->note.string};
     int text_pos[1] = {1};
-    int max_lens[1] = {target_p_note->note.len};
+    int max_lens[1] = {target_square->note.len};
 
     (void) mvwprintw(ui.main_win, 0, 0, "Notes");
     (void) get_multi_input(ui.main_win, pointer_array, 1, max_lens
@@ -250,7 +267,11 @@ void p_note_creation_menu(struct campaign *target_campaign
     (void) erase();
 }
 
-void material_creation_menu(struct campaign *target_campaign)
+void material_creation_menu(struct campaign *target_campaign
+    , /*@null@*/ struct material *target_material)
+    // if target_material is NULL, then new materials are created
+    // (in a loop)
+    // otherwise the target_material is edited (once then exit)
 {
     // ----- initialize windows
     struct ui_windows ui;
@@ -266,7 +287,9 @@ void material_creation_menu(struct campaign *target_campaign)
 
 
     // -----
-    /*@null@*/ struct material *target_material = NULL;
+    bool is_loop;
+    if (target_material == NULL) is_loop = true;
+    else is_loop = false;
     int c = 0;
 
     while (true) {
@@ -289,12 +312,18 @@ void material_creation_menu(struct campaign *target_campaign)
         (void) doupdate();
 
         // ----- get user input for text
-        target_material = &target_campaign->material_list
-            [target_campaign->next_empty_material++];
+        if (target_material == NULL || is_loop)
+            target_material = &target_campaign->material_list
+                [target_campaign->next_empty_material++];
 
         char print_char_string[2];
         (void) memset(print_char_string, 0, sizeof(*print_char_string));
 
+        // copy the material's print_char into print_char_string for
+            // editing
+        print_char_string[0] = target_material->print_char;
+
+        // set values
         char *pointer_array[4] = {target_material->name
             , target_material->desc, print_char_string
             , target_material->note.string};
@@ -313,6 +342,8 @@ void material_creation_menu(struct campaign *target_campaign)
         // move convert print_char_string from a string into a character
         target_material->print_char = print_char_string[0];
 
+        // ----- exit and do not promp the user if is_loop is false
+        if (!is_loop) goto exit;
         // ----- get user input for creating more materials
         // update commands
         (void) werase(ui.commands_win);
@@ -336,5 +367,6 @@ void material_creation_menu(struct campaign *target_campaign)
         (void) werase(ui.main_win);
     }
 
+exit:
     del_ui(&ui);
 }

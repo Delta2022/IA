@@ -1,7 +1,7 @@
 #include "../include/main.h"
 
 #define MAIN_WIN_SPACE LINES * 3/4
-int start_campaign(/*@unused@*/ struct campaign *target_campaign)
+int start_campaign(struct campaign *target_campaign)
     // campaign has to be initialized and defined
     // prompts the user for inputs regarding the campaign
 {
@@ -29,13 +29,14 @@ int start_campaign(/*@unused@*/ struct campaign *target_campaign)
     update_ui(&ui);
     (void) doupdate();
     // ----- get input from user
-    char note_temp[MAX_CHAR];
-    (void) memset(note_temp, 0, sizeof(note_temp));
+    //char note_temp[MAX_CHAR];
+    //(void) memset(note_temp, 0, sizeof(note_temp));
 
     // get_multi_input argument values
     int text_pos[2] = {1, 3};
     int text_pos_len = ARRAY_LEN(text_pos);
-    char *save_ptrs[2] = {target_campaign->name, note_temp};
+    char *save_ptrs[2] = {target_campaign->name
+        , target_campaign->note.string};
     int max_lens[2] = {MAX_CHAR, MAX_CHAR};
 
     (void) clear(); // clear stdscr from the menu in start_menu
@@ -46,9 +47,9 @@ int start_campaign(/*@unused@*/ struct campaign *target_campaign)
         , max_lens, text_pos);
 
     // TODO replace with note setter function when that is done
-    strncpy(target_campaign->note.string, note_temp
-        , (size_t) target_campaign->note.len);
-    target_campaign->note.string[target_campaign->note.len - 1] = '\0';
+    //strncpy(target_campaign->note.string, note_temp
+    //    , (size_t) target_campaign->note.len);
+    //target_campaign->note.string[target_campaign->note.len - 1] = '\0';
 
     del_ui(&ui);
     

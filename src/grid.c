@@ -30,11 +30,11 @@ int init_grid(/*@out@*/ struct grid *target)
 
 
     // -- initalize all p_notes
-    target->p_note_len = ARRAY_LEN(target->p_notes);
-    for (int i = 0; i < target->p_note_len; i++) {
-        foutput = init_p_note(&target->p_notes[i]);
-        check(foutput == 0, "init_p_note failed with code %d", foutput);
-    }
+    //target->p_note_len = ARRAY_LEN(target->p_notes);
+    //for (int i = 0; i < target->p_note_len; i++) {
+    //    foutput = init_p_note(&target->p_notes[i]);
+    //    check(foutput == 0, "init_p_note failed with code %d", foutput);
+    //}
 
     // -- set scale values to default (should be 5ft * 5ft)
     target->x_scale = SQUARE_X_LEN;
@@ -64,6 +64,8 @@ int init_square(/*@out@*/ struct square *target)
     //target->movement_modifier = 0;
     //target->num_creatures = 0;
     target->max_items = ARRAY_LEN(target->items);
+
+    (void) init_note(&target->note);
 
     return 0;
 error:
@@ -127,10 +129,13 @@ void debug_square(struct square *target, int tabs, FILE *format)
     } else {
         fprintf(format, "is_wall: %d | max_creatures: %d"
             " | num_creatures: %d | movement_modifier: %d"
-            " | max_items: %d\n"
+            " | max_items: %d | note: "
             , target->is_wall ? 1 : 0, target->max_creatures
             , target->num_creatures, target->movement_modifier
             , target->max_items);
+
+        print_note(&target->note, stdout);
+        printf("\n");
 
         debug_material(target->material, tabs + 1, format);
 
@@ -158,18 +163,16 @@ void debug_grid(struct grid *target, int tabs, FILE *format)
         return;
     }
     fprintf(format, "x_scale: %d | y_scale: %d | max_y: %d"
-        " | max_x: %d | grid_start: (%d, %d) | cursor: (%d, %d)"
-        " | p_note_len: %d | p_note_next_empty: %d\n"
+        " | max_x: %d | grid_start: (%d, %d) | cursor: (%d, %d)\n"
         , target->x_scale, target->y_scale
         , target->max_y, target->max_x
         , target->grid_start.y, target->grid_start.x
-        , target->cursor.x, target->cursor.y
-        , target->p_note_len, target->p_note_next_empty);
+        , target->cursor.x, target->cursor.y);
 
     // print the p_notes
-    for (int i = 0; i < target->p_note_len; i++) {
-        debug_p_note(&target->p_notes[i], tabs + 1, format);
-    }
+    //for (int i = 0; i < target->p_note_len; i++) {
+    //    debug_p_note(&target->p_notes[i], tabs + 1, format);
+    //}
     (void) fprintf(format, "\n");
     
     // print all the squares
@@ -187,8 +190,16 @@ void mvprintw_square(int y, int x, struct square *target
     // TODO allow multi character movement
 {
     char print_char = '\0';
+    //bool has_p_note = false;
+
+    // TODO find if there is a p_note at this position
+        // NOTE: not ideal
+    
+    // note at that square
+    if (target->note.string[0] != '\0') {
+        print_char = '!';
     // multiple creatures
-    if (target->num_creatures > 1 && !is_materials_only) {
+    } else if (target->num_creatures > 1 && !is_materials_only) {
         // NOTE: doesn't account for more than 9 but its prob fine
         print_char = (char) target->num_creatures + '0';
 
@@ -208,6 +219,7 @@ void mvprintw_square(int y, int x, struct square *target
     } else { // render the material
         print_char = target->material->print_char;
     }
+
     (void) mvwprintw(window, y, x, "%c", print_char);
 
 }
@@ -284,7 +296,9 @@ void mvwdisplay_square_info(WINDOW *target_window, int y, int x
 }
 
 void mvwdisplay_material_info(WINDOW *win, int y, int x
-    , struct coord cursor_pos, /*@null@*/ struct material *target_material)
+    , struct coord cursor_pos
+    , /*@null@*/ struct material *target_material)
+    // cursor_pos is purely aesthetic. target_material's info is printed
 {
     (void) werase(win);
     (void) mvwprintw(win, y, x
@@ -302,6 +316,15 @@ void mvwdisplay_material_info(WINDOW *win, int y, int x
     (void) mvwprintw(win, y + 5, x
         , "Notes: \"%s\"", target_material->note.string);
 }
+void mvwdisplay_square_note_info(WINDOW *win, int y, int x
+    , struct square *target_square, struct coord cursor_pos)
+{
+    (void) mvwprintw(win, y, x
+        , "Positional Note info at (%d, %d):", cursor_pos.x
+        , cursor_pos.y);
+    (void) mvwprintw(win, y + 1, x
+        , "Notes: \"%s\"", target_square->note.string);
+}
 
 void list_square_creatures(WINDOW *win, int y, int x
     , struct square *target_square)
@@ -316,7 +339,22 @@ void list_square_creatures(WINDOW *win, int y, int x
             , i, target_square->creatures[i]->name);
     }
 }
-
+///*@temp@*/ /*@null@*/ struct p_note *find_p_note(struct grid *target_grid
+//    , struct coord target_position)
+//{
+//    /*@null@*/ struct p_note *target_p_note = NULL;
+//    for (int i = 0; i < target_grid->p_note_len; i++) {
+//        target_p_note = &target_grid->p_notes[i];
+//        if (target_p_note == NULL) continue;
+//
+//        if (target_p_note->x == target_position.x && target_p_note->y
+//            == target_position.y) {
+//            return target_p_note;
+//        }
+//    }
+//
+//    return NULL;
+//}
 /*
 int print_grid(struct grid *target_grid, WINDOW *target_window
     , struct coord win_end, struct coord start_print

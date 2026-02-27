@@ -54,7 +54,7 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     (void) noecho();
     (void) keypad(stdscr, true);
 
-    int c = item_creation_menu(&temp);
+    int c = item_creation_menu(&temp, NULL);
 
     (void) endwin();
 
@@ -81,7 +81,7 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     (void) noecho();
     (void) keypad(stdscr, true);
 
-    (void) creature_creation_menu(&temp);
+    (void) creature_creation_menu(&temp, NULL, false);
 
     (void) endwin();
     debug_campaign(&temp, stdout);
@@ -107,9 +107,9 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     //(void) snprintf(temp.material_list[1].desc, MAX_CHAR, "this is veg");
     //temp.material_list[1].print_char = '"';
     
-    (void) material_creation_menu(&temp);
+    (void) material_creation_menu(&temp, NULL);
     (void) start_encounter(&temp);
-    (void) creature_creation_menu(&temp);
+    (void) creature_creation_menu(&temp, NULL, false);
 
     (void) main_menu(&temp);
     (void) endwin();
