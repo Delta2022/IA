@@ -118,9 +118,8 @@ int start_menu()
         }
         update_ui(&ui);
         (void) doupdate();
-    } while (c != 10);
+    } while (c != 10); // space
 
-    // TODO use menu_index to select function
     /*@null@*/ ITEM *cur_item = current_item(start_menu);
     if (cur_item == NULL) {
         (void) endwin();
@@ -211,6 +210,6 @@ int run_main_menu_function(int function_index
         }
     }
 
-    //save_campaign(target_campaign);
+    save_campaign(target_campaign);
     return 0;
 }

@@ -47,21 +47,22 @@ void move_menu(struct campaign *target_campaign)
         (void) mvwprintw(ui.commands_win, 0, 0, "Commands");
         (void) mvwprintw(ui.commands_win, 1, 0, "Arrow keys: move cursor");
         (void) mvwprintw(ui.commands_win, 2, 0, "WASD: move grid around");
+        (void) mvwprintw(ui.commands_win, 3, 0, "F2: exit");
 
         // only print space is available when there is a creature at
             // that square
         if (source_square == NULL) {
             if (cursor_square->num_creatures > 0)
-                (void) mvwprintw(ui.commands_win, 3, 0, "space: select"
+                (void) mvwprintw(ui.commands_win, 4, 0, "space: select"
                     " creature at cursor to move around");
             else
-                (void) mvwprintw(ui.commands_win, 3, 0, "there is no"
+                (void) mvwprintw(ui.commands_win, 4, 0, "there is no"
                     " creature at this square to move.");
         // source_square != NULL
         } else {
-            (void) mvwprintw(ui.commands_win, 3, 0, "space: select"
+            (void) mvwprintw(ui.commands_win, 4, 0, "space: select"
                 " square at cursor to move character to");
-            (void) mvwprintw(ui.commands_win, 4, 0, "q: reset");
+            (void) mvwprintw(ui.commands_win, 5, 0, "q: reset");
         }
             
         // ----- update screen
@@ -106,6 +107,8 @@ void move_menu(struct campaign *target_campaign)
                     source_square = NULL;
                 }
                 break;
+            case KEY_F(2):
+                goto end;
             case ' ':
                 // if this square is setting the source square
                 if (source_square == NULL) {

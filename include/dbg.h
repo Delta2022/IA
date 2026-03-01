@@ -1,3 +1,5 @@
+// Code from Zed A. Shaw's "Learn C the Hard Way", Pg. 91
+    // with comments and minor modifications by me
 #ifndef __dbg_h__
 #define __dbg_h__
 

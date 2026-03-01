@@ -7,17 +7,17 @@
 #include "dbg.h"
 #include <string.h>
 // TODO: rewrite dbg.h such that it can output in the final window
-#define MAX_CHAR 50
-#define MAX_NOTE 50 // max length for notes
+#define MAX_CHAR 100
+#define MAX_NOTE 175 // max length for notes
 #define ARRAY_LEN(a) (int) (sizeof(a) / sizeof(a[0]))
 #define MAX_PNOTES 10
-#define MAX_CREATURES 2
-#define MAX_ITEMS 2
-#define MAX_SAVED_CREATURES 10
-#define MAX_SAVED_MATERIALS 10
-#define MAX_SAVED_ITEMS 10
-#define GRID_X 5
-#define GRID_Y 7
+#define MAX_CREATURES 5
+#define MAX_ITEMS 5
+#define MAX_SAVED_CREATURES 20
+#define MAX_SAVED_MATERIALS 20
+#define MAX_SAVED_ITEMS 20
+#define GRID_X 10
+#define GRID_Y 10
 #define PRINT_TABS(t) \
     {for (int p = 0; p < t; p++) (void) putchar('\t');}
 #define MAX_INVENTORY 3

@@ -585,10 +585,6 @@ void load_grid_item_ptrs(struct campaign *target_campaign
 
 
 void save_campaign(struct campaign *target_campaign)
-    // TODO finish this -> make paths with set names
-    // TODO do dynamic paths later
-    // based on the folder path (use malloc to concat strings)
-    // then implement into save_inventories
     // saving a campaign will create: bin.save, grid_creature.save
         // grid_material.save, creature_inv.save, item_inv.save
     // will save in save folder relative to the Makefile

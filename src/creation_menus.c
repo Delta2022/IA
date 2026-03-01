@@ -21,6 +21,8 @@ int creature_creation_menu(struct campaign *target_campaign
         return -1;
     }
 
+    // TODO improve on this, this is not great code
+reset:
     // ----- write information to info_win and commands_win
     // info_win
     (void) wattron(ui.info_win, A_UNDERLINE);
@@ -71,15 +73,37 @@ int creature_creation_menu(struct campaign *target_campaign
         // the creature
     target_creature->print_char = print_char_string[0];
 
+    // ----- prompt the user if values are empty
+    if (target_creature->name[0] == '\0'
+        || target_creature->print_char == '\0') {
+        (void) werase(ui.commands_win);
+        (void) wattron(ui.commands_win, A_REVERSE);
+        (void) mvwprintw(ui.commands_win, 1, 0, "Name or print"
+            " character section is empty. Please enter a name.");
+        (void) wattroff(ui.commands_win, A_REVERSE);
+        (void) mvwprintw(ui.commands_win, 2, 0, "any character:"
+            " continue inputting");
+        
+        (void) wnoutrefresh(ui.commands_win);
+        (void) doupdate();
+        int c = wgetch(ui.main_win);
+
+        // deincrement the next_empty_creature so when the program
+            // loops, it will continue editing the same material
+        target_campaign->next_empty_creature--;
+
+        // rerun the input code
+        goto reset;
+    }
     // ----- delete windows for inventory_menu
-    del_ui(&ui);
+    //del_ui(&ui);
     // ----- set creature inventory
-    inventory_menu(target_campaign, NULL, target_creature);
+    //inventory_menu(target_campaign, NULL, target_creature);
 
     // ----- initialize windows again
-    if (init_ui(&ui, 0) == -1) {
-        return -1;
-    }
+    //if (init_ui(&ui, 0) == -1) {
+    //    return -1;
+    //}
 
     // ----- skip the placement if is_skip_placement is true
     if (is_skip_placement) {
@@ -97,8 +121,6 @@ int creature_creation_menu(struct campaign *target_campaign
     (void) mvwprintw(ui.commands_win, 2, 0, "WASD: move grid around");
 
     (void) mvwprintw(ui.commands_win, 3, 0, "space: place creature"
-        " at cursor");
-    (void) mvwprintw(ui.commands_win, 4, 0, "F2: place creature"
         " at cursor");
     update_ui(&ui);
     // ----- place the character on the grid
@@ -177,8 +199,6 @@ int item_creation_menu(struct campaign *target_campaign
     (void) mvwprintw(ui.commands_win, 1, 0, "Up arrow/down arrow:"
         " traverse through input fields");
     (void) mvwprintw(ui.commands_win, 2, 0, "F2: submit information");
-    (void) mvwprintw(ui.commands_win, 3, 0, "Note: only characters"
-        " a-z and A-Z are allowed.");
     update_ui(&ui);
     // -----
     char print_char_string[2]; // a string to store the print char
@@ -247,8 +267,6 @@ void square_note_creation_menu(struct campaign *target_campaign
     // commands
     (void) mvwprintw(ui.commands_win, 0, 0, "Commands");
     (void) mvwprintw(ui.commands_win, 1, 0, "F2: submit information");
-    (void) mvwprintw(ui.commands_win, 2, 0, "Note: only characters"
-        " a-z and A-Z are allowed.");
     update_ui(&ui);
     // -----
     
@@ -301,12 +319,11 @@ void material_creation_menu(struct campaign *target_campaign
         }
 
         // ----- write commands to commands_win
+        (void) werase(ui.commands_win);
         (void) mvwprintw(ui.commands_win, 0, 0, "Commands");
         (void) mvwprintw(ui.commands_win, 1, 0, "Up arrow/down arrow:"
             " traverse through input fields");
         (void) mvwprintw(ui.commands_win, 2, 0, "F2: submit information");
-        (void) mvwprintw(ui.commands_win, 3, 0, "Note: only characters"
-            " a-z and A-Z are allowed.");
 
         update_ui(&ui);
         (void) doupdate();
@@ -342,7 +359,29 @@ void material_creation_menu(struct campaign *target_campaign
         // move convert print_char_string from a string into a character
         target_material->print_char = print_char_string[0];
 
-        // ----- exit and do not promp the user if is_loop is false
+        // ----- prompt the user if values are empty
+        if (target_material->name[0] == '\0'
+            || target_material->print_char == '\0') {
+            (void) werase(ui.commands_win);
+            (void) wattron(ui.commands_win, A_REVERSE);
+            (void) mvwprintw(ui.commands_win, 1, 0, "Name or print"
+                " character section is empty. Please enter a name.");
+            (void) wattroff(ui.commands_win, A_REVERSE);
+            (void) mvwprintw(ui.commands_win, 2, 0, "any character:"
+                " continue inputting");
+            
+            (void) wnoutrefresh(ui.commands_win);
+            (void) doupdate();
+            c = wgetch(ui.main_win);
+
+            // deincrement the next_empty_material so when the program
+                // loops, it will continue editing the same material
+            target_campaign->next_empty_material--;
+
+            // rerun the input code
+            continue;
+        }
+        // ----- exit and do not prompt the user if is_loop is false
         if (!is_loop) goto exit;
         // ----- get user input for creating more materials
         // update commands

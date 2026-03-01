@@ -22,8 +22,6 @@ int start_campaign(struct campaign *target_campaign)
     (void) mvwprintw(ui.commands_win, 1, 0, "Up arrow/down arrow:"
         " traverse through input fields");
     (void) mvwprintw(ui.commands_win, 2, 0, "F2: submit information");
-    (void) mvwprintw(ui.commands_win, 3, 0, "Note: only characters"
-        " a-z and A-Z are allowed.");
 
     // ----- update screen
     update_ui(&ui);

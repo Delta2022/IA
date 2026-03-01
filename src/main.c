@@ -40,7 +40,7 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     
     (void) endwin();
 
-    debug_campaign(&main_campaign, stdout);
+    //debug_campaign(&main_campaign, stdout);
 }
 
 /*@unused@*/ static void test_debug()

@@ -121,11 +121,11 @@ int main_menu(struct campaign *target_campaign)
         (void) mvwprintw(commands_win, 2, 0, "WASD: move grid around");
 
         (void) mvwprintw(commands_win, 3, 0, "o: move creatures around");
-        (void) mvwprintw(commands_win, 4, 0, "m: edit creatures/materials");
+        (void) mvwprintw(commands_win, 4, 0, "e: edit creatures/materials");
 
         (void) mvwprintw(commands_win, 5, 0, "c: create new creature");
-        (void) mvwprintw(commands_win, 6, 0, "i: create new item");
-        (void) mvwprintw(commands_win, 7, 0, "m: create new material");
+        //(void) mvwprintw(commands_win, 6, 0, "i: create new item");
+        (void) mvwprintw(commands_win, 6, 0, "m: create new material");
 
         (void) mvwprintw(commands_win, 0, 30, "Commands:");
         (void) mvwprintw(commands_win, 1, 30, "p: edit/create new positional"
@@ -140,6 +140,7 @@ int main_menu(struct campaign *target_campaign)
             " information at cursor");
         (void) mvwprintw(commands_win, 6, 30, "P: display positional"
             " note at cursor");
+        (void) mvwprintw(commands_win, 7, 30, "F2: save and exit");
         // ----- update the screen
         (void) wnoutrefresh(stdscr);
         (void) wnoutrefresh(info_win);
@@ -197,7 +198,7 @@ int main_menu(struct campaign *target_campaign)
                 return_val = P_NOTE_CREATION;
                 goto exit;
             case 'i': // new item
-                return_val = ITEM_CREATION;
+                //return_val = ITEM_CREATION;
                 goto exit;
             case 'm': // new material
                 return_val = MATERIAL_CREATION;
@@ -228,7 +229,7 @@ int main_menu(struct campaign *target_campaign)
                 // not great programming right now
                 // print all characters
                 (void) werase(detailed_data_win);
-                if (target_square->num_creatures == 1) {
+                if (target_square->num_creatures <= 1) {
                     mvwdisplay_creature_info(detailed_data_win, 0, 0
                         , cursor, target_square->creatures[0]);
                     (void) wnoutrefresh(detailed_data_win);

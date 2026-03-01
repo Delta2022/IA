@@ -231,10 +231,7 @@ int get_multi_input(WINDOW *win, char **dest, int num_dest
                 }
 
                 // remove all characters that aren't allowed 
-                    // (alphabetical only for now) TODO change
-                if (c_char != ' ' 
-                    && (c_char < 'a' || c_char > 'z') 
-                    && (c_char < 'A' || c_char > 'Z'))
+                if (c_char <= ' ' && c_char > '~')
                     break;
 
                 // ----- if we aren't at the end
