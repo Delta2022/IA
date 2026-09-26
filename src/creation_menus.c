@@ -86,7 +86,7 @@ reset:
         
         (void) wnoutrefresh(ui.commands_win);
         (void) doupdate();
-        int c = wgetch(ui.main_win);
+        /*@unused@*/ int c = wgetch(ui.main_win);
 
         // deincrement the next_empty_creature so when the program
             // loops, it will continue editing the same material

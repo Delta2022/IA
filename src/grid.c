@@ -339,10 +339,10 @@ void list_square_creatures(WINDOW *win, int y, int x
             , i, target_square->creatures[i]->name);
     }
 }
-///*@temp@*/ /*@null@*/ struct p_note *find_p_note(struct grid *target_grid
+//WAS TEMP AND NULL struct p_note *find_p_note(struct grid *target_grid
 //    , struct coord target_position)
 //{
-//    /*@null@*/ struct p_note *target_p_note = NULL;
+//    WAS NULL struct p_note *target_p_note = NULL;
 //    for (int i = 0; i < target_grid->p_note_len; i++) {
 //        target_p_note = &target_grid->p_notes[i];
 //        if (target_p_note == NULL) continue;

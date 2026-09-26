@@ -1,0 +1,5 @@
+- look into not using pointeres and just saving the indexes (to allow for cleaner saves)
+	- remove using pointers for materials and items (in inventories)
+- split materials, creatures, and items into their own structure (to prevent them cluttering up the campaign struct)
+- safer saves with more checks (eg. looking through material, creature, and item lists to ensure that there are no empty spaces)
+- allow grid resizing using malloc???
